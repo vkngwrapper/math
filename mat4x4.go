@@ -97,7 +97,17 @@ func (m *Mat4x4[T]) SetAxisAngle(axis *Vec3[T], angleRad T) *Mat4x4[T] {
 }
 
 func (m *Mat4x4[T]) SetOrientation(normal *Vec3[T], up *Vec3[T]) *Mat4x4[T] {
-	if 
+	if normal.Equal(up, 0.0001) {
+		m.SetIdentity()
+		return m
+	}
+
+	var rotationAxis Vec3[T]
+	rotationAxis.CopyFrom(up).CrossProduct(normal)
+
+	angle := T(math.Acos(float64(normal.DotProduct(up))))
+
+	return m.SetAxisAngle(&rotationAxis, angle)
 }
 
 func (m *Mat4x4[T]) CopyFrom(other *Mat4x4[T]) *Mat4x4[T] {
@@ -142,26 +152,26 @@ func (m *Mat4x4[T]) SetColMajor(c1, c2, c3, c4 *Vec4[T]) *Mat4x4[T] {
 	return m
 }
 
-func (m *Mat4x4[T]) SetEulerAngle(pitchRad, yawRad, rollRad T) *Mat4x4[T] {
-	cos1 := T(math.Cos(float64(-pitchRad)))
-	cos2 := T(math.Cos(float64(-yawRad)))
-	cos3 := T(math.Cos(float64(-rollRad)))
-	sin1 := T(math.Sin(float64(-pitchRad)))
-	sin2 := T(math.Sin(float64(-yawRad)))
-	sin3 := T(math.Sin(float64(-rollRad)))
+func (m *Mat4x4[T]) SetEulerAngleYXZ(yawRad, pitchRad, rollRad T) *Mat4x4[T] {
+	yawCos := T(math.Cos(float64(yawRad)))
+	pitchCos := T(math.Cos(float64(pitchRad)))
+	rollCos := T(math.Cos(float64(rollRad)))
+	yawSin := T(math.Sin(float64(yawRad)))
+	pitchSin := T(math.Sin(float64(pitchRad)))
+	rollSin := T(math.Sin(float64(rollRad)))
 
-	m[0][0] = cos2 * cos3
-	m[0][1] = -cos1*sin3 + sin1*sin2*cos3
-	m[0][2] = sin1*sin3 + cos1*sin2*cos3
-	m[0][3] = T(0)
-	m[1][0] = cos2 * sin3
-	m[1][1] = cos1*cos3 + sin1*sin2*sin3
-	m[1][2] = -sin1*cos3 + cos1*sin2*sin3
-	m[1][3] = T(0)
-	m[2][0] = -sin2
-	m[2][1] = sin1 * cos2
-	m[2][2] = cos1 * cos2
-	m[2][3] = T(0)
+	m[0][0] = yawCos*rollCos + yawSin*pitchSin*rollSin
+	m[0][1] = rollSin * pitchSin
+	m[0][2] = -yawSin*rollCos + yawCos*pitchSin*rollSin
+	m[0][3] = 0
+	m[1][0] = -yawCos*rollSin + yawSin*pitchSin*rollCos
+	m[1][1] = rollCos * pitchCos
+	m[1][2] = rollSin*yawSin + yawCos*pitchSin*rollCos
+	m[1][3] = 0
+	m[2][0] = yawSin * pitchCos
+	m[2][1] = -pitchSin
+	m[2][2] = yawCos * pitchCos
+	m[2][3] = 0
 	m[3][0] = 0
 	m[3][1] = 0
 	m[3][2] = 0
@@ -566,15 +576,12 @@ func (m *Mat4x4[T]) Scale(v *Vec3[T]) *Mat4x4[T] {
 	return m
 }
 
-func (m *Mat4x4[T]) RotateAroundAxis(axis *Vec3[T], angleRad T) *Mat4x4[T] {
+func (m *Mat4x4[T]) RotateAroundPrenormalizedAxis(unitAxis *Vec3[T], angleRad T) *Mat4x4[T] {
 	cos := T(math.Cos(float64(angleRad)))
 	sin := T(math.Sin(float64(angleRad)))
 
-	var unitAxis Vec3[T]
-	unitAxis.CopyFrom(axis).Normalize()
-
 	var temp Vec3[T]
-	temp.CopyFrom(&unitAxis).Scale(1 - cos)
+	temp.CopyFrom(unitAxis).Scale(1 - cos)
 
 	rotate00 := cos + temp.X*unitAxis.X
 	rotate01 := temp.X*unitAxis.Y + sin*unitAxis.Z
@@ -617,6 +624,28 @@ func (m *Mat4x4[T]) RotateAroundAxis(axis *Vec3[T], angleRad T) *Mat4x4[T] {
 	m[2][3] = m23
 
 	return m
+}
+
+func (m *Mat4x4[T]) RotateAroundAxis(axis *Vec3[T], angleRad T) *Mat4x4[T] {
+	var unitAxis Vec3[T]
+	unitAxis.CopyFrom(axis).Normalize()
+
+	return m.RotateAroundPrenormalizedAxis(&unitAxis, angleRad)
+}
+
+func (m *Mat4x4[T]) RotateX(angleRad T) *Mat4x4[T] {
+	axis := Vec3[T]{X: 1, Y: 0, Z: 0}
+	return m.RotateAroundPrenormalizedAxis(&axis, angleRad)
+}
+
+func (m *Mat4x4[T]) RotateY(angleRad T) *Mat4x4[T] {
+	axis := Vec3[T]{X: 0, Y: 1, Z: 0}
+	return m.RotateAroundPrenormalizedAxis(&axis, angleRad)
+}
+
+func (m *Mat4x4[T]) RotateZ(angleRad T) *Mat4x4[T] {
+	axis := Vec3[T]{X: 0, Y: 0, Z: 1}
+	return m.RotateAroundPrenormalizedAxis(&axis, angleRad)
 }
 
 func (m *Mat4x4[T]) InterpolateMatrix(otherMatrix *Mat4x4[T], delta T) *Mat4x4[T] {

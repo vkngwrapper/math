@@ -54,3 +54,15 @@ func (v *Vec2[T]) Scale(scale T) *Vec2[T] {
 
 	return v
 }
+
+func (v *Vec2[T]) Equal(other *Vec2[T], epsilon T) bool {
+	if abs[T](v.X-other.X) > epsilon {
+		return false
+	}
+
+	if abs[T](v.Y-other.Y) > epsilon {
+		return false
+	}
+
+	return true
+}

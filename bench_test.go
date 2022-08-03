@@ -13,13 +13,13 @@ var g3nGlobalOut math32.Vector3
 func BenchmarkG3nTransform(b *testing.B) {
 	b.ReportAllocs()
 	for i := 0; i < b.N; i++ {
-		scale := math32.Vector3{1.5, 1.5, 1.5}
 		transform := math32.Vector3{5, 10, 15}
 
 		var mat math32.Matrix4
 		mat.Identity()
 		mat.Multiply(mat.MakeTranslation(1, 1, 1)).
-			Multiply(mat.MakeRotationY(1)).Scale(&scale)
+			Multiply(mat.MakeRotationY(1)).
+			Multiply(mat.MakeScale(1.5, 1.5, 1.5))
 		g3nGlobalOut = *(transform.ApplyMatrix4(&mat))
 	}
 }
@@ -57,5 +57,24 @@ func BenchmarkGo3DTransform(b *testing.B) {
 		mat.TransformVec3(&transform)
 
 		go3dGlobalOut = transform
+	}
+}
+
+var vkngMathOut Vec4[float32]
+
+func BenchmarkVkngMathTransform(b *testing.B) {
+	b.ReportAllocs()
+
+	for i := 0; i < b.N; i++ {
+		translate := Vec3[float32]{1, 1, 1}
+		scale := Vec3[float32]{1.5, 1.5, 1.5}
+
+		var mat Mat4x4[float32]
+		mat.SetIdentity().Translate(&translate).RotateY(1).Scale(&scale)
+
+		transform := Vec4[float32]{5, 10, 15, 1}
+		//transform.Transform(&mat)
+
+		vkngMathOut = transform
 	}
 }
