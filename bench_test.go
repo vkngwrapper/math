@@ -50,8 +50,12 @@ func BenchmarkGo3DTransform(b *testing.B) {
 		translate := vec3.T{1, 1, 1}
 		scale := vec3.T{1.5, 1.5, 1.5}
 
-		mat := mat4.Ident.Translate(&translate).
-			AssignYRotation(1).
+		rotate := mat4.Ident
+		rotate.AssignYRotation(1)
+
+		mat := mat4.Ident
+		mat.Translate(&translate).
+			MultMatrix(&rotate).
 			ScaleVec3(&scale)
 		transform := vec3.T{5, 10, 15}
 		mat.TransformVec3(&transform)
@@ -73,7 +77,7 @@ func BenchmarkVkngMathTransform(b *testing.B) {
 		mat.SetIdentity().Translate(&translate).RotateY(1).Scale(&scale)
 
 		transform := Vec4[float32]{5, 10, 15, 1}
-		//transform.Transform(&mat)
+		transform.Transform(&mat)
 
 		vkngMathOut = transform
 	}

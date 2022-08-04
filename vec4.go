@@ -87,3 +87,31 @@ func (v *Vec4[T]) Equal(other *Vec4[T], epsilon T) bool {
 
 	return true
 }
+
+func (v *Vec4[T]) Transform(m *Mat4x4[T]) *Vec4[T] {
+	x := m[0][0]*v.X + m[1][0]*v.Y + m[2][0]*v.Z + m[3][0]*v.W
+	y := m[0][1]*v.X + m[1][1]*v.Y + m[2][1]*v.Z + m[3][1]*v.W
+	z := m[0][2]*v.X + m[1][2]*v.Y + m[2][2]*v.Z + m[3][2]*v.W
+	w := m[0][3]*v.X + m[1][3]*v.Y + m[2][3]*v.Z + m[3][3]*v.W
+
+	v.X = x
+	v.Y = y
+	v.Z = z
+	v.W = w
+
+	return v
+}
+
+func (v *Vec4[T]) TransformExp(m *Mat4x4Exp[T]) *Vec4[T] {
+	x := m.C00*v.X + m.C10*v.Y + m.C20*v.Z + m.C30*v.W
+	y := m.C01*v.X + m.C11*v.Y + m.C21*v.Z + m.C31*v.W
+	z := m.C02*v.X + m.C12*v.Y + m.C22*v.Z + m.C32*v.W
+	w := m.C03*v.X + m.C13*v.Y + m.C23*v.Z + m.C33*v.W
+
+	v.X = x
+	v.Y = y
+	v.Z = z
+	v.W = w
+
+	return v
+}

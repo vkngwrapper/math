@@ -26,7 +26,28 @@ func (m *Mat4x4[T]) SetIdentity() *Mat4x4[T] {
 	return m
 }
 
-func (m *Mat4x4[T]) SetDiagonal(v *Vec4[T]) *Mat4x4[T] {
+func (m *Mat4x4[T]) SetDiagonalScalar(s T) *Mat4x4[T] {
+	m[0][0] = s
+	m[0][1] = 0
+	m[0][2] = 0
+	m[0][3] = 0
+	m[1][0] = 0
+	m[1][1] = s
+	m[1][2] = 0
+	m[1][3] = 0
+	m[2][0] = 0
+	m[2][1] = 0
+	m[2][2] = s
+	m[2][3] = 0
+	m[3][0] = 0
+	m[3][1] = 0
+	m[3][2] = 0
+	m[3][3] = s
+
+	return m
+}
+
+func (m *Mat4x4[T]) SetDiagonalVector(v *Vec4[T]) *Mat4x4[T] {
 	m[0][0] = v.X
 	m[0][1] = 0
 	m[0][2] = 0
@@ -71,22 +92,22 @@ func (m *Mat4x4[T]) SetFrustum(left, right, bottom, top, nearVal, farVal T) *Mat
 func (m *Mat4x4[T]) SetAxisAngle(axis *Vec3[T], angleRad T) *Mat4x4[T] {
 	cos := T(math.Cos(float64(angleRad)))
 	sin := T(math.Sin(float64(angleRad)))
-	t := T(1) - cos
+	inverseCos := T(1) - cos
 
 	var unitAxis Vec3[T]
 	unitAxis.CopyFrom(axis).Normalize()
 
-	m[0][0] = t*unitAxis.X*unitAxis.X + cos
-	m[0][1] = t*unitAxis.X*unitAxis.Y + unitAxis.Z*sin
-	m[0][2] = t*unitAxis.X*unitAxis.Z - unitAxis.Y*sin
+	m[0][0] = inverseCos*unitAxis.X*unitAxis.X + cos
+	m[0][1] = inverseCos*unitAxis.X*unitAxis.Y + unitAxis.Z*sin
+	m[0][2] = inverseCos*unitAxis.X*unitAxis.Z - unitAxis.Y*sin
 	m[0][3] = 0
-	m[1][0] = t*unitAxis.X*unitAxis.Y - unitAxis.Z*sin
-	m[1][1] = t*unitAxis.Y*unitAxis.Y + cos
-	m[1][2] = t*unitAxis.Y*unitAxis.Z + unitAxis.X*sin
+	m[1][0] = inverseCos*unitAxis.X*unitAxis.Y - unitAxis.Z*sin
+	m[1][1] = inverseCos*unitAxis.Y*unitAxis.Y + cos
+	m[1][2] = inverseCos*unitAxis.Y*unitAxis.Z + unitAxis.X*sin
 	m[1][3] = 0
-	m[2][0] = t*unitAxis.X*unitAxis.Z + unitAxis.Y*sin
-	m[2][1] = t*unitAxis.Y*unitAxis.Z - unitAxis.X*sin
-	m[2][2] = t*unitAxis.Z*unitAxis.Z + cos
+	m[2][0] = inverseCos*unitAxis.X*unitAxis.Z + unitAxis.Y*sin
+	m[2][1] = inverseCos*unitAxis.Y*unitAxis.Z - unitAxis.X*sin
+	m[2][2] = inverseCos*unitAxis.Z*unitAxis.Z + cos
 	m[2][3] = 0
 	m[3][0] = 0
 	m[3][1] = 0
@@ -110,7 +131,49 @@ func (m *Mat4x4[T]) SetOrientation(normal *Vec3[T], up *Vec3[T]) *Mat4x4[T] {
 	return m.SetAxisAngle(&rotationAxis, angle)
 }
 
-func (m *Mat4x4[T]) CopyFrom(other *Mat4x4[T]) *Mat4x4[T] {
+func (m *Mat4x4[T]) SetTranslation(x, y, z T) *Mat4x4[T] {
+	m[0][0] = 1
+	m[0][1] = 0
+	m[0][2] = 0
+	m[0][3] = 0
+	m[1][0] = 0
+	m[1][1] = 1
+	m[1][2] = 0
+	m[1][3] = 0
+	m[2][0] = 0
+	m[2][1] = 0
+	m[2][2] = 1
+	m[2][3] = 0
+	m[3][0] = x
+	m[3][1] = y
+	m[3][2] = z
+	m[3][3] = 1
+
+	return m
+}
+
+func (m *Mat4x4[T]) SetScale(x, y, z T) *Mat4x4[T] {
+	m[0][0] = x
+	m[0][1] = 0
+	m[0][2] = 0
+	m[0][3] = 0
+	m[1][0] = 0
+	m[1][1] = y
+	m[1][2] = 0
+	m[1][3] = 0
+	m[2][0] = 0
+	m[2][1] = 0
+	m[2][2] = z
+	m[2][3] = 0
+	m[3][0] = 0
+	m[3][1] = 0
+	m[3][2] = 0
+	m[3][3] = 1
+
+	return m
+}
+
+func (m *Mat4x4[T]) SetMat4x4(other *Mat4x4[T]) *Mat4x4[T] {
 	m[0][0] = other[0][0]
 	m[0][1] = other[0][1]
 	m[0][2] = other[0][2]
@@ -152,7 +215,52 @@ func (m *Mat4x4[T]) SetColMajor(c1, c2, c3, c4 *Vec4[T]) *Mat4x4[T] {
 	return m
 }
 
-func (m *Mat4x4[T]) SetEulerAngleYXZ(yawRad, pitchRad, rollRad T) *Mat4x4[T] {
+func (m *Mat4x4[T]) SetRowMajor(r1, r2, r3, r4 *Vec4[T]) *Mat4x4[T] {
+	m[0][0] = r1.X
+	m[1][0] = r1.Y
+	m[2][0] = r2.Z
+	m[3][0] = r3.W
+	m[0][1] = r2.X
+	m[1][1] = r2.Y
+	m[2][1] = r2.Z
+	m[3][1] = r2.W
+	m[0][2] = r3.X
+	m[1][2] = r3.Y
+	m[2][2] = r3.Z
+	m[3][2] = r3.W
+	m[0][3] = r4.X
+	m[1][3] = r4.Y
+	m[2][3] = r4.Z
+	m[3][3] = r4.W
+
+	return m
+}
+
+func (m *Mat4x4[T]) SetSaturation(scalar T) *Mat4x4[T] {
+	rgbw := Vec3[T]{T(0.2126), T(0.7152), T(0.0722)}
+	rgbw.Scale(T(1) - scalar)
+
+	m[0][0] = rgbw.X + scalar
+	m[0][1] = rgbw.X
+	m[0][2] = rgbw.X
+	m[0][3] = 0
+	m[1][0] = rgbw.Y
+	m[1][1] = rgbw.Y + scalar
+	m[1][2] = rgbw.Y
+	m[1][3] = 0
+	m[2][0] = rgbw.Z
+	m[2][1] = rgbw.Z
+	m[2][2] = rgbw.Z + scalar
+	m[2][3] = 0
+	m[3][0] = 0
+	m[3][1] = 0
+	m[3][2] = 0
+	m[3][3] = 1
+
+	return m
+}
+
+func (m *Mat4x4[T]) SetEulerAngles(yawRad, pitchRad, rollRad T) *Mat4x4[T] {
 	yawCos := T(math.Cos(float64(yawRad)))
 	pitchCos := T(math.Cos(float64(pitchRad)))
 	rollCos := T(math.Cos(float64(rollRad)))
@@ -388,11 +496,56 @@ func (m *Mat4x4[T]) SetMatrixCrossProduct(vec *Vec3[T]) *Mat4x4[T] {
 	return m
 }
 
+func (m *Mat4x4[T]) SetMultMatrix(lhs, rhs *Mat4x4[T]) *Mat4x4[T] {
+	m00 := lhs[0][0]*rhs[0][0] + lhs[1][0]*rhs[0][1] + lhs[2][0]*rhs[0][2] + lhs[3][0]*rhs[0][3]
+	m10 := lhs[0][0]*rhs[1][0] + lhs[1][0]*rhs[1][1] + lhs[2][0]*rhs[1][2] + lhs[3][0]*rhs[1][3]
+	m20 := lhs[0][0]*rhs[2][0] + lhs[1][0]*rhs[2][1] + lhs[2][0]*rhs[2][2] + lhs[3][0]*rhs[2][3]
+	m30 := lhs[0][0]*rhs[3][0] + lhs[1][0]*rhs[3][1] + lhs[2][0]*rhs[3][2] + lhs[3][0]*rhs[3][3]
+
+	m01 := lhs[0][1]*rhs[0][0] + lhs[1][1]*rhs[0][1] + lhs[2][1]*rhs[0][2] + lhs[3][1]*rhs[0][3]
+	m11 := lhs[0][1]*rhs[1][0] + lhs[1][1]*rhs[1][1] + lhs[2][1]*rhs[1][2] + lhs[3][1]*rhs[1][3]
+	m21 := lhs[0][1]*rhs[2][0] + lhs[1][1]*rhs[2][1] + lhs[2][1]*rhs[2][2] + lhs[3][1]*rhs[2][3]
+	m31 := lhs[0][1]*rhs[3][0] + lhs[1][1]*rhs[3][1] + lhs[2][1]*rhs[3][2] + lhs[3][1]*rhs[3][3]
+
+	m02 := lhs[0][2]*rhs[0][0] + lhs[1][2]*rhs[0][1] + lhs[2][2]*rhs[0][2] + lhs[3][2]*rhs[0][3]
+	m12 := lhs[0][2]*rhs[1][0] + lhs[1][2]*rhs[1][1] + lhs[2][2]*rhs[1][2] + lhs[3][2]*rhs[1][3]
+	m22 := lhs[0][2]*rhs[2][0] + lhs[1][2]*rhs[2][1] + lhs[2][2]*rhs[2][2] + lhs[3][2]*rhs[2][3]
+	m32 := lhs[0][2]*rhs[3][0] + lhs[1][2]*rhs[3][1] + lhs[2][2]*rhs[3][2] + lhs[3][2]*rhs[3][3]
+
+	m03 := lhs[0][3]*rhs[0][0] + lhs[1][3]*rhs[0][1] + lhs[2][3]*rhs[0][2] + lhs[3][3]*rhs[0][3]
+	m13 := lhs[0][3]*rhs[1][0] + lhs[1][3]*rhs[1][1] + lhs[2][3]*rhs[1][2] + lhs[3][3]*rhs[1][3]
+	m23 := lhs[0][3]*rhs[2][0] + lhs[1][3]*rhs[2][1] + lhs[2][3]*rhs[2][2] + lhs[3][3]*rhs[2][3]
+	m33 := lhs[0][3]*rhs[3][0] + lhs[1][3]*rhs[3][1] + lhs[2][3]*rhs[3][2] + lhs[3][3]*rhs[3][3]
+
+	m[0][0] = m00
+	m[0][1] = m01
+	m[0][2] = m02
+	m[0][3] = m03
+	m[1][0] = m10
+	m[1][1] = m11
+	m[1][2] = m12
+	m[1][3] = m13
+	m[2][0] = m20
+	m[2][1] = m21
+	m[2][2] = m22
+	m[2][3] = m23
+	m[3][0] = m30
+	m[3][1] = m31
+	m[3][2] = m32
+	m[3][3] = m33
+
+	return m
+}
+
+func (m *Mat4x4[T]) SetInterpolate(lhs, rhs *Mat4x4[T], delta T) *Mat4x4[T] {
+	return m.SetMat4x4(lhs).InterpolateMatrix(rhs, delta)
+}
+
 func abs[T FloatingPoint](in T) T {
 	return T(math.Abs(float64(in)))
 }
 
-func (m *Mat4x4[T]) AxisAngle(outAxis *Vec3[T], outAngleRad *T) {
+func (m *Mat4x4[T]) GetAxisAngle(outAxis *Vec3[T], outAngleRad *T) {
 	epsilon := T(0.01)
 	epsilon2 := T(0.1)
 
@@ -580,20 +733,19 @@ func (m *Mat4x4[T]) RotateAroundPrenormalizedAxis(unitAxis *Vec3[T], angleRad T)
 	cos := T(math.Cos(float64(angleRad)))
 	sin := T(math.Sin(float64(angleRad)))
 
-	var temp Vec3[T]
-	temp.CopyFrom(unitAxis).Scale(1 - cos)
+	inverseCos := 1 - cos
 
-	rotate00 := cos + temp.X*unitAxis.X
-	rotate01 := temp.X*unitAxis.Y + sin*unitAxis.Z
-	rotate02 := temp.X*unitAxis.Z - sin*unitAxis.Y
+	rotate00 := cos + unitAxis.X*unitAxis.X*inverseCos
+	rotate01 := unitAxis.X*unitAxis.Y*inverseCos + sin*unitAxis.Z
+	rotate02 := unitAxis.X*unitAxis.Z*inverseCos - sin*unitAxis.Y
 
-	rotate10 := temp.Y*unitAxis.X - sin*unitAxis.Z
-	rotate11 := cos + temp.Y*unitAxis.Y
-	rotate12 := temp.Y*unitAxis.Z + sin*unitAxis.X
+	rotate10 := unitAxis.Y*unitAxis.X*inverseCos - sin*unitAxis.Z
+	rotate11 := cos + unitAxis.Y*unitAxis.Y*inverseCos
+	rotate12 := unitAxis.Y*unitAxis.Z*inverseCos + sin*unitAxis.X
 
-	rotate20 := temp.Z*unitAxis.X + sin*unitAxis.Y
-	rotate21 := temp.Z*unitAxis.Y - sin*unitAxis.X
-	rotate22 := cos + temp.Z*unitAxis.Z
+	rotate20 := unitAxis.Z*unitAxis.X*inverseCos + sin*unitAxis.Y
+	rotate21 := unitAxis.Z*unitAxis.Y*inverseCos - sin*unitAxis.X
+	rotate22 := cos + unitAxis.Z*unitAxis.Z*inverseCos
 
 	m00 := m[0][0]*rotate00 + m[1][0]*rotate01 + m[2][0]*rotate02
 	m01 := m[0][1]*rotate00 + m[1][1]*rotate01 + m[2][1]*rotate02
@@ -634,36 +786,165 @@ func (m *Mat4x4[T]) RotateAroundAxis(axis *Vec3[T], angleRad T) *Mat4x4[T] {
 }
 
 func (m *Mat4x4[T]) RotateX(angleRad T) *Mat4x4[T] {
-	axis := Vec3[T]{X: 1, Y: 0, Z: 0}
-	return m.RotateAroundPrenormalizedAxis(&axis, angleRad)
+	cos := T(math.Cos(float64(angleRad)))
+	sin := T(math.Sin(float64(angleRad)))
+
+	m10 := m[1][0]*cos + m[2][0]*sin
+	m11 := m[1][1]*cos + m[2][1]*sin
+	m12 := m[1][2]*cos + m[2][2]*sin
+	m13 := m[1][3]*cos + m[2][3]*sin
+
+	m20 := -m[1][0]*sin + m[2][0]*cos
+	m21 := -m[1][1]*sin + m[2][1]*cos
+	m22 := -m[1][2]*sin + m[2][2]*cos
+	m23 := -m[1][3]*sin + m[2][3]*cos
+
+	m[1][0] = m10
+	m[1][1] = m11
+	m[1][2] = m12
+	m[1][3] = m13
+	m[2][0] = m20
+	m[2][1] = m21
+	m[2][2] = m22
+	m[2][3] = m23
+
+	return m
 }
 
 func (m *Mat4x4[T]) RotateY(angleRad T) *Mat4x4[T] {
-	axis := Vec3[T]{X: 0, Y: 1, Z: 0}
-	return m.RotateAroundPrenormalizedAxis(&axis, angleRad)
+	cos := T(math.Cos(float64(angleRad)))
+	sin := T(math.Sin(float64(angleRad)))
+
+	m00 := m[0][0]*cos - m[2][0]*sin
+	m01 := m[0][1]*cos - m[2][1]*sin
+	m02 := m[0][2]*cos - m[2][2]*sin
+	m03 := m[0][3]*cos - m[2][3]*sin
+
+	m20 := m[0][0]*sin + m[2][0]*cos
+	m21 := m[0][1]*sin + m[2][1]*cos
+	m22 := m[0][2]*sin + m[2][2]*cos
+	m23 := m[0][3]*sin + m[2][3]*cos
+
+	m[0][0] = m00
+	m[0][1] = m01
+	m[0][2] = m02
+	m[0][3] = m03
+	m[2][0] = m20
+	m[2][1] = m21
+	m[2][2] = m22
+	m[2][3] = m23
+
+	return m
 }
 
 func (m *Mat4x4[T]) RotateZ(angleRad T) *Mat4x4[T] {
-	axis := Vec3[T]{X: 0, Y: 0, Z: 1}
-	return m.RotateAroundPrenormalizedAxis(&axis, angleRad)
+	cos := T(math.Cos(float64(angleRad)))
+	sin := T(math.Sin(float64(angleRad)))
+
+	m00 := m[0][0]*cos + m[1][0]*sin
+	m01 := m[0][1]*cos + m[1][1]*sin
+	m02 := m[0][2]*cos + m[1][2]*sin
+	m03 := m[0][3]*cos + m[1][3]*sin
+
+	m10 := -m[0][0]*sin + m[1][0]*cos
+	m11 := -m[0][1]*sin + m[1][1]*cos
+	m12 := -m[0][2]*sin + m[1][2]*cos
+	m13 := -m[0][3]*sin + m[1][3]*cos
+
+	m[0][0] = m00
+	m[0][1] = m01
+	m[0][2] = m02
+	m[0][3] = m03
+	m[1][0] = m10
+	m[1][1] = m11
+	m[1][2] = m12
+	m[1][3] = m13
+
+	return m
+}
+
+func (m *Mat4x4[T]) ShearX(y, z T) *Mat4x4[T] {
+
+	m01 := m[0][0]*y + m[0][1]
+	m02 := m[0][0]*z + m[0][2]
+
+	m11 := m[1][0]*y + m[1][1]
+	m12 := m[1][0]*z + m[1][2]
+
+	m21 := m[2][0]*y + m[2][1]
+	m22 := m[2][0]*z + m[2][2]
+
+	m31 := m[3][0]*y + m[3][1]
+	m32 := m[3][0]*z + m[3][2]
+
+	m[0][1] = m01
+	m[0][2] = m02
+	m[1][1] = m11
+	m[1][2] = m12
+	m[2][1] = m21
+	m[2][2] = m22
+	m[3][1] = m31
+	m[3][2] = m32
+
+	return m
+}
+
+func (m *Mat4x4[T]) ShearY(x, z T) *Mat4x4[T] {
+	m00 := m[0][1]*x + m[0][0]
+	m02 := m[0][1]*z + m[0][2]
+
+	m10 := m[1][1]*x + m[1][0]
+	m12 := m[1][1]*z + m[1][2]
+
+	m20 := m[2][1]*x + m[2][0]
+	m22 := m[2][1]*z + m[2][2]
+
+	m[0][0] = m00
+	m[0][2] = m02
+	m[1][0] = m10
+	m[1][2] = m12
+	m[2][0] = m20
+	m[2][2] = m22
+
+	return m
+}
+
+func (m *Mat4x4[T]) ShearZ(x, y T) *Mat4x4[T] {
+	m00 := m[0][2]*x + m[0][0]
+	m01 := m[0][2]*y + m[0][1]
+
+	m10 := m[1][2]*x + m[1][0]
+	m11 := m[1][2]*y + m[1][1]
+
+	m20 := m[2][2]*x + m[2][0]
+	m21 := m[2][2]*y + m[2][1]
+
+	m[0][0] = m00
+	m[0][1] = m01
+	m[1][0] = m10
+	m[1][1] = m11
+	m[2][0] = m20
+	m[2][1] = m21
+
+	return m
 }
 
 func (m *Mat4x4[T]) InterpolateMatrix(otherMatrix *Mat4x4[T], delta T) *Mat4x4[T] {
 	var oldMatrix Mat4x4[T]
-	oldMatrix.CopyFrom(m)
+	oldMatrix.SetMat4x4(m)
 
 	var thisRotation Mat4x4[T]
 	thisRotation.SetMatrixRotationFrom(m)
 
 	var transposedRotation Mat4x4[T]
-	transposedRotation.CopyFrom(&thisRotation).Transpose()
+	transposedRotation.SetMat4x4(&thisRotation).Transpose()
 
 	var deltaRotation Mat4x4[T]
-	deltaRotation.CopyFrom(otherMatrix).MultMatrix(&transposedRotation)
+	deltaRotation.SetMat4x4(otherMatrix).MultMatrix(&transposedRotation)
 
 	var deltaAxis Vec3[T]
 	var deltaAngle T
-	deltaRotation.AxisAngle(&deltaAxis, &deltaAngle)
+	deltaRotation.GetAxisAngle(&deltaAxis, &deltaAngle)
 
 	m.SetAxisAngle(&deltaAxis, deltaAngle).MultMatrix(&thisRotation)
 	m[3][0] = oldMatrix[3][0] + delta*(otherMatrix[3][0]-oldMatrix[3][0])
