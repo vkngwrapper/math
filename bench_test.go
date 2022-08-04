@@ -3,6 +3,7 @@ package math
 import (
 	"github.com/ungerik/go3d/mat4"
 	"github.com/ungerik/go3d/vec3"
+	"github.com/ungerik/go3d/vec4"
 	"testing"
 )
 import "github.com/g3n/engine/math32"
@@ -41,7 +42,7 @@ func BenchmarkMathGLTransform(b *testing.B) {
 	}
 }
 
-var go3dGlobalOut vec3.T
+var go3dGlobalOut vec4.T
 
 func BenchmarkGo3DTransform(b *testing.B) {
 	b.ReportAllocs()
@@ -57,8 +58,8 @@ func BenchmarkGo3DTransform(b *testing.B) {
 		mat.Translate(&translate).
 			MultMatrix(&rotate).
 			ScaleVec3(&scale)
-		transform := vec3.T{5, 10, 15}
-		mat.TransformVec3(&transform)
+		transform := vec4.T{5, 10, 15, 1}
+		mat.TransformVec4(&transform)
 
 		go3dGlobalOut = transform
 	}
