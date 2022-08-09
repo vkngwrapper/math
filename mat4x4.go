@@ -493,7 +493,7 @@ func (m *Mat4x4[T]) SetMatrixCrossProduct(vec *Vec3[T]) *Mat4x4[T] {
 	return m
 }
 
-func (m *Mat4x4[T]) SetMultMatrix(lhs, rhs *Mat4x4[T]) *Mat4x4[T] {
+func (m *Mat4x4[T]) SetMultMatrix4x4(lhs, rhs *Mat4x4[T]) *Mat4x4[T] {
 	m00 := lhs[0][0]*rhs[0][0] + lhs[1][0]*rhs[0][1] + lhs[2][0]*rhs[0][2] + lhs[3][0]*rhs[0][3]
 	m10 := lhs[0][0]*rhs[1][0] + lhs[1][0]*rhs[1][1] + lhs[2][0]*rhs[1][2] + lhs[3][0]*rhs[1][3]
 	m20 := lhs[0][0]*rhs[2][0] + lhs[1][0]*rhs[2][1] + lhs[2][0]*rhs[2][2] + lhs[3][0]*rhs[2][3]
@@ -698,7 +698,7 @@ func (m *Mat4x4[T]) Inverse() *Mat4x4[T] {
 	return m
 }
 
-func (m *Mat4x4[T]) MultMatrix(other *Mat4x4[T]) *Mat4x4[T] {
+func (m *Mat4x4[T]) MultMatrix4x4(other *Mat4x4[T]) *Mat4x4[T] {
 	m00 := m[0][0]*other[0][0] + m[1][0]*other[0][1] + m[2][0]*other[0][2] + m[3][0]*other[0][3]
 	m10 := m[0][0]*other[1][0] + m[1][0]*other[1][1] + m[2][0]*other[1][2] + m[3][0]*other[1][3]
 	m20 := m[0][0]*other[2][0] + m[1][0]*other[2][1] + m[2][0]*other[2][2] + m[3][0]*other[2][3]
@@ -758,7 +758,7 @@ func (m *Mat4x4[T]) Proj3D(normal *Vec3[T]) *Mat4x4[T] {
 	proj[3][2] = 0
 	proj[3][3] = 1
 
-	return m.MultMatrix(&proj)
+	return m.MultMatrix4x4(&proj)
 }
 
 func (m *Mat4x4[T]) Translate(v *Vec3[T]) *Mat4x4[T] {
@@ -994,13 +994,13 @@ func (m *Mat4x4[T]) InterpolateMatrix(otherMatrix *Mat4x4[T], delta T) *Mat4x4[T
 	transposedRotation.SetMat4x4(&thisRotation).Transpose()
 
 	var deltaRotation Mat4x4[T]
-	deltaRotation.SetMat4x4(otherMatrix).MultMatrix(&transposedRotation)
+	deltaRotation.SetMat4x4(otherMatrix).MultMatrix4x4(&transposedRotation)
 
 	var deltaAxis Vec3[T]
 	var deltaAngle T
 	deltaRotation.GetAxisAngle(&deltaAxis, &deltaAngle)
 
-	m.SetAxisAngle(&deltaAxis, deltaAngle).MultMatrix(&thisRotation)
+	m.SetAxisAngle(&deltaAxis, deltaAngle).MultMatrix4x4(&thisRotation)
 	m[3][0] = oldMatrix[3][0] + delta*(otherMatrix[3][0]-oldMatrix[3][0])
 	m[3][1] = oldMatrix[3][1] + delta*(otherMatrix[3][1]-oldMatrix[3][1])
 	m[3][2] = oldMatrix[3][2] + delta*(otherMatrix[3][2]-oldMatrix[3][2])

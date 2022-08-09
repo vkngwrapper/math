@@ -101,7 +101,7 @@ func (m *Mat3x3[T]) SetRowMajor(r1, r2, r3 *Vec3[T]) *Mat3x3[T] {
 	return m
 }
 
-func (m *Mat3x3[T]) SetMultMatrix(lhs, rhs *Mat3x3[T]) *Mat3x3[T] {
+func (m *Mat3x3[T]) SetMultMatrix3x3(lhs, rhs *Mat3x3[T]) *Mat3x3[T] {
 	m00 := lhs[0][0]*rhs[0][0] + lhs[1][0]*rhs[0][1] + lhs[2][0]*rhs[0][2]
 	m10 := lhs[0][0]*rhs[1][0] + lhs[1][0]*rhs[1][1] + lhs[2][0]*rhs[1][2]
 	m20 := lhs[0][0]*rhs[2][0] + lhs[1][0]*rhs[2][1] + lhs[2][0]*rhs[2][2]
@@ -213,7 +213,7 @@ func (m *Mat3x3[T]) Orthonormalize() *Mat3x3[T] {
 	return m
 }
 
-func (m *Mat3x3[T]) MultMatrix(other *Mat3x3[T]) *Mat3x3[T] {
+func (m *Mat3x3[T]) MultMatrix3x3(other *Mat3x3[T]) *Mat3x3[T] {
 	m00 := m[0][0]*other[0][0] + m[1][0]*other[0][1] + m[2][0]*other[0][2]
 	m10 := m[0][0]*other[1][0] + m[1][0]*other[1][1] + m[2][0]*other[1][2]
 	m20 := m[0][0]*other[2][0] + m[1][0]*other[2][1] + m[2][0]*other[2][2]

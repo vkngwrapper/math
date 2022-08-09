@@ -75,7 +75,7 @@ func (m *Mat2x2[T]) SetRowMajor(r1, r2 *Vec2[T]) *Mat2x2[T] {
 	return m
 }
 
-func (m *Mat2x2[T]) SetMultMatrix(lhs, rhs *Mat2x2[T]) *Mat2x2[T] {
+func (m *Mat2x2[T]) SetMultMatrix2x2(lhs, rhs *Mat2x2[T]) *Mat2x2[T] {
 	m00 := lhs[0][0]*rhs[0][0] + lhs[1][0]*rhs[0][1]
 	m10 := lhs[0][0]*rhs[1][0] + lhs[1][0]*rhs[1][1]
 
@@ -90,7 +90,7 @@ func (m *Mat2x2[T]) SetMultMatrix(lhs, rhs *Mat2x2[T]) *Mat2x2[T] {
 	return m
 }
 
-func (m *Mat2x2[T]) MultMatrix(other *Mat2x2[T]) *Mat2x2[T] {
+func (m *Mat2x2[T]) MultMatrix2x2(other *Mat2x2[T]) *Mat2x2[T] {
 	m00 := m[0][0]*other[0][0] + m[1][0]*other[0][1]
 	m10 := m[0][0]*other[1][0] + m[1][0]*other[1][1]
 

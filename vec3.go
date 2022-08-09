@@ -248,7 +248,7 @@ func (v *Vec3[T]) Project(model *Mat4x4[T], proj *Mat4x4[T], viewport *Vec4[T]) 
 
 func (v *Vec3[T]) Unproject(model *Mat4x4[T], proj *Mat4x4[T], viewport *Vec4[T]) *Vec3[T] {
 	var inverse Mat4x4[T]
-	inverse.SetMat4x4(proj).MultMatrix(model).Inverse()
+	inverse.SetMat4x4(proj).MultMatrix4x4(model).Inverse()
 
 	x := (v.X - viewport.X) / viewport.Z
 	y := (v.Y - viewport.Y) / viewport.W
