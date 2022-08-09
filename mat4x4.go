@@ -95,7 +95,7 @@ func (m *Mat4x4[T]) SetAxisAngle(axis *Vec3[T], angleRad T) *Mat4x4[T] {
 	inverseCos := T(1) - cos
 
 	var unitAxis Vec3[T]
-	unitAxis.CopyFrom(axis).Normalize()
+	unitAxis.SetVec3(axis).Normalize()
 
 	m[0][0] = inverseCos*unitAxis.X*unitAxis.X + cos
 	m[0][1] = inverseCos*unitAxis.X*unitAxis.Y + unitAxis.Z*sin
@@ -124,7 +124,7 @@ func (m *Mat4x4[T]) SetOrientation(normal *Vec3[T], up *Vec3[T]) *Mat4x4[T] {
 	}
 
 	var rotationAxis Vec3[T]
-	rotationAxis.CopyFrom(up).CrossProduct(normal)
+	rotationAxis.SetVec3(up).CrossProduct(normal)
 
 	angle := T(math.Acos(float64(normal.DotProduct(up))))
 
@@ -194,6 +194,27 @@ func (m *Mat4x4[T]) SetMat4x4(other *Mat4x4[T]) *Mat4x4[T] {
 	return m
 }
 
+func (m *Mat4x4[T]) SetMat3x3(other *Mat3x3[T]) *Mat4x4[T] {
+	m[0][0] = other[0][0]
+	m[0][1] = other[0][1]
+	m[0][2] = other[0][2]
+	m[0][3] = 0
+	m[1][0] = other[1][0]
+	m[1][1] = other[1][1]
+	m[1][2] = other[1][2]
+	m[1][3] = 0
+	m[2][0] = other[2][0]
+	m[2][1] = other[2][1]
+	m[2][2] = other[2][2]
+	m[2][3] = 0
+	m[3][0] = 0
+	m[3][1] = 0
+	m[3][2] = 0
+	m[3][3] = 1
+
+	return m
+}
+
 func (m *Mat4x4[T]) SetColMajor(c1, c2, c3, c4 *Vec4[T]) *Mat4x4[T] {
 	m[0][0] = c1.X
 	m[0][1] = c1.Y
@@ -232,30 +253,6 @@ func (m *Mat4x4[T]) SetRowMajor(r1, r2, r3, r4 *Vec4[T]) *Mat4x4[T] {
 	m[1][3] = r4.Y
 	m[2][3] = r4.Z
 	m[3][3] = r4.W
-
-	return m
-}
-
-func (m *Mat4x4[T]) SetSaturation(scalar T) *Mat4x4[T] {
-	rgbw := Vec3[T]{T(0.2126), T(0.7152), T(0.0722)}
-	rgbw.Scale(T(1) - scalar)
-
-	m[0][0] = rgbw.X + scalar
-	m[0][1] = rgbw.X
-	m[0][2] = rgbw.X
-	m[0][3] = 0
-	m[1][0] = rgbw.Y
-	m[1][1] = rgbw.Y + scalar
-	m[1][2] = rgbw.Y
-	m[1][3] = 0
-	m[2][0] = rgbw.Z
-	m[2][1] = rgbw.Z
-	m[2][2] = rgbw.Z + scalar
-	m[2][3] = 0
-	m[3][0] = 0
-	m[3][1] = 0
-	m[3][2] = 0
-	m[3][3] = 1
 
 	return m
 }
@@ -447,13 +444,13 @@ func (m *Mat4x4[T]) SetPickMatrix(center *Vec2[T], delta *Vec2[T], viewport Vec4
 
 func (m *Mat4x4[T]) SetLookAt(eyePosition *Vec3[T], target *Vec3[T], up *Vec3[T]) *Mat4x4[T] {
 	var f Vec3[T]
-	f.CopyFrom(target).SubtractVec3(eyePosition).Normalize()
+	f.SetVec3(target).SubtractVec3(eyePosition).Normalize()
 
 	var s Vec3[T]
-	s.CopyFrom(&f).CrossProduct(up).Normalize()
+	s.SetVec3(&f).CrossProduct(up).Normalize()
 
 	var u Vec3[T]
-	u.CopyFrom(&s).CrossProduct(&f)
+	u.SetVec3(&s).CrossProduct(&f)
 
 	m[0][0] = s.X
 	m[1][0] = s.Y
@@ -539,10 +536,6 @@ func (m *Mat4x4[T]) SetMultMatrix(lhs, rhs *Mat4x4[T]) *Mat4x4[T] {
 
 func (m *Mat4x4[T]) SetInterpolate(lhs, rhs *Mat4x4[T], delta T) *Mat4x4[T] {
 	return m.SetMat4x4(lhs).InterpolateMatrix(rhs, delta)
-}
-
-func abs[T FloatingPoint](in T) T {
-	return T(math.Abs(float64(in)))
 }
 
 func (m *Mat4x4[T]) GetAxisAngle(outAxis *Vec3[T], outAngleRad *T) {
@@ -640,6 +633,71 @@ func (m *Mat4x4[T]) Transpose() *Mat4x4[T] {
 	return m
 }
 
+func (m *Mat4x4[T]) Inverse() *Mat4x4[T] {
+	coefficient0 := m[2][2]*m[3][3] - m[3][2]*m[2][3]
+	coefficient2 := m[1][2]*m[3][3] - m[3][2]*m[1][3]
+	coefficient3 := m[1][2]*m[2][3] - m[2][2]*m[1][3]
+
+	coefficient4 := m[2][1]*m[3][3] - m[3][1]*m[2][3]
+	coefficient6 := m[1][1]*m[3][3] - m[3][1]*m[1][3]
+	coefficient7 := m[1][1]*m[2][3] - m[2][1]*m[1][3]
+
+	coefficient8 := m[2][1]*m[3][2] - m[3][1]*m[2][2]
+	coefficient10 := m[1][1]*m[3][2] - m[3][1]*m[1][2]
+	coefficient11 := m[1][1]*m[2][2] - m[2][1]*m[1][2]
+
+	coefficient12 := m[2][0]*m[3][3] - m[3][0]*m[2][3]
+	coefficient14 := m[1][0]*m[3][3] - m[3][0]*m[1][3]
+	coefficient15 := m[1][0]*m[2][3] - m[2][0]*m[1][3]
+
+	coefficient16 := m[2][0]*m[3][2] - m[3][0]*m[2][2]
+	coefficient18 := m[1][0]*m[3][2] - m[3][0]*m[1][2]
+	coefficient19 := m[1][0]*m[2][2] - m[2][0]*m[1][2]
+
+	coefficient20 := m[2][0]*m[3][1] - m[3][0]*m[2][1]
+	coefficient22 := m[1][0]*m[3][1] - m[3][0]*m[1][1]
+	coefficient23 := m[1][0]*m[2][1] - m[2][0]*m[1][1]
+
+	m00 := m[1][0]*coefficient0 - m[1][2]*coefficient4 + m[1][3]*coefficient8
+	m01 := -m[0][1]*coefficient0 + m[0][2]*coefficient4 - m[0][3]*coefficient8
+	m02 := m[0][1]*coefficient2 - m[0][2]*coefficient6 + m[0][3]*coefficient10
+	m03 := -m[0][1]*coefficient3 + m[0][2]*coefficient7 - m[0][3]*coefficient11
+	m10 := -m[1][0]*coefficient0 + m[1][2]*coefficient12 - m[1][3]*coefficient16
+	m11 := m[0][0]*coefficient0 - m[0][2]*coefficient12 + m[0][3]*coefficient16
+	m12 := -m[0][0]*coefficient2 + m[0][2]*coefficient14 - m[0][3]*coefficient18
+	m13 := m[0][0]*coefficient3 - m[0][2]*coefficient16 + m[0][3]*coefficient19
+	m20 := m[1][0]*coefficient16 - m[1][1]*coefficient12 + m[1][3]*coefficient20
+	m21 := -m[0][0]*coefficient16 + m[0][1]*coefficient12 - m[0][3]*coefficient20
+	m22 := m[0][0]*coefficient18 - m[0][1]*coefficient14 + m[0][3]*coefficient22
+	m23 := -m[0][0]*coefficient19 + m[0][1]*coefficient15 - m[0][3]*coefficient23
+	m30 := -m[1][0]*coefficient8 + m[1][1]*coefficient16 - m[1][2]*coefficient20
+	m31 := m[0][0]*coefficient8 - m[0][1]*coefficient16 + m[0][2]*coefficient20
+	m32 := -m[0][0]*coefficient10 + m[0][1]*coefficient18 - m[0][2]*coefficient22
+	m33 := m[0][0]*coefficient11 - m[0][1]*coefficient19 + m[0][2]*coefficient23
+
+	determinant := m[0][0]*m00 + m[0][1]*m10 + m[0][2]*m20 + m[0][3]*m30
+	oneOverDeterminant := 1.0 / determinant
+
+	m[0][0] = m00 * oneOverDeterminant
+	m[0][1] = m01 * oneOverDeterminant
+	m[0][2] = m02 * oneOverDeterminant
+	m[0][3] = m03 * oneOverDeterminant
+	m[1][0] = m10 * oneOverDeterminant
+	m[1][1] = m11 * oneOverDeterminant
+	m[1][2] = m12 * oneOverDeterminant
+	m[1][3] = m13 * oneOverDeterminant
+	m[2][0] = m20 * oneOverDeterminant
+	m[2][1] = m21 * oneOverDeterminant
+	m[2][2] = m22 * oneOverDeterminant
+	m[2][3] = m23 * oneOverDeterminant
+	m[3][0] = m30 * oneOverDeterminant
+	m[3][1] = m31 * oneOverDeterminant
+	m[3][2] = m32 * oneOverDeterminant
+	m[3][3] = m33 * oneOverDeterminant
+
+	return m
+}
+
 func (m *Mat4x4[T]) MultMatrix(other *Mat4x4[T]) *Mat4x4[T] {
 	m00 := m[0][0]*other[0][0] + m[1][0]*other[0][1] + m[2][0]*other[0][2] + m[3][0]*other[0][3]
 	m10 := m[0][0]*other[1][0] + m[1][0]*other[1][1] + m[2][0]*other[1][2] + m[3][0]*other[1][3]
@@ -729,7 +787,10 @@ func (m *Mat4x4[T]) Scale(v *Vec3[T]) *Mat4x4[T] {
 	return m
 }
 
-func (m *Mat4x4[T]) RotateAroundPrenormalizedAxis(unitAxis *Vec3[T], angleRad T) *Mat4x4[T] {
+func (m *Mat4x4[T]) RotateAroundAxis(axis *Vec3[T], angleRad T) *Mat4x4[T] {
+	var unitAxis Vec3[T]
+	unitAxis.SetVec3(axis).Normalize()
+
 	cos := T(math.Cos(float64(angleRad)))
 	sin := T(math.Sin(float64(angleRad)))
 
@@ -776,13 +837,6 @@ func (m *Mat4x4[T]) RotateAroundPrenormalizedAxis(unitAxis *Vec3[T], angleRad T)
 	m[2][3] = m23
 
 	return m
-}
-
-func (m *Mat4x4[T]) RotateAroundAxis(axis *Vec3[T], angleRad T) *Mat4x4[T] {
-	var unitAxis Vec3[T]
-	unitAxis.CopyFrom(axis).Normalize()
-
-	return m.RotateAroundPrenormalizedAxis(&unitAxis, angleRad)
 }
 
 func (m *Mat4x4[T]) RotateX(angleRad T) *Mat4x4[T] {

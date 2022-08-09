@@ -9,7 +9,7 @@ type Vec4[T FloatingPoint] struct {
 	W T
 }
 
-func (v *Vec4[T]) CopyFrom(in *Vec4[T]) *Vec4[T] {
+func (v *Vec4[T]) SetVec4(in *Vec4[T]) *Vec4[T] {
 	v.X = in.X
 	v.Y = in.Y
 	v.Z = in.Z
@@ -18,8 +18,32 @@ func (v *Vec4[T]) CopyFrom(in *Vec4[T]) *Vec4[T] {
 	return v
 }
 
+func (v *Vec4[T]) SetVec3(in *Vec3[T]) *Vec4[T] {
+	v.X = in.X
+	v.Y = in.Y
+	v.Z = in.Z
+	v.W = 1
+
+	return v
+}
+
+func (v *Vec4[T]) SetVec2(in *Vec2[T]) *Vec4[T] {
+	v.X = in.X
+	v.Y = in.Y
+	v.Z = 0
+	v.W = 1
+
+	return v
+}
+
 func (v *Vec4[T]) Normalize() *Vec4[T] {
-	inverse := 1.0 / v.Len()
+	vecLen := v.Len()
+
+	if abs[T](vecLen-1) > 0.0001 {
+		return v
+	}
+
+	inverse := 1.0 / vecLen
 	v.X *= inverse
 	v.Y *= inverse
 	v.Z *= inverse
@@ -88,6 +112,38 @@ func (v *Vec4[T]) Equal(other *Vec4[T], epsilon T) bool {
 	return true
 }
 
+func (v *Vec4[T]) GreaterThan(other *Vec4[T]) bool {
+	if v.X <= other.X || v.Y <= other.Y || v.Z <= other.Z || v.W <= other.W {
+		return false
+	}
+
+	return true
+}
+
+func (v *Vec4[T]) GreaterThanEqual(other *Vec4[T]) bool {
+	if v.X < other.X || v.Y < other.Y || v.Z < other.Z || v.W < other.W {
+		return false
+	}
+
+	return true
+}
+
+func (v *Vec4[T]) LessThan(other *Vec4[T]) bool {
+	if v.X >= other.X || v.Y >= other.Y || v.Z >= other.Z || v.W >= other.W {
+		return false
+	}
+
+	return true
+}
+
+func (v *Vec4[T]) LessThanEqual(other *Vec4[T]) bool {
+	if v.X > other.X || v.Y > other.Y || v.Z > other.Z || v.W > other.W {
+		return false
+	}
+
+	return true
+}
+
 func (v *Vec4[T]) Transform(m *Mat4x4[T]) *Vec4[T] {
 	x := m[0][0]*v.X + m[1][0]*v.Y + m[2][0]*v.Z + m[3][0]*v.W
 	y := m[0][1]*v.X + m[1][1]*v.Y + m[2][1]*v.Z + m[3][1]*v.W
@@ -98,6 +154,81 @@ func (v *Vec4[T]) Transform(m *Mat4x4[T]) *Vec4[T] {
 	v.Y = y
 	v.Z = z
 	v.W = w
+
+	return v
+}
+
+func (v *Vec4[T]) Lerp(other *Vec4[T], delta T) *Vec4[T] {
+	v.X = v.X*(1-delta) + other.X*delta
+	v.Y = v.Y*(1-delta) + other.Y*delta
+	v.Z = v.Z*(1-delta) + other.Z*delta
+	v.W = v.W*(1-delta) + other.W*delta
+
+	return v
+}
+
+func (v *Vec4[T]) Rotate(angleRad T, normal *Vec3[T]) *Vec4[T] {
+	cos := T(math.Cos(float64(angleRad)))
+	sin := T(math.Sin(float64(angleRad)))
+	inverseCos := T(1) - cos
+
+	var unitAxis Vec3[T]
+	unitAxis.SetVec3(normal).Normalize()
+
+	x := (inverseCos*unitAxis.X*unitAxis.X+cos)*v.X +
+		(inverseCos*unitAxis.X*unitAxis.Y+unitAxis.Z*sin)*v.Y +
+		(inverseCos*unitAxis.X*unitAxis.Z-unitAxis.Y*sin)*v.Z
+
+	y := (inverseCos*unitAxis.X*unitAxis.Y-unitAxis.Z*sin)*v.X +
+		(inverseCos*unitAxis.Y*unitAxis.Y+cos)*v.Y +
+		(inverseCos*unitAxis.Y*unitAxis.Z+unitAxis.X*sin)*v.Z
+
+	z := (inverseCos*unitAxis.X*unitAxis.Z+unitAxis.Y*sin)*v.X +
+		(inverseCos*unitAxis.Y*unitAxis.Z-unitAxis.X*sin)*v.Y +
+		(inverseCos*unitAxis.Z*unitAxis.Z+cos)*v.Z
+
+	v.X = x
+	v.Y = y
+	v.Z = z
+
+	return v
+}
+
+func (v *Vec4[T]) RotateX(angleRad T) *Vec4[T] {
+	cos := T(math.Cos(float64(angleRad)))
+	sin := T(math.Sin(float64(angleRad)))
+
+	y := v.Y*cos - v.Z*sin
+	z := v.Y*sin + v.Z*cos
+
+	v.Y = y
+	v.Z = z
+
+	return v
+}
+
+func (v *Vec4[T]) RotateY(angleRad T) *Vec4[T] {
+	cos := T(math.Cos(float64(angleRad)))
+	sin := T(math.Sin(float64(angleRad)))
+
+	x := v.X*cos + v.Z*sin
+	z := -v.X*sin + v.Z*cos
+
+	v.X = x
+	v.Z = z
+
+	return v
+}
+
+func (v *Vec4[T]) RotateZ(angleRad T) *Vec4[T] {
+	cos := T(math.Cos(float64(angleRad)))
+	sin := T(math.Sin(float64(angleRad)))
+
+	x := v.X*cos - v.Y*sin
+	y := v.X*sin + v.Y*cos
+
+	v.X = x
+	v.Y = y
 
 	return v
 }
