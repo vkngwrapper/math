@@ -194,6 +194,23 @@ func (v *Vec4[T]) Rotate(angleRad T, normal *Vec3[T]) *Vec4[T] {
 	return v
 }
 
+func (v *Vec4[T]) RotateWithQuaternion(q *Quaternion[T]) *Vec4[T] {
+	quatVector := Vec3[T]{q.X, q.Y, q.Z}
+	vec3 := Vec3[T]{v.X, v.Y, v.Z}
+
+	var uv Vec3[T]
+	uv.SetVec3(&quatVector).CrossProduct(&vec3)
+
+	var uuv Vec3[T]
+	uuv.SetVec3(&quatVector).CrossProduct(&uv)
+
+	v.X += ((uv.X * q.W) + uuv.X) * 2.0
+	v.Y += ((uv.Y * q.W) + uuv.Y) * 2.0
+	v.Z += ((uv.Z * q.W) + uuv.Z) * 2.0
+
+	return v
+}
+
 func (v *Vec4[T]) RotateX(angleRad T) *Vec4[T] {
 	cos := T(math.Cos(float64(angleRad)))
 	sin := T(math.Sin(float64(angleRad)))

@@ -44,6 +44,14 @@ func (v *Vec3[T]) SetHomogenousVec4(in *Vec4[T]) *Vec3[T] {
 	return v
 }
 
+func (v *Vec3[T]) SetCrossProduct(lhs, rhs *Vec3[T]) *Vec3[T] {
+	v.X = lhs.Y*rhs.Z - lhs.Z*rhs.Y
+	v.Y = lhs.Z*rhs.X - lhs.X*rhs.Z
+	v.Z = lhs.X*rhs.Y - lhs.Y*rhs.X
+
+	return v
+}
+
 func (v *Vec3[T]) Normalize() *Vec3[T] {
 	vecLen := v.Len()
 
@@ -92,6 +100,20 @@ func (v *Vec3[T]) CrossProduct(other *Vec3[T]) *Vec3[T] {
 	v.X = x
 	v.Y = y
 	v.Z = z
+
+	return v
+}
+
+func (v *Vec3[T]) CrossProductQuaternion(other *Quaternion[T]) *Vec3[T] {
+	quatVector := Vec3[T]{other.X, other.Y, other.Z}
+	var uv, uuv Vec3[T]
+
+	uv.SetVec3(&quatVector).CrossProduct(v)
+	uuv.SetVec3(&quatVector).CrossProduct(&uv)
+
+	v.X = v.X + ((uv.X*other.W)+uuv.X)*2.0
+	v.Y = v.Y + ((uv.Y*other.W)+uuv.Y)*2.0
+	v.Z = v.Z + ((uv.Z*other.W)+uuv.Z)*2.0
 
 	return v
 }
@@ -292,6 +314,22 @@ func (v *Vec3[T]) Rotate(angleRad T, normal *Vec3[T]) *Vec3[T] {
 	v.X = x
 	v.Y = y
 	v.Z = z
+
+	return v
+}
+
+func (v *Vec3[T]) RotateWithQuaternion(q *Quaternion[T]) *Vec3[T] {
+	quatVector := Vec3[T]{q.X, q.Y, q.Z}
+
+	var uv Vec3[T]
+	uv.SetVec3(&quatVector).CrossProduct(v)
+
+	var uuv Vec3[T]
+	uuv.SetVec3(&quatVector).CrossProduct(&uv)
+
+	v.X += ((uv.X * q.W) + uuv.X) * 2.0
+	v.Y += ((uv.Y * q.W) + uuv.Y) * 2.0
+	v.Z += ((uv.Z * q.W) + uuv.Z) * 2.0
 
 	return v
 }
