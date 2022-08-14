@@ -2,11 +2,11 @@ package math
 
 import "math"
 
-type Quaternion[T FloatingPoint] struct {
-	X, Y, Z, W T
+type Quaternion struct {
+	X, Y, Z, W float32
 }
 
-func (q *Quaternion[T]) SetIdentity() *Quaternion[T] {
+func (q *Quaternion) SetIdentity() *Quaternion {
 	q.X = 0
 	q.Y = 0
 	q.Z = 0
@@ -15,8 +15,8 @@ func (q *Quaternion[T]) SetIdentity() *Quaternion[T] {
 	return q
 }
 
-func (q *Quaternion[T]) SetAxisAngle(axis *Vec3[T], angle T) *Quaternion[T] {
-	s := T(math.Sin(float64(angle * 0.5)))
+func (q *Quaternion) SetAxisAngle(axis *Vec3, angle float32) *Quaternion {
+	s := float32(math.Sin(float64(angle * 0.5)))
 	q.X = axis.X * s
 	q.Y = axis.Y * s
 	q.Z = axis.Z * s
@@ -25,7 +25,7 @@ func (q *Quaternion[T]) SetAxisAngle(axis *Vec3[T], angle T) *Quaternion[T] {
 	return q
 }
 
-func (q *Quaternion[T]) SetVectorRotation(origin *Vec3[T], destination *Vec3[T]) *Quaternion[T] {
+func (q *Quaternion) SetVectorRotation(origin *Vec3, destination *Vec3) *Quaternion {
 	cosTheta := origin.DotProduct(destination)
 
 	if cosTheta >= 0.9999 {
@@ -37,10 +37,10 @@ func (q *Quaternion[T]) SetVectorRotation(origin *Vec3[T], destination *Vec3[T])
 	}
 
 	if cosTheta < -0.9999 {
-		rotationAxis := Vec3[T]{0, 0, 1}
+		rotationAxis := Vec3{0, 0, 1}
 		rotationAxis.CrossProduct(origin)
 		if rotationAxis.LenSqr() < 0.0001 {
-			rotationAxis = Vec3[T]{1, 0, 0}
+			rotationAxis = Vec3{1, 0, 0}
 			rotationAxis.CrossProduct(origin)
 		}
 
@@ -48,15 +48,15 @@ func (q *Quaternion[T]) SetVectorRotation(origin *Vec3[T], destination *Vec3[T])
 		q.X = rotationAxis.X
 		q.Y = rotationAxis.Y
 		q.Z = rotationAxis.Z
-		q.W = T(math.Pi)
+		q.W = float32(math.Pi)
 		return q
 	}
 
-	var rotationAxis Vec3[T]
+	var rotationAxis Vec3
 	rotationAxis.SetCrossProduct(origin, destination)
 
 	lengthSquared := (1.0 + cosTheta) * 2.0
-	length := T(math.Sqrt(float64(lengthSquared)))
+	length := float32(math.Sqrt(float64(lengthSquared)))
 	inverse := 1.0 / length
 
 	q.X = rotationAxis.X * inverse
@@ -67,7 +67,7 @@ func (q *Quaternion[T]) SetVectorRotation(origin *Vec3[T], destination *Vec3[T])
 	return q
 }
 
-func (q *Quaternion[T]) SetQuaternion(other *Quaternion[T]) *Quaternion[T] {
+func (q *Quaternion) SetQuaternion(other *Quaternion) *Quaternion {
 	q.X = other.X
 	q.Y = other.Y
 	q.Z = other.Z
@@ -76,7 +76,7 @@ func (q *Quaternion[T]) SetQuaternion(other *Quaternion[T]) *Quaternion[T] {
 	return q
 }
 
-func (q *Quaternion[T]) SetMat3x3(m *Mat3x3[T]) *Quaternion[T] {
+func (q *Quaternion) SetMat3x3(m *Mat3x3) *Quaternion {
 	fourXSquaredMinus1 := m[0][0] - m[1][1] - m[2][2]
 	fourYSquaredMinus1 := m[1][1] - m[0][0] - m[2][2]
 	fourZSquaredMinus1 := m[2][2] - m[0][0] - m[1][1]
@@ -97,7 +97,7 @@ func (q *Quaternion[T]) SetMat3x3(m *Mat3x3[T]) *Quaternion[T] {
 		biggestIndex = 3
 	}
 
-	biggestVal := T(math.Sqrt(float64(fourBiggestSquaredMinus1+1.0))) * 0.5
+	biggestVal := float32(math.Sqrt(float64(fourBiggestSquaredMinus1+1.0))) * 0.5
 	mult := 0.25 / biggestVal
 
 	switch biggestIndex {
@@ -134,7 +134,7 @@ func (q *Quaternion[T]) SetMat3x3(m *Mat3x3[T]) *Quaternion[T] {
 	}
 }
 
-func (q *Quaternion[T]) SetMat4x4(m *Mat4x4[T]) *Quaternion[T] {
+func (q *Quaternion) SetMat4x4(m *Mat4x4) *Quaternion {
 	fourXSquaredMinus1 := m[0][0] - m[1][1] - m[2][2]
 	fourYSquaredMinus1 := m[1][1] - m[0][0] - m[2][2]
 	fourZSquaredMinus1 := m[2][2] - m[0][0] - m[1][1]
@@ -155,7 +155,7 @@ func (q *Quaternion[T]) SetMat4x4(m *Mat4x4[T]) *Quaternion[T] {
 		biggestIndex = 3
 	}
 
-	biggestVal := T(math.Sqrt(float64(fourBiggestSquaredMinus1+1.0))) * 0.5
+	biggestVal := float32(math.Sqrt(float64(fourBiggestSquaredMinus1+1.0))) * 0.5
 	mult := 0.25 / biggestVal
 
 	switch biggestIndex {
@@ -192,18 +192,18 @@ func (q *Quaternion[T]) SetMat4x4(m *Mat4x4[T]) *Quaternion[T] {
 	}
 }
 
-func (q *Quaternion[T]) SetIntermediate(prev *Quaternion[T], current *Quaternion[T], next *Quaternion[T]) *Quaternion[T] {
-	var inverseCurrent Quaternion[T]
+func (q *Quaternion) SetIntermediate(prev *Quaternion, current *Quaternion, next *Quaternion) *Quaternion {
+	var inverseCurrent Quaternion
 	inverseCurrent.Inverse()
 
-	var nextDiff Quaternion[T]
+	var nextDiff Quaternion
 	nextDiff.SetMultQuaternion(next, &inverseCurrent).Log()
 
-	var prevDiff Quaternion[T]
+	var prevDiff Quaternion
 	prevDiff.SetMultQuaternion(prev, &inverseCurrent).Log()
 
-	factor := T(-1.0 / 4.0)
-	preExp := Quaternion[T]{
+	factor := float32(-1.0 / 4.0)
+	preExp := Quaternion{
 		X: (nextDiff.X + prevDiff.X) * factor,
 		Y: (nextDiff.Y + prevDiff.Y) * factor,
 		Z: (nextDiff.Z + prevDiff.Z) * factor,
@@ -212,23 +212,23 @@ func (q *Quaternion[T]) SetIntermediate(prev *Quaternion[T], current *Quaternion
 	return preExp.Exp().MultQuaternion(current)
 }
 
-func (q *Quaternion[T]) SetMix(lhs, rhs *Quaternion[T], delta T) *Quaternion[T] {
+func (q *Quaternion) SetMix(lhs, rhs *Quaternion, delta float32) *Quaternion {
 	cosTheta := lhs.DotProduct(rhs)
 
 	// Perform a linear interpolation when cosTheta is close to 1 to avoid side effect of sin(angle) becoming a zero denominator
 	if cosTheta > 0.9999 {
-		q.X = mix[T](lhs.X, rhs.X, delta)
-		q.Y = mix[T](lhs.Y, rhs.Y, delta)
-		q.Z = mix[T](lhs.Z, rhs.Z, delta)
-		q.W = mix[T](lhs.W, rhs.W, delta)
+		q.X = mix(lhs.X, rhs.X, delta)
+		q.Y = mix(lhs.Y, rhs.Y, delta)
+		q.Z = mix(lhs.Z, rhs.Z, delta)
+		q.W = mix(lhs.W, rhs.W, delta)
 
 		return q
 	}
 
-	angle := T(math.Acos(float64(cosTheta)))
-	qFactor := T(math.Sin(float64(1.0-delta))) * angle
-	otherFactor := T(math.Sin(float64(delta * angle)))
-	inverseFactor := 1.0 / T(math.Sin(float64(angle)))
+	angle := float32(math.Acos(float64(cosTheta)))
+	qFactor := float32(math.Sin(float64(1.0-delta))) * angle
+	otherFactor := float32(math.Sin(float64(delta * angle)))
+	inverseFactor := 1.0 / float32(math.Sin(float64(angle)))
 
 	q.X = (lhs.X*qFactor + rhs.X*otherFactor) * inverseFactor
 	q.Y = (lhs.Y*qFactor + rhs.Y*otherFactor) * inverseFactor
@@ -238,7 +238,7 @@ func (q *Quaternion[T]) SetMix(lhs, rhs *Quaternion[T], delta T) *Quaternion[T] 
 	return q
 }
 
-func (q *Quaternion[T]) SetShortMix(lhs, rhs *Quaternion[T], delta T) *Quaternion[T] {
+func (q *Quaternion) SetShortMix(lhs, rhs *Quaternion, delta float32) *Quaternion {
 	if delta <= 0 {
 		return q
 	} else if delta >= 1 {
@@ -249,7 +249,7 @@ func (q *Quaternion[T]) SetShortMix(lhs, rhs *Quaternion[T], delta T) *Quaternio
 		return q
 	}
 
-	var rhs2 Quaternion[T]
+	var rhs2 Quaternion
 	rhs2.SetQuaternion(rhs)
 
 	cos := lhs.DotProduct(rhs)
@@ -262,16 +262,16 @@ func (q *Quaternion[T]) SetShortMix(lhs, rhs *Quaternion[T], delta T) *Quaternio
 		cos = -cos
 	}
 
-	var k0, k1 T
+	var k0, k1 float32
 	if cos > 0.9999 {
 		k0 = 1.0 - delta
 		k1 = delta
 	} else {
-		sin := T(math.Sqrt(float64(1.0 - cos*cos)))
-		angle := T(math.Atan2(float64(sin), float64(cos)))
+		sin := float32(math.Sqrt(float64(1.0 - cos*cos)))
+		angle := float32(math.Atan2(float64(sin), float64(cos)))
 		oneOverSin := 1.0 / sin
-		k0 = T(math.Sin(float64((1.0-delta)*angle))) * oneOverSin
-		k1 = T(math.Sin(float64(delta*angle))) * oneOverSin
+		k0 = float32(math.Sin(float64((1.0-delta)*angle))) * oneOverSin
+		k1 = float32(math.Sin(float64(delta*angle))) * oneOverSin
 	}
 
 	q.X = k0*lhs.X + k1*rhs2.X
@@ -282,10 +282,10 @@ func (q *Quaternion[T]) SetShortMix(lhs, rhs *Quaternion[T], delta T) *Quaternio
 	return q
 }
 
-func (q *Quaternion[T]) SetSlerp(lhs, rhs *Quaternion[T], delta T) *Quaternion[T] {
+func (q *Quaternion) SetSlerp(lhs, rhs *Quaternion, delta float32) *Quaternion {
 	cosTheta := lhs.DotProduct(rhs)
 
-	var tmpRHS Quaternion[T]
+	var tmpRHS Quaternion
 	tmpRHS.SetQuaternion(rhs)
 
 	// If cosTheta < 0, the interpolation will take the long way around the sphere
@@ -299,17 +299,17 @@ func (q *Quaternion[T]) SetSlerp(lhs, rhs *Quaternion[T], delta T) *Quaternion[T
 
 	// Perform linear interpolation when costheta is close to 1
 	if cosTheta > 0.9999 {
-		q.X = mix[T](lhs.X, rhs.X, delta)
-		q.Y = mix[T](lhs.Y, rhs.Y, delta)
-		q.Z = mix[T](lhs.Z, rhs.Z, delta)
-		q.W = mix[T](lhs.W, rhs.W, delta)
+		q.X = mix(lhs.X, rhs.X, delta)
+		q.Y = mix(lhs.Y, rhs.Y, delta)
+		q.Z = mix(lhs.Z, rhs.Z, delta)
+		q.W = mix(lhs.W, rhs.W, delta)
 		return q
 	}
 
-	angle := T(math.Acos(float64(cosTheta)))
-	qFactor := T(math.Sin(float64((1.0 - delta) * angle)))
-	otherFactor := T(math.Sin(float64(delta * angle)))
-	inverseFactor := 1.0 / T(math.Sin(float64(angle)))
+	angle := float32(math.Acos(float64(cosTheta)))
+	qFactor := float32(math.Sin(float64((1.0 - delta) * angle)))
+	otherFactor := float32(math.Sin(float64(delta * angle)))
+	inverseFactor := 1.0 / float32(math.Sin(float64(angle)))
 
 	q.X = (lhs.X*qFactor + rhs.X*otherFactor) * inverseFactor
 	q.Y = (lhs.Y*qFactor + rhs.Y*otherFactor) * inverseFactor
@@ -319,7 +319,7 @@ func (q *Quaternion[T]) SetSlerp(lhs, rhs *Quaternion[T], delta T) *Quaternion[T
 	return q
 }
 
-func (q *Quaternion[T]) SetLerp(lhs, rhs *Quaternion[T], delta T) *Quaternion[T] {
+func (q *Quaternion) SetLerp(lhs, rhs *Quaternion, delta float32) *Quaternion {
 	q.X = lhs.X*(1-delta) + (rhs.X * delta)
 	q.Y = lhs.Y*(1-delta) + (rhs.Y * delta)
 	q.Z = lhs.Z*(1-delta) + (rhs.Z * delta)
@@ -328,7 +328,7 @@ func (q *Quaternion[T]) SetLerp(lhs, rhs *Quaternion[T], delta T) *Quaternion[T]
 	return q.Normalize()
 }
 
-func (q *Quaternion[T]) SetMultQuaternion(lhs, rhs *Quaternion[T]) *Quaternion[T] {
+func (q *Quaternion) SetMultQuaternion(lhs, rhs *Quaternion) *Quaternion {
 	x := lhs.W*rhs.X + lhs.X*rhs.W + lhs.Y*rhs.Z - lhs.Z*rhs.Y
 	y := lhs.W*rhs.Y + lhs.Y*rhs.W + lhs.Z*rhs.X - lhs.X*rhs.Z
 	z := lhs.W*rhs.Z + lhs.Z*rhs.W + lhs.X*rhs.Y - lhs.Y*rhs.X
@@ -342,8 +342,8 @@ func (q *Quaternion[T]) SetMultQuaternion(lhs, rhs *Quaternion[T]) *Quaternion[T
 	return q
 }
 
-func (q *Quaternion[T]) SetQuad(q1, q2, s1, s2 *Quaternion[T], delta T) *Quaternion[T] {
-	var qComponent, sComponent Quaternion[T]
+func (q *Quaternion) SetSquad(q1, q2, s1, s2 *Quaternion, delta float32) *Quaternion {
+	var qComponent, sComponent Quaternion
 
 	qComponent.SetMix(q1, q2, delta)
 	sComponent.SetMix(s1, s2, delta)
@@ -353,19 +353,35 @@ func (q *Quaternion[T]) SetQuad(q1, q2, s1, s2 *Quaternion[T], delta T) *Quatern
 	return q.SetMix(&qComponent, &sComponent, finalDelta)
 }
 
-func (q *Quaternion[T]) Angle() T {
-	if abs[T](q.W) > cosOneOverTwo[T]() {
-		quatLen := T(math.Sqrt(float64(q.X*q.X + q.Y*q.Y + q.Z*q.Z)))
-		return T(math.Asin(float64(quatLen))) * 2
-	}
+func (q *Quaternion) SetEulerAngles(yawRad, pitchRad, rollRad float32) *Quaternion {
+	yawCos := float32(math.Cos(float64(yawRad * 0.5)))
+	yawSin := float32(math.Sin(float64(yawRad * 0.5)))
+	pitchCos := float32(math.Cos(float64(pitchRad * 0.5)))
+	pitchSin := float32(math.Sin(float64(pitchRad * 0.5)))
+	rollCos := float32(math.Cos(float64(rollRad * 0.5)))
+	rollSin := float32(math.Sin(float64(rollRad * 0.5)))
 
-	return T(math.Acos(float64(q.W))) * 2
+	q.W = pitchCos*yawCos*rollCos + pitchSin*yawSin*rollSin
+	q.X = pitchSin*yawCos*rollCos - pitchCos*yawSin*rollSin
+	q.Y = pitchCos*yawSin*rollCos + pitchSin*yawSin*rollSin
+	q.Z = pitchCos*yawCos*rollSin - pitchSin*yawSin*rollCos
+
+	return q
 }
 
-func (q *Quaternion[T]) GetAxis(outAxis *Vec3[T]) {
-	tmp1 := T(1.0) - q.W*q.W
+func (q *Quaternion) Angle() float32 {
+	if abs(q.W) > cosOneOverTwo() {
+		quatLen := float32(math.Sqrt(float64(q.X*q.X + q.Y*q.Y + q.Z*q.Z)))
+		return float32(math.Asin(float64(quatLen))) * 2
+	}
 
-	if tmp1 <= T(0.0) {
+	return float32(math.Acos(float64(q.W))) * 2
+}
+
+func (q *Quaternion) GetAxis(outAxis *Vec3) {
+	tmp1 := 1 - q.W*q.W
+
+	if tmp1 <= 0 {
 		outAxis.X = 0
 		outAxis.Y = 0
 		outAxis.Z = 1
@@ -373,60 +389,60 @@ func (q *Quaternion[T]) GetAxis(outAxis *Vec3[T]) {
 		return
 	}
 
-	tmp2 := T(1.0) / T(math.Sqrt(float64(tmp1)))
+	tmp2 := 1 / float32(math.Sqrt(float64(tmp1)))
 
 	outAxis.X = q.X * tmp2
 	outAxis.Y = q.Y * tmp2
 	outAxis.Z = q.Z * tmp2
 }
 
-func (q *Quaternion[T]) EulerAngles() (yaw, pitch, roll T) {
+func (q *Quaternion) EulerAngles() (yaw, pitch, roll float32) {
 	return q.Yaw(), q.Pitch(), q.Roll()
 }
 
-func (q *Quaternion[T]) Yaw() T {
+func (q *Quaternion) Yaw() float32 {
 	unclamped := (q.X*q.Z - q.W*q.Y) * -2
-	return T(math.Asin(float64(clamp[T](unclamped, -1, 1))))
+	return float32(math.Asin(float64(clamp(unclamped, -1, 1))))
 }
 
-func (q *Quaternion[T]) Pitch() T {
+func (q *Quaternion) Pitch() float32 {
 	y := (q.Y*q.Z + q.W*q.X) * 2
 	x := q.W*q.W - q.X*q.X - q.Y*q.Y + q.Z*q.Z
 
-	if abs[T](x) < 0.0001 && abs[T](y) < 0.0001 {
-		return T(math.Atan2(float64(q.X), float64(q.W))) * 2
+	if abs(x) < 0.0001 && abs(y) < 0.0001 {
+		return float32(math.Atan2(float64(q.X), float64(q.W))) * 2
 	}
 
-	return T(math.Atan2(float64(y), float64(x)))
+	return float32(math.Atan2(float64(y), float64(x)))
 }
 
-func (q *Quaternion[T]) Roll() T {
+func (q *Quaternion) Roll() float32 {
 	y := 2 * (q.X*q.Y + q.W*q.Z)
 	x := q.W*q.W + q.X*q.X - q.Y*q.Y - q.Z*q.Z
 
-	return T(math.Atan2(float64(y), float64(x)))
+	return float32(math.Atan2(float64(y), float64(x)))
 }
 
-func (q *Quaternion[T]) ExtractRealComponent() T {
+func (q *Quaternion) ExtractRealComponent() float32 {
 	w := 1.0 - q.X*q.X - q.Y*q.Y - q.Z*q.Z
 
 	if w < 0 {
 		return 0
 	} else {
-		return -T(math.Sqrt(float64(w)))
+		return -float32(math.Sqrt(float64(w)))
 	}
 }
 
-func (q *Quaternion[T]) Len() T {
+func (q *Quaternion) Len() float32 {
 	sqr := float64(q.X*q.X + q.Y*q.Y + q.Z*q.Z + q.W*q.W)
-	return T(math.Sqrt(sqr))
+	return float32(math.Sqrt(sqr))
 }
 
-func (q *Quaternion[T]) LenSqr() T {
+func (q *Quaternion) LenSqr() float32 {
 	return q.X*q.X + q.Y*q.Y + q.Z*q.Z + q.W*q.W
 }
 
-func (q *Quaternion[T]) Conjugate() *Quaternion[T] {
+func (q *Quaternion) Conjugate() *Quaternion {
 	q.X = -q.X
 	q.Y = -q.Y
 	q.Z = -q.Z
@@ -434,8 +450,8 @@ func (q *Quaternion[T]) Conjugate() *Quaternion[T] {
 	return q
 }
 
-func (q *Quaternion[T]) Exp() *Quaternion[T] {
-	angle := T(math.Sqrt(float64(q.X*q.X + q.Y*q.Y + q.Z*q.Z)))
+func (q *Quaternion) Exp() *Quaternion {
+	angle := float32(math.Sqrt(float64(q.X*q.X + q.Y*q.Y + q.Z*q.Z)))
 	if angle < 0.0001 {
 		q.X = 0
 		q.Y = 0
@@ -444,8 +460,8 @@ func (q *Quaternion[T]) Exp() *Quaternion[T] {
 		return q
 	}
 
-	cos := T(math.Cos(float64(angle)))
-	sin := T(math.Sin(float64(angle)))
+	cos := float32(math.Cos(float64(angle)))
+	sin := float32(math.Sin(float64(angle)))
 	factor := sin / angle
 
 	q.X *= factor
@@ -456,45 +472,45 @@ func (q *Quaternion[T]) Exp() *Quaternion[T] {
 	return q
 }
 
-func (q *Quaternion[T]) Log() *Quaternion[T] {
+func (q *Quaternion) Log() *Quaternion {
 	lenSquared := q.LenSqr()
-	quatLen := T(math.Sqrt(float64(lenSquared)))
+	quatLen := float32(math.Sqrt(float64(lenSquared)))
 
 	if lenSquared < 0.0001 {
 		if q.W > 0 {
 			q.X = 0
 			q.Y = 0
 			q.Z = 0
-			q.W = T(math.Log(float64(q.W)))
+			q.W = float32(math.Log(float64(q.W)))
 			return q
 		} else if q.W < 0 {
 			q.X = math.Pi
 			q.Y = 0
 			q.Z = 0
-			q.W = T(math.Log(float64(-q.W)))
+			q.W = float32(math.Log(float64(-q.W)))
 			return q
 		}
 
-		q.X = T(math.Inf(1))
-		q.Y = T(math.Inf(1))
-		q.Z = T(math.Inf(1))
-		q.W = T(math.Inf(1))
+		q.X = float32(math.Inf(1))
+		q.Y = float32(math.Inf(1))
+		q.Z = float32(math.Inf(1))
+		q.W = float32(math.Inf(1))
 		return q
 	}
 
-	t := T(math.Atan2(float64(quatLen), float64(q.W))) / quatLen
+	t := float32(math.Atan2(float64(quatLen), float64(q.W))) / quatLen
 	quatLen2 := lenSquared + q.W*q.W
 
 	q.X *= t
 	q.Y *= t
 	q.Z *= t
-	q.W = T(math.Log(float64(quatLen2))) * 0.5
+	q.W = float32(math.Log(float64(quatLen2))) * 0.5
 
 	return q
 }
 
-func (q *Quaternion[T]) Pow(y T) *Quaternion[T] {
-	if abs[T](y) < 0.0001 {
+func (q *Quaternion) Pow(y float32) *Quaternion {
+	if abs(y) < 0.0001 {
 		q.X = 0
 		q.Y = 0
 		q.Z = 0
@@ -504,36 +520,36 @@ func (q *Quaternion[T]) Pow(y T) *Quaternion[T] {
 
 	magnitude := q.Len()
 
-	var angle T
-	if abs[T](q.W/magnitude) > cosOneOverTwo[T]() {
+	var angle float32
+	if abs(q.W/magnitude) > cosOneOverTwo() {
 		vectorMagnitude := q.X*q.X + q.Y*q.Y + q.Z*q.Z
 
 		if vectorMagnitude < 0.0001 {
 			q.X = 0
 			q.Y = 0
 			q.Z = 0
-			q.W = T(math.Pow(float64(q.W), float64(y)))
+			q.W = float32(math.Pow(float64(q.W), float64(y)))
 			return q
 		}
 
-		angle = T(math.Asin(math.Sqrt(float64(vectorMagnitude)) / float64(magnitude)))
+		angle = float32(math.Asin(math.Sqrt(float64(vectorMagnitude)) / float64(magnitude)))
 	} else {
-		angle = T(math.Acos(float64(q.W / magnitude)))
+		angle = float32(math.Acos(float64(q.W / magnitude)))
 	}
 
 	newAngle := angle * y
-	div := T(math.Sin(float64(newAngle)) / math.Sin(float64(angle)))
-	mag := T(math.Pow(float64(magnitude), float64(y-1)))
+	div := float32(math.Sin(float64(newAngle)) / math.Sin(float64(angle)))
+	mag := float32(math.Pow(float64(magnitude), float64(y-1)))
 
 	q.X = q.X * div * mag
 	q.Y = q.Y * div * mag
 	q.Z = q.Z * div * mag
-	q.W = T(math.Cos(float64(newAngle))) * magnitude * mag
+	q.W = float32(math.Cos(float64(newAngle))) * magnitude * mag
 
 	return q
 }
 
-func (q *Quaternion[T]) Normalize() *Quaternion[T] {
+func (q *Quaternion) Normalize() *Quaternion {
 	oneOverLen := 1.0 / q.Len()
 
 	q.X *= oneOverLen
@@ -544,7 +560,7 @@ func (q *Quaternion[T]) Normalize() *Quaternion[T] {
 	return q
 }
 
-func (q *Quaternion[T]) Inverse() *Quaternion[T] {
+func (q *Quaternion) Inverse() *Quaternion {
 	inverseDotProduct := 1.0 / (q.X*q.X + q.Y*q.Y + q.Z*q.Z + q.W*q.W)
 	q.X = -q.X * inverseDotProduct
 	q.Y = -q.Y * inverseDotProduct
@@ -554,23 +570,23 @@ func (q *Quaternion[T]) Inverse() *Quaternion[T] {
 	return q
 }
 
-func (q *Quaternion[T]) Mix(other *Quaternion[T], delta T) *Quaternion[T] {
+func (q *Quaternion) Mix(other *Quaternion, delta float32) *Quaternion {
 	cosTheta := q.DotProduct(other)
 
 	// Perform a linear interpolation when cosTheta is close to 1 to avoid side effect of sin(angle) becoming a zero denominator
 	if cosTheta > 0.9999 {
-		q.X = mix[T](q.X, other.X, delta)
-		q.Y = mix[T](q.Y, other.Y, delta)
-		q.Z = mix[T](q.Z, other.Z, delta)
-		q.W = mix[T](q.W, other.W, delta)
+		q.X = mix(q.X, other.X, delta)
+		q.Y = mix(q.Y, other.Y, delta)
+		q.Z = mix(q.Z, other.Z, delta)
+		q.W = mix(q.W, other.W, delta)
 
 		return q
 	}
 
-	angle := T(math.Acos(float64(cosTheta)))
-	qFactor := T(math.Sin(float64(1.0-delta))) * angle
-	otherFactor := T(math.Sin(float64(delta * angle)))
-	inverseFactor := 1.0 / T(math.Sin(float64(angle)))
+	angle := float32(math.Acos(float64(cosTheta)))
+	qFactor := float32(math.Sin(float64(1.0-delta))) * angle
+	otherFactor := float32(math.Sin(float64(delta * angle)))
+	inverseFactor := 1.0 / float32(math.Sin(float64(angle)))
 
 	q.X = (q.X*qFactor + other.X*otherFactor) * inverseFactor
 	q.Y = (q.Y*qFactor + other.Y*otherFactor) * inverseFactor
@@ -580,7 +596,7 @@ func (q *Quaternion[T]) Mix(other *Quaternion[T], delta T) *Quaternion[T] {
 	return q
 }
 
-func (q *Quaternion[T]) ShortMix(other *Quaternion[T], delta T) *Quaternion[T] {
+func (q *Quaternion) ShortMix(other *Quaternion, delta float32) *Quaternion {
 	if delta <= 0 {
 		return q
 	} else if delta >= 1 {
@@ -591,7 +607,7 @@ func (q *Quaternion[T]) ShortMix(other *Quaternion[T], delta T) *Quaternion[T] {
 		return q
 	}
 
-	var other2 Quaternion[T]
+	var other2 Quaternion
 	other2.SetQuaternion(other)
 
 	cos := q.DotProduct(other)
@@ -604,16 +620,16 @@ func (q *Quaternion[T]) ShortMix(other *Quaternion[T], delta T) *Quaternion[T] {
 		cos = -cos
 	}
 
-	var k0, k1 T
+	var k0, k1 float32
 	if cos > 0.9999 {
 		k0 = 1.0 - delta
 		k1 = delta
 	} else {
-		sin := T(math.Sqrt(float64(1.0 - cos*cos)))
-		angle := T(math.Atan2(float64(sin), float64(cos)))
+		sin := float32(math.Sqrt(float64(1.0 - cos*cos)))
+		angle := float32(math.Atan2(float64(sin), float64(cos)))
 		oneOverSin := 1.0 / sin
-		k0 = T(math.Sin(float64((1.0-delta)*angle))) * oneOverSin
-		k1 = T(math.Sin(float64(delta*angle))) * oneOverSin
+		k0 = float32(math.Sin(float64((1.0-delta)*angle))) * oneOverSin
+		k1 = float32(math.Sin(float64(delta*angle))) * oneOverSin
 	}
 
 	q.X = k0*q.X + k1*other2.X
@@ -624,10 +640,10 @@ func (q *Quaternion[T]) ShortMix(other *Quaternion[T], delta T) *Quaternion[T] {
 	return q
 }
 
-func (q *Quaternion[T]) Slerp(other *Quaternion[T], delta T) *Quaternion[T] {
+func (q *Quaternion) Slerp(other *Quaternion, delta float32) *Quaternion {
 	cosTheta := q.DotProduct(other)
 
-	var tmpOther Quaternion[T]
+	var tmpOther Quaternion
 	tmpOther.SetQuaternion(other)
 
 	// If cosTheta < 0, the interpolation will take the long way around the sphere
@@ -641,17 +657,17 @@ func (q *Quaternion[T]) Slerp(other *Quaternion[T], delta T) *Quaternion[T] {
 
 	// Perform linear interpolation when costheta is close to 1
 	if cosTheta > 0.9999 {
-		q.X = mix[T](q.X, other.X, delta)
-		q.Y = mix[T](q.Y, other.Y, delta)
-		q.Z = mix[T](q.Z, other.Z, delta)
-		q.W = mix[T](q.W, other.W, delta)
+		q.X = mix(q.X, other.X, delta)
+		q.Y = mix(q.Y, other.Y, delta)
+		q.Z = mix(q.Z, other.Z, delta)
+		q.W = mix(q.W, other.W, delta)
 		return q
 	}
 
-	angle := T(math.Acos(float64(cosTheta)))
-	qFactor := T(math.Sin(float64((1.0 - delta) * angle)))
-	otherFactor := T(math.Sin(float64(delta * angle)))
-	inverseFactor := 1.0 / T(math.Sin(float64(angle)))
+	angle := float32(math.Acos(float64(cosTheta)))
+	qFactor := float32(math.Sin(float64((1.0 - delta) * angle)))
+	otherFactor := float32(math.Sin(float64(delta * angle)))
+	inverseFactor := 1.0 / float32(math.Sin(float64(angle)))
 
 	q.X = (q.X*qFactor + other.X*otherFactor) * inverseFactor
 	q.Y = (q.Y*qFactor + other.Y*otherFactor) * inverseFactor
@@ -661,7 +677,7 @@ func (q *Quaternion[T]) Slerp(other *Quaternion[T], delta T) *Quaternion[T] {
 	return q
 }
 
-func (q *Quaternion[T]) Lerp(other *Quaternion[T], delta T) *Quaternion[T] {
+func (q *Quaternion) Lerp(other *Quaternion, delta float32) *Quaternion {
 	q.X = q.X*(1-delta) + (other.X * delta)
 	q.Y = q.Y*(1-delta) + (other.Y * delta)
 	q.Z = q.Z*(1-delta) + (other.Z * delta)
@@ -670,26 +686,26 @@ func (q *Quaternion[T]) Lerp(other *Quaternion[T], delta T) *Quaternion[T] {
 	return q.Normalize()
 }
 
-func (q *Quaternion[T]) RotateNormalizedAxis(unitAxis *Vec3[T], angle T) *Quaternion[T] {
-	sin := T(math.Sin(float64(angle * 0.5)))
+func (q *Quaternion) RotateNormalizedAxis(unitAxis *Vec3, angle float32) *Quaternion {
+	sin := float32(math.Sin(float64(angle * 0.5)))
 
-	angleAxisQuat := Quaternion[T]{
+	angleAxisQuat := Quaternion{
 		X: unitAxis.X * sin,
 		Y: unitAxis.Y * sin,
 		Z: unitAxis.Z * sin,
-		W: T(math.Cos(float64(angle * 0.5))),
+		W: float32(math.Cos(float64(angle * 0.5))),
 	}
 
 	return q.MultQuaternion(&angleAxisQuat)
 }
 
-func (q *Quaternion[T]) Rotate(axis *Vec3[T], angle T) *Quaternion[T] {
+func (q *Quaternion) Rotate(axis *Vec3, angle float32) *Quaternion {
 	axisLen := axis.Len()
 
-	var unitAxis Vec3[T]
+	var unitAxis Vec3
 	unitAxis.SetVec3(axis)
 
-	if abs[T](axisLen-1.0) > 0.0001 {
+	if abs(axisLen-1.0) > 0.0001 {
 		oneOverLen := 1.0 / axisLen
 		unitAxis.X *= oneOverLen
 		unitAxis.Y *= oneOverLen
@@ -699,7 +715,7 @@ func (q *Quaternion[T]) Rotate(axis *Vec3[T], angle T) *Quaternion[T] {
 	return q.RotateNormalizedAxis(&unitAxis, angle)
 }
 
-func (q *Quaternion[T]) MultQuaternion(other *Quaternion[T]) *Quaternion[T] {
+func (q *Quaternion) MultQuaternion(other *Quaternion) *Quaternion {
 	x := q.W*other.X + q.X*other.W + q.Y*other.Z - q.Z*other.Y
 	y := q.W*other.Y + q.Y*other.W + q.Z*other.X - q.X*other.Z
 	z := q.W*other.Z + q.Z*other.W + q.X*other.Y - q.Y*other.X
@@ -713,31 +729,31 @@ func (q *Quaternion[T]) MultQuaternion(other *Quaternion[T]) *Quaternion[T] {
 	return q
 }
 
-func (q *Quaternion[T]) DotProduct(other *Quaternion[T]) T {
+func (q *Quaternion) DotProduct(other *Quaternion) float32 {
 	return q.X*other.X + q.Y*other.Y + q.Z*other.Z + q.W*other.W
 }
 
-func (q *Quaternion[T]) Equal(other *Quaternion[T], epsilon T) bool {
-	xDiff := abs[T](q.X - other.X)
-	yDiff := abs[T](q.Y - other.Y)
-	zDiff := abs[T](q.Z - other.Z)
-	wDiff := abs[T](q.W - other.W)
+func (q *Quaternion) Equal(other *Quaternion, epsilon float32) bool {
+	xDiff := abs(q.X - other.X)
+	yDiff := abs(q.Y - other.Y)
+	zDiff := abs(q.Z - other.Z)
+	wDiff := abs(q.W - other.W)
 
 	return xDiff < epsilon && yDiff < epsilon && zDiff < epsilon && wDiff < epsilon
 }
 
-func (q *Quaternion[T]) GreaterThan(other *Quaternion[T]) bool {
+func (q *Quaternion) GreaterThan(other *Quaternion) bool {
 	return q.X > other.X && q.Y > other.Y && q.Z > other.Z && q.W > other.W
 }
 
-func (q *Quaternion[T]) GreaterThanEqual(other *Quaternion[T]) bool {
+func (q *Quaternion) GreaterThanEqual(other *Quaternion) bool {
 	return q.X >= other.X && q.Y >= other.Y && q.Z >= other.Z && q.W >= other.W
 }
 
-func (q *Quaternion[T]) LessThan(other *Quaternion[T]) bool {
+func (q *Quaternion) LessThan(other *Quaternion) bool {
 	return q.X < other.X && q.Y < other.Y && q.Z < other.Z && q.W < other.W
 }
 
-func (q *Quaternion[T]) LessThanEqual(other *Quaternion[T]) bool {
+func (q *Quaternion) LessThanEqual(other *Quaternion) bool {
 	return q.X <= other.X && q.Y <= other.Y && q.Z <= other.Z && q.W <= other.W
 }

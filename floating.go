@@ -2,19 +2,15 @@ package math
 
 import "math"
 
-type FloatingPoint interface {
-	~float32 | ~float64
+func abs(in float32) float32 {
+	return float32(math.Abs(float64(in)))
 }
 
-func abs[T FloatingPoint](in T) T {
-	return T(math.Abs(float64(in)))
-}
-
-func cosOneOverTwo[T FloatingPoint]() T {
+func cosOneOverTwo() float32 {
 	return 0.877582561890372716130286068203503191
 }
 
-func clamp[T FloatingPoint](v, min, max T) T {
+func clamp(v, min, max float32) float32 {
 	if v < min {
 		return min
 	}
@@ -25,6 +21,6 @@ func clamp[T FloatingPoint](v, min, max T) T {
 	return v
 }
 
-func mix[T FloatingPoint](x, y, delta T) T {
+func mix(x, y, delta float32) float32 {
 	return x*(1.0-delta) + y*delta
 }
