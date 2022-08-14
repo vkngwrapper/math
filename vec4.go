@@ -199,10 +199,10 @@ func (v *Vec4[T]) RotateWithQuaternion(q *Quaternion[T]) *Vec4[T] {
 	vec3 := Vec3[T]{v.X, v.Y, v.Z}
 
 	var uv Vec3[T]
-	uv.SetVec3(&quatVector).CrossProduct(&vec3)
+	uv.SetCrossProduct(&quatVector, &vec3)
 
 	var uuv Vec3[T]
-	uuv.SetVec3(&quatVector).CrossProduct(&uv)
+	uuv.SetCrossProduct(&quatVector, &uv)
 
 	v.X += ((uv.X * q.W) + uuv.X) * 2.0
 	v.Y += ((uv.Y * q.W) + uuv.Y) * 2.0

@@ -52,6 +52,22 @@ func (v *Vec3[T]) SetCrossProduct(lhs, rhs *Vec3[T]) *Vec3[T] {
 	return v
 }
 
+func (v *Vec3[T]) SetSubtractVec3(lhs, rhs *Vec3[T]) *Vec3[T] {
+	v.X = lhs.X - rhs.X
+	v.Y = lhs.Y - rhs.Y
+	v.Z = lhs.Z - rhs.Z
+
+	return v
+}
+
+func (v *Vec3[T]) SetAddVec3(lhs, rhs *Vec3[T]) *Vec3[T] {
+	v.X = lhs.X + rhs.X
+	v.Y = lhs.Y + rhs.Y
+	v.Z = lhs.Z + rhs.Z
+
+	return v
+}
+
 func (v *Vec3[T]) Normalize() *Vec3[T] {
 	vecLen := v.Len()
 
@@ -108,8 +124,8 @@ func (v *Vec3[T]) CrossProductQuaternion(other *Quaternion[T]) *Vec3[T] {
 	quatVector := Vec3[T]{other.X, other.Y, other.Z}
 	var uv, uuv Vec3[T]
 
-	uv.SetVec3(&quatVector).CrossProduct(v)
-	uuv.SetVec3(&quatVector).CrossProduct(&uv)
+	uv.SetCrossProduct(&quatVector, v)
+	uuv.SetCrossProduct(&quatVector, &uv)
 
 	v.X = v.X + ((uv.X*other.W)+uuv.X)*2.0
 	v.Y = v.Y + ((uv.Y*other.W)+uuv.Y)*2.0
@@ -189,14 +205,14 @@ func (v *Vec3[T]) Lerp(other *Vec3[T], delta T) *Vec3[T] {
 func (v *Vec3[T]) SetClosestPointOnLine(point, endpoint1, endpoint2 *Vec3[T]) *Vec3[T] {
 
 	var unitLine Vec3[T]
-	unitLine.SetVec3(endpoint2).SubtractVec3(endpoint1)
+	unitLine.SetSubtractVec3(endpoint2, endpoint1)
 
 	distanceSquared := unitLine.LenSqr()
 
 	unitLine.Normalize()
 
 	var lineToPoint Vec3[T]
-	lineToPoint.SetVec3(point).SubtractVec3(endpoint1)
+	lineToPoint.SetSubtractVec3(point, endpoint1)
 
 	distance := lineToPoint.DotProduct(&unitLine)
 
@@ -322,10 +338,10 @@ func (v *Vec3[T]) RotateWithQuaternion(q *Quaternion[T]) *Vec3[T] {
 	quatVector := Vec3[T]{q.X, q.Y, q.Z}
 
 	var uv Vec3[T]
-	uv.SetVec3(&quatVector).CrossProduct(v)
+	uv.SetCrossProduct(&quatVector, v)
 
 	var uuv Vec3[T]
-	uuv.SetVec3(&quatVector).CrossProduct(&uv)
+	uuv.SetCrossProduct(&quatVector, &uv)
 
 	v.X += ((uv.X * q.W) + uuv.X) * 2.0
 	v.Y += ((uv.Y * q.W) + uuv.Y) * 2.0
@@ -376,8 +392,8 @@ func (v *Vec3[T]) RotateZ(angleRad T) *Vec3[T] {
 func (v *Vec3[T]) SetTriangleNormal(point1, point2, point3 *Vec3[T]) *Vec3[T] {
 	var edge1, edge2 Vec3[T]
 
-	edge2.SetVec3(point1).SubtractVec3(point3)
-	normal := edge1.SetVec3(point1).SubtractVec3(point2).CrossProduct(&edge2).Normalize()
+	edge2.SetSubtractVec3(point1, point3)
+	normal := edge1.SetSubtractVec3(point1, point2).CrossProduct(&edge2).Normalize()
 
 	v.X = normal.X
 	v.Y = normal.Y

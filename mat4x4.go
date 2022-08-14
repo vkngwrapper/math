@@ -535,7 +535,28 @@ func (m *Mat4x4[T]) SetMultMatrix4x4(lhs, rhs *Mat4x4[T]) *Mat4x4[T] {
 }
 
 func (m *Mat4x4[T]) SetInterpolate(lhs, rhs *Mat4x4[T], delta T) *Mat4x4[T] {
-	return m.SetMat4x4(lhs).InterpolateMatrix(rhs, delta)
+	var oldMatrix Mat4x4[T]
+	oldMatrix.SetMat4x4(lhs)
+
+	var thisRotation Mat4x4[T]
+	thisRotation.SetMatrixRotationFrom(lhs)
+
+	var transposedRotation Mat4x4[T]
+	transposedRotation.SetMat4x4(&thisRotation).Transpose()
+
+	var deltaRotation Mat4x4[T]
+	deltaRotation.SetMultMatrix4x4(rhs, &transposedRotation)
+
+	var deltaAxis Vec3[T]
+	var deltaAngle T
+	deltaRotation.GetAxisAngle(&deltaAxis, &deltaAngle)
+
+	m.SetAxisAngle(&deltaAxis, deltaAngle).MultMatrix4x4(&thisRotation)
+	m[3][0] = oldMatrix[3][0] + delta*(rhs[3][0]-oldMatrix[3][0])
+	m[3][1] = oldMatrix[3][1] + delta*(rhs[3][1]-oldMatrix[3][1])
+	m[3][2] = oldMatrix[3][2] + delta*(rhs[3][2]-oldMatrix[3][2])
+
+	return m
 }
 
 func (m *Mat4x4[T]) GetAxisAngle(outAxis *Vec3[T], outAngleRad *T) {
@@ -994,7 +1015,7 @@ func (m *Mat4x4[T]) InterpolateMatrix(otherMatrix *Mat4x4[T], delta T) *Mat4x4[T
 	transposedRotation.SetMat4x4(&thisRotation).Transpose()
 
 	var deltaRotation Mat4x4[T]
-	deltaRotation.SetMat4x4(otherMatrix).MultMatrix4x4(&transposedRotation)
+	deltaRotation.SetMultMatrix4x4(otherMatrix, &transposedRotation)
 
 	var deltaAxis Vec3[T]
 	var deltaAngle T
