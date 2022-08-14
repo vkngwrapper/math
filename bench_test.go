@@ -7,7 +7,6 @@ import (
 	"github.com/ungerik/go3d/quaternion"
 	"github.com/ungerik/go3d/vec3"
 	"github.com/ungerik/go3d/vec4"
-	"golang.org/x/sys/cpu"
 	"math"
 	"testing"
 )
@@ -27,9 +26,9 @@ var go3dGlobalOutVec3 vec3.T
 var go3dGlobalOutQuat quaternion.T
 var go3dGlobalOutScalar float32
 
-var vkngMathOutVec4 Vec4
-var vkngMathOutVec3 Vec3
-var vkngMathOutQuat Quaternion
+var vkngMathOutVec4 Vec4[float32]
+var vkngMathOutVec3 Vec3[float32]
+var vkngMathOutQuat Quaternion[float32]
 var vkngMathOutScalar float32
 
 func BenchmarkTransformVec4G3n(b *testing.B) {
@@ -82,41 +81,17 @@ func BenchmarkTransformVec4Go3D(b *testing.B) {
 	}
 }
 
-func BenchmarkTransformVec4VkngMathPureGo(b *testing.B) {
-	b.ReportAllocs()
-	supportsSSE = false
-
-	for i := 0; i < b.N; i++ {
-		translate := Vec3{1, 1, 1}
-		scale := Vec3{1.5, 1.5, 1.5}
-
-		var mat Mat4x4
-		mat.SetIdentity().Translate(&translate).RotateY(1).Scale(&scale)
-
-		transform := Vec4{5, 10, 15, 1}
-		transform.Transform(&mat)
-
-		vkngMathOutVec4 = transform
-	}
-}
-
-func BenchmarkTransformVec4VkngMathSSE(b *testing.B) {
+func BenchmarkVkngMathTransform(b *testing.B) {
 	b.ReportAllocs()
 
-	if !cpu.X86.HasSSE2 {
-		b.Skip("SSE2 not supported on this system")
-		return
-	}
-	supportsSSE = true
-
 	for i := 0; i < b.N; i++ {
-		translate := Vec3{1, 1, 1}
-		scale := Vec3{1.5, 1.5, 1.5}
+		translate := Vec3[float32]{1, 1, 1}
+		scale := Vec3[float32]{1.5, 1.5, 1.5}
 
-		var mat Mat4x4
+		var mat Mat4x4[float32]
 		mat.SetIdentity().Translate(&translate).RotateY(1).Scale(&scale)
 
-		transform := Vec4{5, 10, 15, 1}
+		transform := Vec4[float32]{5, 10, 15, 1}
 		transform.Transform(&mat)
 
 		vkngMathOutVec4 = transform
@@ -163,8 +138,8 @@ func BenchmarkRotateVec3VkngMath(b *testing.B) {
 	b.ReportAllocs()
 
 	for i := 0; i < b.N; i++ {
-		transform := Vec3{5, 10, 15}
-		axis := Vec3{1, 0, 0}
+		transform := Vec3[float32]{5, 10, 15}
+		axis := Vec3[float32]{1, 0, 0}
 
 		transform.Rotate(math.Pi, &axis)
 		vkngMathOutVec3 = transform
@@ -212,12 +187,12 @@ func BenchmarkRotateQuaternionGo3D(b *testing.B) {
 	}
 }
 
-func BenchmarkRotateQuaternionVkngMathPureGo(b *testing.B) {
+func BenchmarkRotateQuaternionVkngMath(b *testing.B) {
 	b.ReportAllocs()
 
 	for i := 0; i < b.N; i++ {
-		transform := Vec3{5, 10, 15}
-		var quat Quaternion
+		transform := Vec3[float32]{5, 10, 15}
+		var quat Quaternion[float32]
 		quat.SetEulerAngles(0, math.Pi, math.Pi/2)
 		transform.RotateWithQuaternion(&quat)
 

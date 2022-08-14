@@ -1,9 +1,9 @@
 package math
 
-type Mat3Row [3]float32
-type Mat3x3 [3]Mat3Row
+type Mat3Row[T FloatingPoint] [3]T
+type Mat3x3[T FloatingPoint] [3]Mat3Row[T]
 
-func (m *Mat3x3) SetIdentity() *Mat3x3 {
+func (m *Mat3x3[T]) SetIdentity() *Mat3x3[T] {
 	m[0][0] = 1
 	m[0][1] = 0
 	m[0][2] = 0
@@ -17,7 +17,7 @@ func (m *Mat3x3) SetIdentity() *Mat3x3 {
 	return m
 }
 
-func (m *Mat3x3) SetDiagonalScalar(s float32) *Mat3x3 {
+func (m *Mat3x3[T]) SetDiagonalScalar(s T) *Mat3x3[T] {
 	m[0][0] = s
 	m[0][1] = 0
 	m[0][2] = 0
@@ -31,7 +31,7 @@ func (m *Mat3x3) SetDiagonalScalar(s float32) *Mat3x3 {
 	return m
 }
 
-func (m *Mat3x3) SetDiagonalVector(v *Vec3) *Mat3x3 {
+func (m *Mat3x3[T]) SetDiagonalVector(v *Vec3[T]) *Mat3x3[T] {
 	m[0][0] = v.X
 	m[0][1] = 0
 	m[0][2] = 0
@@ -45,7 +45,7 @@ func (m *Mat3x3) SetDiagonalVector(v *Vec3) *Mat3x3 {
 	return m
 }
 
-func (m *Mat3x3) SetMat3x3(other *Mat3x3) *Mat3x3 {
+func (m *Mat3x3[T]) SetMat3x3(other *Mat3x3[T]) *Mat3x3[T] {
 	m[0][0] = other[0][0]
 	m[0][1] = other[0][1]
 	m[0][2] = other[0][2]
@@ -59,7 +59,7 @@ func (m *Mat3x3) SetMat3x3(other *Mat3x3) *Mat3x3 {
 	return m
 }
 
-func (m *Mat3x3) SetMat4x4(other *Mat4x4) *Mat3x3 {
+func (m *Mat3x3[T]) SetMat4x4(other *Mat4x4[T]) *Mat3x3[T] {
 	m[0][0] = other[0][0]
 	m[0][1] = other[0][1]
 	m[0][2] = other[0][2]
@@ -73,7 +73,7 @@ func (m *Mat3x3) SetMat4x4(other *Mat4x4) *Mat3x3 {
 	return m
 }
 
-func (m *Mat3x3) SetColMajor(c1, c2, c3 *Vec3) *Mat3x3 {
+func (m *Mat3x3[T]) SetColMajor(c1, c2, c3 *Vec3[T]) *Mat3x3[T] {
 	m[0][0] = c1.X
 	m[0][1] = c1.Y
 	m[0][2] = c1.Z
@@ -87,7 +87,7 @@ func (m *Mat3x3) SetColMajor(c1, c2, c3 *Vec3) *Mat3x3 {
 	return m
 }
 
-func (m *Mat3x3) SetRowMajor(r1, r2, r3 *Vec3) *Mat3x3 {
+func (m *Mat3x3[T]) SetRowMajor(r1, r2, r3 *Vec3[T]) *Mat3x3[T] {
 	m[0][0] = r1.X
 	m[1][0] = r1.Y
 	m[2][0] = r2.Z
@@ -101,7 +101,7 @@ func (m *Mat3x3) SetRowMajor(r1, r2, r3 *Vec3) *Mat3x3 {
 	return m
 }
 
-func (m *Mat3x3) SetMultMatrix3x3(lhs, rhs *Mat3x3) *Mat3x3 {
+func (m *Mat3x3[T]) SetMultMatrix3x3(lhs, rhs *Mat3x3[T]) *Mat3x3[T] {
 	m00 := lhs[0][0]*rhs[0][0] + lhs[1][0]*rhs[0][1] + lhs[2][0]*rhs[0][2]
 	m10 := lhs[0][0]*rhs[1][0] + lhs[1][0]*rhs[1][1] + lhs[2][0]*rhs[1][2]
 	m20 := lhs[0][0]*rhs[2][0] + lhs[1][0]*rhs[2][1] + lhs[2][0]*rhs[2][2]
@@ -127,7 +127,7 @@ func (m *Mat3x3) SetMultMatrix3x3(lhs, rhs *Mat3x3) *Mat3x3 {
 	return m
 }
 
-func (m *Mat3x3) SetMatrixCrossProduct(vec *Vec3) *Mat3x3 {
+func (m *Mat3x3[T]) SetMatrixCrossProduct(vec *Vec3[T]) *Mat3x3[T] {
 	m[0][0] = 0
 	m[0][1] = vec.Z
 	m[0][2] = -vec.Y
@@ -141,7 +141,7 @@ func (m *Mat3x3) SetMatrixCrossProduct(vec *Vec3) *Mat3x3 {
 	return m
 }
 
-func (m *Mat3x3) Transpose() *Mat3x3 {
+func (m *Mat3x3[T]) Transpose() *Mat3x3[T] {
 	m[1][0], m[0][1] = m[0][1], m[1][0]
 	m[2][0], m[0][2] = m[0][2], m[2][0]
 	m[2][1], m[1][2] = m[1][2], m[2][1]
@@ -149,7 +149,7 @@ func (m *Mat3x3) Transpose() *Mat3x3 {
 	return m
 }
 
-func (m *Mat3x3) Inverse() *Mat3x3 {
+func (m *Mat3x3[T]) Inverse() *Mat3x3[T] {
 	determinant := m[0][0]*(m[1][1]*m[2][2]-m[2][1]*m[1][2]) -
 		m[1][0]*(m[0][1]*m[2][2]-m[2][1]*m[0][2]) +
 		m[2][0]*(m[0][1]*m[1][2]-m[1][1]*m[0][2])
@@ -178,10 +178,10 @@ func (m *Mat3x3) Inverse() *Mat3x3 {
 	return m
 }
 
-func (m *Mat3x3) Orthonormalize() *Mat3x3 {
-	col0 := Vec3{m[0][0], m[0][1], m[0][2]}
-	col1 := Vec3{m[1][0], m[1][1], m[1][2]}
-	col2 := Vec3{m[2][0], m[2][1], m[2][2]}
+func (m *Mat3x3[T]) Orthonormalize() *Mat3x3[T] {
+	col0 := Vec3[T]{m[0][0], m[0][1], m[0][2]}
+	col1 := Vec3[T]{m[1][0], m[1][1], m[1][2]}
+	col2 := Vec3[T]{m[2][0], m[2][1], m[2][2]}
 
 	col0.Normalize()
 	dot0 := col0.DotProduct(&col1)
@@ -213,7 +213,7 @@ func (m *Mat3x3) Orthonormalize() *Mat3x3 {
 	return m
 }
 
-func (m *Mat3x3) MultMatrix3x3(other *Mat3x3) *Mat3x3 {
+func (m *Mat3x3[T]) MultMatrix3x3(other *Mat3x3[T]) *Mat3x3[T] {
 	m00 := m[0][0]*other[0][0] + m[1][0]*other[0][1] + m[2][0]*other[0][2]
 	m10 := m[0][0]*other[1][0] + m[1][0]*other[1][1] + m[2][0]*other[1][2]
 	m20 := m[0][0]*other[2][0] + m[1][0]*other[2][1] + m[2][0]*other[2][2]
@@ -239,7 +239,7 @@ func (m *Mat3x3) MultMatrix3x3(other *Mat3x3) *Mat3x3 {
 	return m
 }
 
-func (m *Mat3x3) Proj2D(normal *Vec3) *Mat3x3 {
+func (m *Mat3x3[T]) Proj2D(normal *Vec3[T]) *Mat3x3[T] {
 	transform00 := 1.0 - normal.X*normal.X
 	transform01 := -normal.X * normal.Y
 	transform10 := -normal.X * normal.Y
@@ -264,7 +264,7 @@ func (m *Mat3x3) Proj2D(normal *Vec3) *Mat3x3 {
 	return m
 }
 
-func (m *Mat3x3) ShearX(y float32) *Mat3x3 {
+func (m *Mat3x3[T]) ShearX(y T) *Mat3x3[T] {
 	m[0][0] = m[0][0] + m[0][1]*y
 	m[1][0] = m[1][0] + m[1][1]*y
 	m[2][0] = m[2][0] + m[2][1]*y
@@ -272,7 +272,7 @@ func (m *Mat3x3) ShearX(y float32) *Mat3x3 {
 	return m
 }
 
-func (m *Mat3x3) ShearY(x float32) *Mat3x3 {
+func (m *Mat3x3[T]) ShearY(x T) *Mat3x3[T] {
 	m[0][1] = m[0][0]*x + m[0][1]
 	m[1][1] = m[1][0]*x + m[1][1]
 	m[2][1] = m[2][0]*x + m[2][1]
@@ -280,17 +280,17 @@ func (m *Mat3x3) ShearY(x float32) *Mat3x3 {
 	return m
 }
 
-func (m *Mat3x3) IsNormalized(epsilon float32) bool {
+func (m *Mat3x3[T]) IsNormalized(epsilon T) bool {
 	for i := 0; i < 3; i++ {
-		column := abs(m[i][0]*m[i][0] + m[i][1]*m[i][1] + m[i][2]*m[i][2])
-		if column-1 > 2*epsilon {
+		column := abs[T](m[i][0]*m[i][0] + m[i][1]*m[i][1] + m[i][2]*m[i][2])
+		if column-T(1) > T(2)*epsilon {
 			return false
 		}
 	}
 
 	for i := 0; i < 3; i++ {
-		row := abs(m[0][i]*m[0][i] + m[1][i]*m[1][i] + m[2][i]*m[2][i])
-		for row-1 > 2*epsilon {
+		row := abs[T](m[0][i]*m[0][i] + m[1][i]*m[1][i] + m[2][i]*m[2][i])
+		for row-T(1) > T(2)*epsilon {
 			return false
 		}
 	}
@@ -298,9 +298,9 @@ func (m *Mat3x3) IsNormalized(epsilon float32) bool {
 	return true
 }
 
-func (m *Mat3x3) IsNull(epsilon float32) bool {
+func (m *Mat3x3[T]) IsNull(epsilon T) bool {
 	for i := 0; i < 3; i++ {
-		column := abs(m[i][0]*m[i][0] + m[i][1]*m[i][1] + m[i][2]*m[i][2])
+		column := abs[T](m[i][0]*m[i][0] + m[i][1]*m[i][1] + m[i][2]*m[i][2])
 		if column > epsilon {
 			return false
 		}
@@ -309,10 +309,10 @@ func (m *Mat3x3) IsNull(epsilon float32) bool {
 	return true
 }
 
-func (m *Mat3x3) Equal(other *Mat3x3, epsilon float32) bool {
+func (m *Mat3x3[T]) Equal(other *Mat3x3[T], epsilon T) bool {
 	for i := 0; i < 3; i++ {
 		for j := 0; j < 3; j++ {
-			if abs(m[i][j]-other[i][j]) > epsilon {
+			if abs[T](m[i][j]-other[i][j]) > epsilon {
 				return false
 			}
 		}

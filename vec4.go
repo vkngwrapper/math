@@ -2,14 +2,14 @@ package math
 
 import "math"
 
-type Vec4 struct {
-	X float32
-	Y float32
-	Z float32
-	W float32
+type Vec4[T FloatingPoint] struct {
+	X T
+	Y T
+	Z T
+	W T
 }
 
-func (v *Vec4) SetVec4(in *Vec4) *Vec4 {
+func (v *Vec4[T]) SetVec4(in *Vec4[T]) *Vec4[T] {
 	v.X = in.X
 	v.Y = in.Y
 	v.Z = in.Z
@@ -18,7 +18,7 @@ func (v *Vec4) SetVec4(in *Vec4) *Vec4 {
 	return v
 }
 
-func (v *Vec4) SetVec3(in *Vec3) *Vec4 {
+func (v *Vec4[T]) SetVec3(in *Vec3[T]) *Vec4[T] {
 	v.X = in.X
 	v.Y = in.Y
 	v.Z = in.Z
@@ -27,7 +27,7 @@ func (v *Vec4) SetVec3(in *Vec3) *Vec4 {
 	return v
 }
 
-func (v *Vec4) SetVec2(in *Vec2) *Vec4 {
+func (v *Vec4[T]) SetVec2(in *Vec2[T]) *Vec4[T] {
 	v.X = in.X
 	v.Y = in.Y
 	v.Z = 0
@@ -36,10 +36,10 @@ func (v *Vec4) SetVec2(in *Vec2) *Vec4 {
 	return v
 }
 
-func (v *Vec4) Normalize() *Vec4 {
+func (v *Vec4[T]) Normalize() *Vec4[T] {
 	vecLen := v.Len()
 
-	if math.Abs(float64(vecLen-1)) > 0.0001 {
+	if abs[T](vecLen-1) > 0.0001 {
 		return v
 	}
 
@@ -52,16 +52,16 @@ func (v *Vec4) Normalize() *Vec4 {
 	return v
 }
 
-func (v *Vec4) Len() float32 {
+func (v *Vec4[T]) Len() T {
 	sqr := float64(v.X*v.X + v.Y*v.Y + v.Z*v.Z + v.W*v.W)
-	return float32(math.Sqrt(sqr))
+	return T(math.Sqrt(sqr))
 }
 
-func (v *Vec4) LenSqr() float32 {
+func (v *Vec4[T]) LenSqr() T {
 	return v.X*v.X + v.Y*v.Y + v.Z*v.Z + v.W*v.W
 }
 
-func (v *Vec4) AddVec4(other *Vec4) *Vec4 {
+func (v *Vec4[T]) AddVec4(other *Vec4[T]) *Vec4[T] {
 	v.X += other.X
 	v.Y += other.Y
 	v.Z += other.Z
@@ -70,7 +70,7 @@ func (v *Vec4) AddVec4(other *Vec4) *Vec4 {
 	return v
 }
 
-func (v *Vec4) SubtractVec4(other *Vec4) *Vec4 {
+func (v *Vec4[T]) SubtractVec4(other *Vec4[T]) *Vec4[T] {
 	v.X -= other.X
 	v.Y -= other.Y
 	v.Z -= other.Z
@@ -79,11 +79,11 @@ func (v *Vec4) SubtractVec4(other *Vec4) *Vec4 {
 	return v
 }
 
-func (v *Vec4) DotProduct(other *Vec4) float32 {
+func (v *Vec4[T]) DotProduct(other *Vec4[T]) T {
 	return v.X*other.X + v.Y*other.Y + v.Z*other.Z + v.W*other.W
 }
 
-func (v *Vec4) Scale(scale float32) *Vec4 {
+func (v *Vec4[T]) Scale(scale T) *Vec4[T] {
 	v.X *= scale
 	v.Y *= scale
 	v.Z *= scale
@@ -92,27 +92,27 @@ func (v *Vec4) Scale(scale float32) *Vec4 {
 	return v
 }
 
-func (v *Vec4) Equal(other *Vec4, epsilon float32) bool {
-	if float32(math.Abs(float64(v.X-other.X))) > epsilon {
+func (v *Vec4[T]) Equal(other *Vec4[T], epsilon T) bool {
+	if abs[T](v.X-other.X) > epsilon {
 		return false
 	}
 
-	if abs(v.Y-other.Y) > epsilon {
+	if abs[T](v.Y-other.Y) > epsilon {
 		return false
 	}
 
-	if abs(v.Z-other.Z) > epsilon {
+	if abs[T](v.Z-other.Z) > epsilon {
 		return false
 	}
 
-	if abs(v.W-other.W) > epsilon {
+	if abs[T](v.W-other.W) > epsilon {
 		return false
 	}
 
 	return true
 }
 
-func (v *Vec4) GreaterThan(other *Vec4) bool {
+func (v *Vec4[T]) GreaterThan(other *Vec4[T]) bool {
 	if v.X <= other.X || v.Y <= other.Y || v.Z <= other.Z || v.W <= other.W {
 		return false
 	}
@@ -120,7 +120,7 @@ func (v *Vec4) GreaterThan(other *Vec4) bool {
 	return true
 }
 
-func (v *Vec4) GreaterThanEqual(other *Vec4) bool {
+func (v *Vec4[T]) GreaterThanEqual(other *Vec4[T]) bool {
 	if v.X < other.X || v.Y < other.Y || v.Z < other.Z || v.W < other.W {
 		return false
 	}
@@ -128,7 +128,7 @@ func (v *Vec4) GreaterThanEqual(other *Vec4) bool {
 	return true
 }
 
-func (v *Vec4) LessThan(other *Vec4) bool {
+func (v *Vec4[T]) LessThan(other *Vec4[T]) bool {
 	if v.X >= other.X || v.Y >= other.Y || v.Z >= other.Z || v.W >= other.W {
 		return false
 	}
@@ -136,7 +136,7 @@ func (v *Vec4) LessThan(other *Vec4) bool {
 	return true
 }
 
-func (v *Vec4) LessThanEqual(other *Vec4) bool {
+func (v *Vec4[T]) LessThanEqual(other *Vec4[T]) bool {
 	if v.X > other.X || v.Y > other.Y || v.Z > other.Z || v.W > other.W {
 		return false
 	}
@@ -144,7 +144,7 @@ func (v *Vec4) LessThanEqual(other *Vec4) bool {
 	return true
 }
 
-func (v *Vec4) Transform(m *Mat4x4) *Vec4 {
+func (v *Vec4[T]) Transform(m *Mat4x4[T]) *Vec4[T] {
 	x := m[0][0]*v.X + m[1][0]*v.Y + m[2][0]*v.Z + m[3][0]*v.W
 	y := m[0][1]*v.X + m[1][1]*v.Y + m[2][1]*v.Z + m[3][1]*v.W
 	z := m[0][2]*v.X + m[1][2]*v.Y + m[2][2]*v.Z + m[3][2]*v.W
@@ -158,7 +158,7 @@ func (v *Vec4) Transform(m *Mat4x4) *Vec4 {
 	return v
 }
 
-func (v *Vec4) Lerp(other *Vec4, delta float32) *Vec4 {
+func (v *Vec4[T]) Lerp(other *Vec4[T], delta T) *Vec4[T] {
 	v.X = v.X*(1-delta) + other.X*delta
 	v.Y = v.Y*(1-delta) + other.Y*delta
 	v.Z = v.Z*(1-delta) + other.Z*delta
@@ -167,12 +167,12 @@ func (v *Vec4) Lerp(other *Vec4, delta float32) *Vec4 {
 	return v
 }
 
-func (v *Vec4) Rotate(angleRad float32, normal *Vec3) *Vec4 {
-	cos := float32(math.Cos(float64(angleRad)))
-	sin := float32(math.Sin(float64(angleRad)))
-	inverseCos := 1 - cos
+func (v *Vec4[T]) Rotate(angleRad T, normal *Vec3[T]) *Vec4[T] {
+	cos := T(math.Cos(float64(angleRad)))
+	sin := T(math.Sin(float64(angleRad)))
+	inverseCos := T(1) - cos
 
-	var unitAxis Vec3
+	var unitAxis Vec3[T]
 	unitAxis.SetVec3(normal).Normalize()
 
 	x := (inverseCos*unitAxis.X*unitAxis.X+cos)*v.X +
@@ -194,14 +194,14 @@ func (v *Vec4) Rotate(angleRad float32, normal *Vec3) *Vec4 {
 	return v
 }
 
-func (v *Vec4) RotateWithQuaternion(q *Quaternion) *Vec4 {
-	quatVector := Vec3{q.X, q.Y, q.Z}
-	vec3 := Vec3{v.X, v.Y, v.Z}
+func (v *Vec4[T]) RotateWithQuaternion(q *Quaternion[T]) *Vec4[T] {
+	quatVector := Vec3[T]{q.X, q.Y, q.Z}
+	vec3 := Vec3[T]{v.X, v.Y, v.Z}
 
-	var uv Vec3
+	var uv Vec3[T]
 	uv.SetVec3(&quatVector).CrossProduct(&vec3)
 
-	var uuv Vec3
+	var uuv Vec3[T]
 	uuv.SetVec3(&quatVector).CrossProduct(&uv)
 
 	v.X += ((uv.X * q.W) + uuv.X) * 2.0
@@ -211,9 +211,9 @@ func (v *Vec4) RotateWithQuaternion(q *Quaternion) *Vec4 {
 	return v
 }
 
-func (v *Vec4) RotateX(angleRad float32) *Vec4 {
-	cos := float32(math.Cos(float64(angleRad)))
-	sin := float32(math.Sin(float64(angleRad)))
+func (v *Vec4[T]) RotateX(angleRad T) *Vec4[T] {
+	cos := T(math.Cos(float64(angleRad)))
+	sin := T(math.Sin(float64(angleRad)))
 
 	y := v.Y*cos - v.Z*sin
 	z := v.Y*sin + v.Z*cos
@@ -224,9 +224,9 @@ func (v *Vec4) RotateX(angleRad float32) *Vec4 {
 	return v
 }
 
-func (v *Vec4) RotateY(angleRad float32) *Vec4 {
-	cos := float32(math.Cos(float64(angleRad)))
-	sin := float32(math.Sin(float64(angleRad)))
+func (v *Vec4[T]) RotateY(angleRad T) *Vec4[T] {
+	cos := T(math.Cos(float64(angleRad)))
+	sin := T(math.Sin(float64(angleRad)))
 
 	x := v.X*cos + v.Z*sin
 	z := -v.X*sin + v.Z*cos
@@ -237,9 +237,9 @@ func (v *Vec4) RotateY(angleRad float32) *Vec4 {
 	return v
 }
 
-func (v *Vec4) RotateZ(angleRad float32) *Vec4 {
-	cos := float32(math.Cos(float64(angleRad)))
-	sin := float32(math.Sin(float64(angleRad)))
+func (v *Vec4[T]) RotateZ(angleRad T) *Vec4[T] {
+	cos := T(math.Cos(float64(angleRad)))
+	sin := T(math.Sin(float64(angleRad)))
 
 	x := v.X*cos - v.Y*sin
 	y := v.X*sin + v.Y*cos
