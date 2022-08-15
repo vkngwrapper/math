@@ -257,7 +257,7 @@ func (m *Mat4x4[T]) SetRowMajor(r1, r2, r3, r4 *Vec4[T]) *Mat4x4[T] {
 	return m
 }
 
-func (m *Mat4x4[T]) SetEulerAngles(yawRad, pitchRad, rollRad T) *Mat4x4[T] {
+func (m *Mat4x4[T]) SetRotationEulers(yawRad, pitchRad, rollRad T) *Mat4x4[T] {
 	yawCos := T(math.Cos(float64(yawRad)))
 	pitchCos := T(math.Cos(float64(pitchRad)))
 	rollCos := T(math.Cos(float64(rollRad)))
@@ -276,6 +276,108 @@ func (m *Mat4x4[T]) SetEulerAngles(yawRad, pitchRad, rollRad T) *Mat4x4[T] {
 	m[2][0] = yawSin * pitchCos
 	m[2][1] = -pitchSin
 	m[2][2] = yawCos * pitchCos
+	m[2][3] = 0
+	m[3][0] = 0
+	m[3][1] = 0
+	m[3][2] = 0
+	m[3][3] = 1
+
+	return m
+}
+
+func (m *Mat4x4[T]) SetRotationY(yawRad T) *Mat4x4[T] {
+	cos := T(math.Cos(float64(yawRad)))
+	sin := T(math.Sin(float64(yawRad)))
+
+	m00 := m[0][0]*cos - m[2][0]*sin
+	m01 := m[0][1]*cos - m[2][1]*sin
+	m02 := m[0][2]*cos - m[2][2]*sin
+	m03 := m[0][3]*cos - m[2][3]*sin
+
+	m20 := m[0][0]*sin + m[2][0]*cos
+	m21 := m[0][1]*sin + m[2][1]*cos
+	m22 := m[0][2]*sin + m[2][2]*cos
+	m23 := m[0][3]*sin + m[2][3]*cos
+
+	m[0][0] = m00
+	m[0][1] = m01
+	m[0][2] = m02
+	m[0][3] = m03
+	m[1][0] = 0
+	m[1][1] = 1
+	m[1][2] = 0
+	m[1][3] = 0
+	m[2][0] = m20
+	m[2][1] = m21
+	m[2][2] = m22
+	m[2][3] = m23
+	m[3][0] = 0
+	m[3][1] = 0
+	m[3][2] = 0
+	m[3][3] = 1
+
+	return m
+}
+
+func (m *Mat4x4[T]) SetRotationX(pitchRad T) *Mat4x4[T] {
+	cos := T(math.Cos(float64(pitchRad)))
+	sin := T(math.Sin(float64(pitchRad)))
+
+	m10 := m[1][0]*cos + m[2][0]*sin
+	m11 := m[1][1]*cos + m[2][1]*sin
+	m12 := m[1][2]*cos + m[2][2]*sin
+	m13 := m[1][3]*cos + m[2][3]*sin
+
+	m20 := -m[1][0]*sin + m[2][0]*cos
+	m21 := -m[1][1]*sin + m[2][1]*cos
+	m22 := -m[1][2]*sin + m[2][2]*cos
+	m23 := -m[1][3]*sin + m[2][3]*cos
+
+	m[0][0] = 1
+	m[0][1] = 0
+	m[0][2] = 0
+	m[0][3] = 0
+	m[1][0] = m10
+	m[1][1] = m11
+	m[1][2] = m12
+	m[1][3] = m13
+	m[2][0] = m20
+	m[2][1] = m21
+	m[2][2] = m22
+	m[2][3] = m23
+	m[3][0] = 0
+	m[3][1] = 0
+	m[3][2] = 0
+	m[3][3] = 1
+
+	return m
+}
+
+func (m *Mat4x4[T]) SetRotationZ(rollRad T) *Mat4x4[T] {
+	cos := T(math.Cos(float64(rollRad)))
+	sin := T(math.Sin(float64(rollRad)))
+
+	m00 := m[0][0]*cos + m[1][0]*sin
+	m01 := m[0][1]*cos + m[1][1]*sin
+	m02 := m[0][2]*cos + m[1][2]*sin
+	m03 := m[0][3]*cos + m[1][3]*sin
+
+	m10 := -m[0][0]*sin + m[1][0]*cos
+	m11 := -m[0][1]*sin + m[1][1]*cos
+	m12 := -m[0][2]*sin + m[1][2]*cos
+	m13 := -m[0][3]*sin + m[1][3]*cos
+
+	m[0][0] = m00
+	m[0][1] = m01
+	m[0][2] = m02
+	m[0][3] = m03
+	m[1][0] = m10
+	m[1][1] = m11
+	m[1][2] = m12
+	m[1][3] = m13
+	m[2][0] = 0
+	m[2][1] = 0
+	m[2][2] = 1
 	m[2][3] = 0
 	m[3][0] = 0
 	m[3][1] = 0

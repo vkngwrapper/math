@@ -36,11 +36,17 @@ func BenchmarkTransformVec4G3n(b *testing.B) {
 	for i := 0; i < b.N; i++ {
 		transform := math32.Vector4{5, 10, 15, 1}
 
+		var translateMat, rotateMat, scaleMat math32.Matrix4
+		translateMat.MakeTranslation(1, 1, 1)
+		rotateMat.MakeRotationY(1)
+		scaleMat.MakeScale(1.5, 1.5, 1.5)
+
 		var mat math32.Matrix4
-		mat.Identity()
-		mat.Multiply(mat.MakeTranslation(1, 1, 1)).
-			Multiply(mat.MakeRotationY(1)).
-			Multiply(mat.MakeScale(1.5, 1.5, 1.5))
+		mat.MultiplyMatrices(
+			&translateMat,
+			&rotateMat,
+		).Multiply(&scaleMat)
+
 		g3nGlobalOutVec4 = *(transform.ApplyMatrix4(&mat))
 	}
 }
@@ -81,7 +87,7 @@ func BenchmarkTransformVec4Go3D(b *testing.B) {
 	}
 }
 
-func BenchmarkVkngMathTransform(b *testing.B) {
+func BenchmarkTransformVec4VkngMath(b *testing.B) {
 	b.ReportAllocs()
 
 	for i := 0; i < b.N; i++ {
@@ -197,5 +203,87 @@ func BenchmarkRotateQuaternionVkngMath(b *testing.B) {
 		transform.RotateWithQuaternion(&quat)
 
 		vkngMathOutQuat = quat
+	}
+}
+
+func BenchmarkMatrixMultTransformG3n(b *testing.B) {
+	b.ReportAllocs()
+
+	for i := 0; i < b.N; i++ {
+		transform := math32.Vector4{5, 10, 15, 1}
+
+		var translateMat, rotateMat, scaleMat math32.Matrix4
+		translateMat.MakeTranslation(1, 1, 1)
+		rotateMat.MakeRotationY(1)
+		scaleMat.MakeScale(1.5, 1.5, 1.5)
+
+		var mat math32.Matrix4
+		mat.MultiplyMatrices(
+			&translateMat,
+			&rotateMat,
+		).Multiply(&scaleMat)
+
+		g3nGlobalOutVec4 = *(transform.ApplyMatrix4(&mat))
+	}
+}
+
+func BenchmarkMatrixMultTransformMatGL(b *testing.B) {
+	b.ReportAllocs()
+
+	for i := 0; i < b.N; i++ {
+		mat := mgl32.Ident4().
+			Mul4(mgl32.Translate3D(1, 1, 1)).
+			Mul4(mgl32.HomogRotate3DY(1)).
+			Mul4(mgl32.Scale3D(1.5, 1.5, 1.5))
+		transform := mgl32.Vec4{5.0, 10.0, 15.0, 1.0}
+		transform = mat.Mul4x1(transform)
+
+		mathglGlobalOutVec4 = transform
+	}
+}
+
+func BenchmarkMatrixMultTransformGo3D(b *testing.B) {
+	b.ReportAllocs()
+
+	for i := 0; i < b.N; i++ {
+		translate := vec3.T{1, 1, 1}
+		scale := vec3.T{1.5, 1.5, 1.5}
+
+		rotate := mat4.Ident
+		rotate.AssignYRotation(1)
+
+		translateMat := mat4.Ident
+		translateMat.Translate(&translate)
+
+		scaleMat := mat4.Ident
+		scaleMat.ScaleVec3(&scale)
+
+		var mat mat4.T
+		mat.AssignMul(&translateMat, &rotate).
+			MultMatrix(&scaleMat)
+		transform := vec4.T{5, 10, 15, 1}
+		mat.TransformVec4(&transform)
+
+		go3dGlobalOutVec4 = transform
+	}
+}
+
+func BenchmarkMatrixMultTransformVkngMath(b *testing.B) {
+	b.ReportAllocs()
+
+	for i := 0; i < b.N; i++ {
+
+		var translateMat, rotateMat, scaleMat Mat4x4[float32]
+		translateMat.SetTranslation(1, 1, 1)
+		rotateMat.SetRotationY(1)
+		scaleMat.SetScale(1.5, 1.5, 1.5)
+
+		var mat Mat4x4[float32]
+		mat.SetMultMatrix4x4(&translateMat, &rotateMat).MultMatrix4x4(&scaleMat)
+
+		transform := Vec4[float32]{5, 10, 15, 1}
+		transform.Transform(&mat)
+
+		vkngMathOutVec4 = transform
 	}
 }
