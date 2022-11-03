@@ -127,20 +127,6 @@ func (m *Mat3x3[T]) SetMultMatrix3x3(lhs, rhs *Mat3x3[T]) *Mat3x3[T] {
 	return m
 }
 
-func (m *Mat3x3[T]) SetMatrixCrossProduct(vec *Vec3[T]) *Mat3x3[T] {
-	m[0][0] = 0
-	m[0][1] = vec.Z
-	m[0][2] = -vec.Y
-	m[1][0] = -vec.Z
-	m[1][1] = 0
-	m[1][2] = vec.X
-	m[2][0] = vec.Y
-	m[2][1] = -vec.X
-	m[2][2] = 0
-
-	return m
-}
-
 func (m *Mat3x3[T]) Transpose() *Mat3x3[T] {
 	m[1][0], m[0][1] = m[0][1], m[1][0]
 	m[2][0], m[0][2] = m[0][2], m[2][0]

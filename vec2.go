@@ -151,9 +151,9 @@ func (v *Vec2[T]) SetLinearGradient(point0, point1, position *Vec2[T]) T {
 	return (lineX*(position.X-point0.X) + lineY*(position.Y-point0.Y)) / (lineX*lineX + lineY*lineY)
 }
 
-func (v *Vec2[T]) Rotate(angleRad T) *Vec2[T] {
-	cos := T(math.Cos(float64(angleRad)))
-	sin := T(math.Sin(float64(angleRad)))
+func (v *Vec2[T]) Rotate(angleRad float64) *Vec2[T] {
+	cos := T(math.Cos(angleRad))
+	sin := T(math.Sin(angleRad))
 
 	x := v.X*cos - v.Y*sin
 	y := v.X*sin + v.Y*cos

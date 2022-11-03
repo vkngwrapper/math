@@ -353,13 +353,13 @@ func (q *Quaternion[T]) SetQuad(q1, q2, s1, s2 *Quaternion[T], delta T) *Quatern
 	return q.SetMix(&qComponent, &sComponent, finalDelta)
 }
 
-func (q *Quaternion[T]) SetEulerAngles(yawRad, pitchRad, rollRad float32) *Quaternion[T] {
-	yawCos := T(math.Cos(float64(yawRad * 0.5)))
-	yawSin := T(math.Sin(float64(yawRad * 0.5)))
-	pitchCos := T(math.Cos(float64(pitchRad * 0.5)))
-	pitchSin := T(math.Sin(float64(pitchRad * 0.5)))
-	rollCos := T(math.Cos(float64(rollRad * 0.5)))
-	rollSin := T(math.Sin(float64(rollRad * 0.5)))
+func (q *Quaternion[T]) SetEulerAngles(yawRad, pitchRad, rollRad float64) *Quaternion[T] {
+	yawCos := T(math.Cos(yawRad * 0.5))
+	yawSin := T(math.Sin(yawRad * 0.5))
+	pitchCos := T(math.Cos(pitchRad * 0.5))
+	pitchSin := T(math.Sin(pitchRad * 0.5))
+	rollCos := T(math.Cos(rollRad * 0.5))
+	rollSin := T(math.Sin(rollRad * 0.5))
 
 	q.W = pitchCos*yawCos*rollCos + pitchSin*yawSin*rollSin
 	q.X = pitchSin*yawCos*rollCos - pitchCos*yawSin*rollSin
@@ -686,20 +686,20 @@ func (q *Quaternion[T]) Lerp(other *Quaternion[T], delta T) *Quaternion[T] {
 	return q.Normalize()
 }
 
-func (q *Quaternion[T]) RotateNormalizedAxis(unitAxis *Vec3[T], angle T) *Quaternion[T] {
-	sin := T(math.Sin(float64(angle * 0.5)))
+func (q *Quaternion[T]) RotateNormalizedAxis(unitAxis *Vec3[T], angleRad float64) *Quaternion[T] {
+	sin := T(math.Sin(angleRad * 0.5))
 
 	angleAxisQuat := Quaternion[T]{
 		X: unitAxis.X * sin,
 		Y: unitAxis.Y * sin,
 		Z: unitAxis.Z * sin,
-		W: T(math.Cos(float64(angle * 0.5))),
+		W: T(math.Cos(angleRad * 0.5)),
 	}
 
 	return q.MultQuaternion(&angleAxisQuat)
 }
 
-func (q *Quaternion[T]) Rotate(axis *Vec3[T], angle T) *Quaternion[T] {
+func (q *Quaternion[T]) Rotate(axis *Vec3[T], angleRad float64) *Quaternion[T] {
 	axisLen := axis.Len()
 
 	var unitAxis Vec3[T]
@@ -712,7 +712,7 @@ func (q *Quaternion[T]) Rotate(axis *Vec3[T], angle T) *Quaternion[T] {
 		unitAxis.Z *= oneOverLen
 	}
 
-	return q.RotateNormalizedAxis(&unitAxis, angle)
+	return q.RotateNormalizedAxis(&unitAxis, angleRad)
 }
 
 func (q *Quaternion[T]) MultQuaternion(other *Quaternion[T]) *Quaternion[T] {

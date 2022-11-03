@@ -71,7 +71,7 @@ func (v *Vec3[T]) SetAddVec3(lhs, rhs *Vec3[T]) *Vec3[T] {
 func (v *Vec3[T]) Normalize() *Vec3[T] {
 	vecLen := v.Len()
 
-	if abs[T](vecLen-1) > 0.0001 {
+	if abs[T](vecLen-1) <= 0.0001 {
 		return v
 	}
 
@@ -307,9 +307,9 @@ func (v *Vec3[T]) Unproject(model *Mat4x4[T], proj *Mat4x4[T], viewport *Vec4[T]
 	return v
 }
 
-func (v *Vec3[T]) Rotate(angleRad T, normal *Vec3[T]) *Vec3[T] {
-	cos := T(math.Cos(float64(angleRad)))
-	sin := T(math.Sin(float64(angleRad)))
+func (v *Vec3[T]) Rotate(angleRad float64, normal *Vec3[T]) *Vec3[T] {
+	cos := T(math.Cos(angleRad))
+	sin := T(math.Sin(angleRad))
 	inverseCos := T(1) - cos
 
 	var unitAxis Vec3[T]
@@ -350,9 +350,9 @@ func (v *Vec3[T]) RotateWithQuaternion(q *Quaternion[T]) *Vec3[T] {
 	return v
 }
 
-func (v *Vec3[T]) RotateX(angleRad T) *Vec3[T] {
-	cos := T(math.Cos(float64(angleRad)))
-	sin := T(math.Sin(float64(angleRad)))
+func (v *Vec3[T]) RotateX(angleRad float64) *Vec3[T] {
+	cos := T(math.Cos(angleRad))
+	sin := T(math.Sin(angleRad))
 
 	y := v.Y*cos - v.Z*sin
 	z := v.Y*sin + v.Z*cos
@@ -363,9 +363,9 @@ func (v *Vec3[T]) RotateX(angleRad T) *Vec3[T] {
 	return v
 }
 
-func (v *Vec3[T]) RotateY(angleRad T) *Vec3[T] {
-	cos := T(math.Cos(float64(angleRad)))
-	sin := T(math.Sin(float64(angleRad)))
+func (v *Vec3[T]) RotateY(angleRad float64) *Vec3[T] {
+	cos := T(math.Cos(angleRad))
+	sin := T(math.Sin(angleRad))
 
 	x := v.X*cos + v.Z*sin
 	z := -v.X*sin + v.Z*cos
@@ -376,9 +376,9 @@ func (v *Vec3[T]) RotateY(angleRad T) *Vec3[T] {
 	return v
 }
 
-func (v *Vec3[T]) RotateZ(angleRad T) *Vec3[T] {
-	cos := T(math.Cos(float64(angleRad)))
-	sin := T(math.Sin(float64(angleRad)))
+func (v *Vec3[T]) RotateZ(angleRad float64) *Vec3[T] {
+	cos := T(math.Cos(angleRad))
+	sin := T(math.Sin(angleRad))
 
 	x := v.X*cos - v.Y*sin
 	y := v.X*sin + v.Y*cos

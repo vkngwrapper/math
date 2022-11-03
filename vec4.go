@@ -167,10 +167,10 @@ func (v *Vec4[T]) Lerp(other *Vec4[T], delta T) *Vec4[T] {
 	return v
 }
 
-func (v *Vec4[T]) Rotate(angleRad T, normal *Vec3[T]) *Vec4[T] {
-	cos := T(math.Cos(float64(angleRad)))
-	sin := T(math.Sin(float64(angleRad)))
-	inverseCos := T(1) - cos
+func (v *Vec4[T]) Rotate(angleRad float64, normal *Vec3[T]) *Vec4[T] {
+	cos := T(math.Cos(angleRad))
+	sin := T(math.Sin(angleRad))
+	inverseCos := 1 - cos
 
 	var unitAxis Vec3[T]
 	unitAxis.SetVec3(normal).Normalize()
@@ -211,9 +211,9 @@ func (v *Vec4[T]) RotateWithQuaternion(q *Quaternion[T]) *Vec4[T] {
 	return v
 }
 
-func (v *Vec4[T]) RotateX(angleRad T) *Vec4[T] {
-	cos := T(math.Cos(float64(angleRad)))
-	sin := T(math.Sin(float64(angleRad)))
+func (v *Vec4[T]) RotateX(angleRad float64) *Vec4[T] {
+	cos := T(math.Cos(angleRad))
+	sin := T(math.Sin(angleRad))
 
 	y := v.Y*cos - v.Z*sin
 	z := v.Y*sin + v.Z*cos
@@ -224,9 +224,9 @@ func (v *Vec4[T]) RotateX(angleRad T) *Vec4[T] {
 	return v
 }
 
-func (v *Vec4[T]) RotateY(angleRad T) *Vec4[T] {
-	cos := T(math.Cos(float64(angleRad)))
-	sin := T(math.Sin(float64(angleRad)))
+func (v *Vec4[T]) RotateY(angleRad float64) *Vec4[T] {
+	cos := T(math.Cos(angleRad))
+	sin := T(math.Sin(angleRad))
 
 	x := v.X*cos + v.Z*sin
 	z := -v.X*sin + v.Z*cos
@@ -237,9 +237,9 @@ func (v *Vec4[T]) RotateY(angleRad T) *Vec4[T] {
 	return v
 }
 
-func (v *Vec4[T]) RotateZ(angleRad T) *Vec4[T] {
-	cos := T(math.Cos(float64(angleRad)))
-	sin := T(math.Sin(float64(angleRad)))
+func (v *Vec4[T]) RotateZ(angleRad float64) *Vec4[T] {
+	cos := T(math.Cos(angleRad))
+	sin := T(math.Sin(angleRad))
 
 	x := v.X*cos - v.Y*sin
 	y := v.X*sin + v.Y*cos
