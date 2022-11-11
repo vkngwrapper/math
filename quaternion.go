@@ -686,6 +686,57 @@ func (q *Quaternion[T]) Lerp(other *Quaternion[T], delta T) *Quaternion[T] {
 	return q.Normalize()
 }
 
+func (q *Quaternion[T]) RotateX(angleRad float64) *Quaternion[T] {
+	sin := T(math.Sin(angleRad * 0.5))
+	cos := T(math.Cos(angleRad * 0.5))
+
+	x := q.W*sin + q.X*cos
+	y := q.Y*cos + q.Z*sin
+	z := q.Z*cos - q.Y*sin
+	w := q.W*cos - q.X*sin
+
+	q.X = x
+	q.Y = y
+	q.Z = z
+	q.W = w
+
+	return q
+}
+
+func (q *Quaternion[T]) RotateY(angleRad float64) *Quaternion[T] {
+	sin := T(math.Sin(angleRad * 0.5))
+	cos := T(math.Cos(angleRad * 0.5))
+
+	x := q.X*cos - q.Z*sin
+	y := q.W*sin + q.Y*cos
+	z := q.Z*cos + q.X*sin
+	w := q.W*cos - q.Y*sin
+
+	q.X = x
+	q.Y = y
+	q.Z = z
+	q.W = w
+
+	return q
+}
+
+func (q *Quaternion[T]) RotateZ(angleRad float64) *Quaternion[T] {
+	sin := T(math.Sin(angleRad * 0.5))
+	cos := T(math.Cos(angleRad * 0.5))
+
+	x := q.X*cos + q.Y*sin
+	y := q.Y*cos - q.X*sin
+	z := q.W*sin + q.Z*cos
+	w := q.W*cos - q.Z*sin
+
+	q.X = x
+	q.Y = y
+	q.Z = z
+	q.W = w
+
+	return q
+}
+
 func (q *Quaternion[T]) RotateNormalizedAxis(unitAxis *Vec3[T], angleRad float64) *Quaternion[T] {
 	sin := T(math.Sin(angleRad * 0.5))
 
