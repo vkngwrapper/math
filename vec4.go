@@ -36,6 +36,155 @@ func (v *Vec4[T]) SetVec2(in *Vec2[T]) *Vec4[T] {
 	return v
 }
 
+func (v *Vec4[T]) SetTransform(input *Vec4[T], m *Mat4x4[T]) *Vec4[T] {
+	v.X = m[0][0]*input.X + m[1][0]*input.Y + m[2][0]*input.Z + m[3][0]*input.W
+	v.Y = m[0][1]*input.X + m[1][1]*input.Y + m[2][1]*input.Z + m[3][1]*input.W
+	v.Z = m[0][2]*input.X + m[1][2]*input.Y + m[2][2]*input.Z + m[3][2]*input.W
+	v.W = m[0][3]*input.X + m[1][3]*input.Y + m[2][3]*input.Z + m[3][3]*input.W
+
+	return v
+}
+
+func (v *Vec4[T]) SetRotateWithQuaternion(input *Vec4[T], q *Quaternion[T]) *Vec4[T] {
+	quatVector := Vec3[T]{q.X, q.Y, q.Z}
+	vec3 := Vec3[T]{input.X, input.Y, input.Z}
+	var uv Vec3[T]
+
+	uv.SetCrossProduct(&quatVector, &vec3)
+
+	var uuv Vec3[T]
+	uuv.SetCrossProduct(&quatVector, &uv)
+
+	v.X = input.X + ((uv.X*q.W)+uuv.X)*2.0
+	v.Y = input.Y + ((uv.Y*q.W)+uuv.Y)*2.0
+	v.Z = input.Z + ((uv.Z*q.W)+uuv.Z)*2.0
+	v.W = input.W
+
+	return v
+}
+
+func (v *Vec4[T]) SetRotate(input *Vec4[T], angleRad float64, normal *Vec3[T]) *Vec4[T] {
+	cos := T(math.Cos(angleRad))
+	sin := T(math.Sin(angleRad))
+	inverseCos := 1 - cos
+
+	var unitAxis Vec3[T]
+	unitAxis.SetVec3(normal).Normalize()
+
+	v.X = (inverseCos*unitAxis.X*unitAxis.X+cos)*input.X +
+		(inverseCos*unitAxis.X*unitAxis.Y+unitAxis.Z*sin)*input.Y +
+		(inverseCos*unitAxis.X*unitAxis.Z-unitAxis.Y*sin)*input.Z
+	v.Y = (inverseCos*unitAxis.X*unitAxis.Y-unitAxis.Z*sin)*input.X +
+		(inverseCos*unitAxis.Y*unitAxis.Y+cos)*input.Y +
+		(inverseCos*unitAxis.Y*unitAxis.Z+unitAxis.X*sin)*input.Z
+	v.Z = (inverseCos*unitAxis.X*unitAxis.Z+unitAxis.Y*sin)*input.X +
+		(inverseCos*unitAxis.Y*unitAxis.Z-unitAxis.X*sin)*input.Y +
+		(inverseCos*unitAxis.Z*unitAxis.Z+cos)*input.Z
+
+	return v
+}
+
+func (v *Vec4[T]) SetRotateX(input *Vec4[T], angleRad float64) *Vec4[T] {
+	cos := T(math.Cos(angleRad))
+	sin := T(math.Sin(angleRad))
+
+	y := input.Y*cos - input.Z*sin
+	z := input.Y*sin + input.Z*cos
+
+	v.X = input.X
+	v.Y = y
+	v.Z = z
+	v.W = input.W
+
+	return v
+}
+
+func (v *Vec4[T]) SetRotateY(input *Vec4[T], angleRad float64) *Vec4[T] {
+	cos := T(math.Cos(angleRad))
+	sin := T(math.Sin(angleRad))
+
+	x := input.X*cos + input.Z*sin
+	z := -input.X*sin + input.Z*cos
+
+	v.X = x
+	v.Y = input.Y
+	v.Z = z
+	v.W = input.W
+
+	return v
+}
+
+func (v *Vec4[T]) SetRotateZ(input *Vec4[T], angleRad float64) *Vec4[T] {
+	cos := T(math.Cos(angleRad))
+	sin := T(math.Sin(angleRad))
+
+	x := input.X*cos - input.Y*sin
+	y := input.X*sin + input.Y*cos
+
+	v.X = x
+	v.Y = y
+	v.Z = input.Z
+	v.W = input.W
+
+	return v
+}
+
+func (v *Vec4[T]) SetNormalizeVec4(input *Vec4[T]) *Vec4[T] {
+	vecLen := input.Len()
+
+	if abs[T](vecLen-1) > 0.0001 {
+		v.X = input.X
+		v.Y = input.Y
+		v.Z = input.Z
+		v.W = input.W
+		return v
+	}
+
+	inverse := 1.0 / vecLen
+	v.X = input.X * inverse
+	v.Y = input.Y * inverse
+	v.Z = input.Z * inverse
+	v.W = input.W * inverse
+
+	return v
+}
+
+func (v *Vec4[T]) SetAddVec4(lhs *Vec4[T], rhs *Vec4[T]) *Vec4[T] {
+	v.X = lhs.X + rhs.X
+	v.Y = lhs.Y + rhs.Y
+	v.Z = lhs.Z + rhs.Z
+	v.W = lhs.W + rhs.W
+
+	return v
+}
+
+func (v *Vec4[T]) SetSubtractVec4(lhs *Vec4[T], rhs *Vec4[T]) *Vec4[T] {
+	v.X = lhs.X - rhs.Y
+	v.Y = lhs.Y - rhs.Y
+	v.Z = lhs.Z - rhs.Z
+	v.W = lhs.W - rhs.W
+
+	return v
+}
+
+func (v *Vec4[T]) SetScaleVec4(input *Vec4[T], scale T) *Vec4[T] {
+	v.X = input.X * scale
+	v.Y = input.Y * scale
+	v.Z = input.Z * scale
+	v.W = input.W * scale
+
+	return v
+}
+
+func (v *Vec4[T]) SetLerpVec4(lhs *Vec4[T], rhs *Vec4[T], delta T) *Vec4[T] {
+	v.X = lhs.X*(1-delta) + rhs.X*delta
+	v.Y = lhs.Y*(1-delta) + rhs.Y*delta
+	v.Z = lhs.Z*(1-delta) + rhs.Z*delta
+	v.W = lhs.W*(1-delta) + rhs.W*delta
+
+	return v
+}
+
 func (v *Vec4[T]) Normalize() *Vec4[T] {
 	vecLen := v.Len()
 

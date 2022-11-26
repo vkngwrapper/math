@@ -68,6 +68,128 @@ func (v *Vec3[T]) SetAddVec3(lhs, rhs *Vec3[T]) *Vec3[T] {
 	return v
 }
 
+func (v *Vec3[T]) SetTransform(input *Vec3[T], m *Mat3x3[T]) *Vec3[T] {
+	x := m[0][0]*input.X + m[1][0]*input.Y + m[2][0]*input.Z
+	y := m[0][1]*input.X + m[1][1]*input.Y + m[2][1]*input.Z
+	z := m[0][2]*input.X + m[1][2]*input.Y + m[2][2]*input.Z
+
+	v.X = x
+	v.Y = y
+	v.Z = z
+
+	return v
+}
+
+func (v *Vec3[T]) SetTransformHomogenous(input *Vec3[T], m *Mat4x4[T]) *Vec3[T] {
+	x := m[0][0]*input.X + m[1][0]*input.Y + m[2][0]*input.Z + m[3][0]
+	y := m[0][1]*input.X + m[1][1]*input.Y + m[2][1]*input.Z + m[3][1]
+	z := m[0][2]*input.X + m[1][2]*input.Y + m[2][2]*input.Z + m[3][2]
+	w := m[0][3]*input.X + m[1][3]*input.Y + m[2][3]*input.Z + m[3][3]
+
+	factor := 1.0 / w
+	v.X = x * factor
+	v.Y = y * factor
+	v.Z = z * factor
+
+	return v
+}
+
+func (v *Vec3[T]) SetRotateWithQuaternion(input *Vec3[T], q *Quaternion[T]) *Vec3[T] {
+	quatVector := Vec3[T]{q.X, q.Y, q.Z}
+
+	var uv Vec3[T]
+	uv.SetCrossProduct(&quatVector, input)
+
+	var uuv Vec3[T]
+	uuv.SetCrossProduct(&quatVector, &uv)
+
+	v.X = input.X + ((uv.X*q.W)+uuv.X)*2.0
+	v.Y = input.Y + ((uv.Y*q.W)+uuv.Y)*2.0
+	v.Z = input.Z + ((uv.Z*q.W)+uuv.Z)*2.0
+
+	return v
+}
+
+func (v *Vec3[T]) SetRotate(input *Vec3[T], angleRad float64, axis *Vec3[T]) *Vec3[T] {
+	cos := T(math.Cos(angleRad))
+	sin := T(math.Sin(angleRad))
+	inverseCos := T(1) - cos
+
+	var unitAxis Vec3[T]
+	unitAxis.SetVec3(axis).Normalize()
+
+	v.X = (inverseCos*unitAxis.X*unitAxis.X+cos)*input.X +
+		(inverseCos*unitAxis.X*unitAxis.Y+unitAxis.Z*sin)*input.Y +
+		(inverseCos*unitAxis.X*unitAxis.Z-unitAxis.Y*sin)*input.Z
+	v.Y = (inverseCos*unitAxis.X*unitAxis.Y-unitAxis.Z*sin)*input.X +
+		(inverseCos*unitAxis.Y*unitAxis.Y+cos)*input.Y +
+		(inverseCos*unitAxis.Y*unitAxis.Z+unitAxis.X*sin)*input.Z
+	v.Z = (inverseCos*unitAxis.X*unitAxis.Z+unitAxis.Y*sin)*input.X +
+		(inverseCos*unitAxis.Y*unitAxis.Z-unitAxis.X*sin)*input.Y +
+		(inverseCos*unitAxis.Z*unitAxis.Z+cos)*input.Z
+
+	return v
+}
+
+func (v *Vec3[T]) SetRotateX(input *Vec3[T], angleRad float64) *Vec3[T] {
+	cos := T(math.Cos(angleRad))
+	sin := T(math.Sin(angleRad))
+
+	v.X = input.X
+	v.Y = input.Y*cos - input.Z*sin
+	v.Z = input.Y*sin + input.Z*cos
+
+	return v
+}
+
+func (v *Vec3[T]) SetRotateY(input *Vec3[T], angleRad float64) *Vec3[T] {
+	cos := T(math.Cos(angleRad))
+	sin := T(math.Sin(angleRad))
+
+	v.X = input.X*cos + input.Z*sin
+	v.Y = input.Y
+	v.Z = -input.X*sin + input.Z*cos
+
+	return v
+}
+
+func (v *Vec3[T]) SetRotateZ(input *Vec3[T], angleRad float64) *Vec3[T] {
+	cos := T(math.Cos(angleRad))
+	sin := T(math.Sin(angleRad))
+
+	v.X = input.X*cos - input.Y*sin
+	v.Y = input.X*sin + input.Y*cos
+	v.Z = input.Z
+
+	return v
+}
+
+func (v *Vec3[T]) SetNormalizeVec3(input *Vec3[T]) *Vec3[T] {
+	vecLen := input.Len()
+
+	if abs[T](vecLen-1) <= 0.0001 {
+		v.X = input.X
+		v.Y = input.Y
+		v.Z = input.Z
+		return v
+	}
+
+	inverse := 1.0 / vecLen
+	v.X = input.X * inverse
+	v.Y = input.Y * inverse
+	v.Z = input.Z * inverse
+
+	return v
+}
+
+func (v *Vec3[T]) SetLerp(lhs, rhs *Vec3[T], delta T) *Vec3[T] {
+	v.X = lhs.X*(1-delta) + rhs.X*delta
+	v.Y = lhs.Y*(1-delta) + rhs.Y*delta
+	v.Z = lhs.Z*(1-delta) + rhs.Z*delta
+
+	return v
+}
+
 func (v *Vec3[T]) Normalize() *Vec3[T] {
 	vecLen := v.Len()
 
@@ -116,20 +238,6 @@ func (v *Vec3[T]) CrossProduct(other *Vec3[T]) *Vec3[T] {
 	v.X = x
 	v.Y = y
 	v.Z = z
-
-	return v
-}
-
-func (v *Vec3[T]) CrossProductQuaternion(other *Quaternion[T]) *Vec3[T] {
-	quatVector := Vec3[T]{other.X, other.Y, other.Z}
-	var uv, uuv Vec3[T]
-
-	uv.SetCrossProduct(&quatVector, v)
-	uuv.SetCrossProduct(&quatVector, &uv)
-
-	v.X = v.X + ((uv.X*other.W)+uuv.X)*2.0
-	v.Y = v.Y + ((uv.Y*other.W)+uuv.Y)*2.0
-	v.Z = v.Z + ((uv.Z*other.W)+uuv.Z)*2.0
 
 	return v
 }
@@ -229,32 +337,6 @@ func (v *Vec3[T]) SetClosestPointOnLine(point, endpoint1, endpoint2 *Vec3[T]) *V
 	return v
 }
 
-func (v *Vec3[T]) SetEuclidianFromPolarVec2(polar *Vec2[T]) *Vec3[T] {
-	latitudeCos := T(math.Cos(float64(polar.X)))
-	latitudeSin := T(math.Sin(float64(polar.X)))
-	longitudeCos := T(math.Cos(float64(polar.Y)))
-	longitudeSin := T(math.Sin(float64(polar.Y)))
-
-	v.X = latitudeCos * longitudeSin
-	v.Y = latitudeSin
-	v.Z = latitudeCos * longitudeCos
-
-	return v
-}
-
-func (v *Vec3[T]) SetPolarFromEuclidianVec3(euclidian *Vec3[T]) *Vec3[T] {
-	var unitEuclidian Vec3[T]
-	unitEuclidian.Normalize()
-
-	xzDist := T(math.Sqrt(float64(unitEuclidian.X*unitEuclidian.X + unitEuclidian.Z*unitEuclidian.Z)))
-
-	v.X = T(math.Asin(float64(unitEuclidian.Y)))
-	v.Y = T(math.Atan2(float64(unitEuclidian.X), float64(unitEuclidian.Z)))
-	v.Z = xzDist
-
-	return v
-}
-
 func (v *Vec3[T]) Orthonormalize(other *Vec3[T]) *Vec3[T] {
 	dotProduct := v.DotProduct(other)
 
@@ -265,67 +347,18 @@ func (v *Vec3[T]) Orthonormalize(other *Vec3[T]) *Vec3[T] {
 	return v.Normalize()
 }
 
-func (v *Vec3[T]) Project(model *Mat4x4[T], proj *Mat4x4[T], viewport *Vec4[T]) *Vec3[T] {
-	xModel := model[0][0]*v.X + model[0][1]*v.Y + model[0][2]*v.Z + model[0][3]
-	yModel := model[1][0]*v.X + model[1][1]*v.Y + model[1][2]*v.Z + model[1][3]
-	zModel := model[2][0]*v.X + model[2][1]*v.Y + model[2][2]*v.Z + model[2][3]
-	wModel := model[3][0] + v.X + model[3][1]*v.Y + model[3][2]*v.Z + model[3][3]
-
-	x := proj[0][0]*xModel + proj[0][1]*yModel + proj[0][2]*zModel + proj[0][3]*wModel
-	y := proj[1][0]*xModel + proj[1][1]*yModel + proj[1][2]*zModel + proj[1][3]*wModel
-	z := proj[2][0]*xModel + proj[2][1]*yModel + proj[2][2]*zModel + proj[2][3]*wModel
-	w := proj[3][0]*xModel + proj[3][1]*yModel + proj[3][2]*zModel + proj[3][3]*wModel
-
-	factor := 1 / w
-	v.X = (x*factor*0.5+0.5)*viewport.Z + viewport.X
-	v.Y = (y*factor*0.5+0.5)*viewport.W + viewport.Y
-	v.Z = z * factor
-
-	return v
-}
-
-func (v *Vec3[T]) Unproject(model *Mat4x4[T], proj *Mat4x4[T], viewport *Vec4[T]) *Vec3[T] {
-	var inverse Mat4x4[T]
-	inverse.SetMat4x4(proj).MultMatrix4x4(model).Inverse()
-
-	x := (v.X - viewport.X) / viewport.Z
-	y := (v.Y - viewport.Y) / viewport.W
-	x = x*2.0 - 1.0
-	y = y*2.0 - 1.0
-	z := v.Z
-
-	v.X = inverse[0][0]*x + inverse[0][1]*y + inverse[0][2]*z + inverse[0][3]
-	v.Y = inverse[1][0]*x + inverse[1][1]*y + inverse[1][2]*z + inverse[1][3]
-	v.Z = inverse[2][0]*x + inverse[2][1]*y + inverse[2][2]*z + inverse[2][3]
-	w := inverse[3][0]*x + inverse[3][1]*y + inverse[3][2]*z + inverse[3][3]
-
-	factor := 1.0 / w
-	v.X *= factor
-	v.Y *= factor
-	v.Z *= factor
-
-	return v
-}
-
-func (v *Vec3[T]) Rotate(angleRad float64, normal *Vec3[T]) *Vec3[T] {
+func (v *Vec3[T]) Rotate(angleRad float64, axis *Vec3[T]) *Vec3[T] {
 	cos := T(math.Cos(angleRad))
 	sin := T(math.Sin(angleRad))
 	inverseCos := T(1) - cos
 
 	var unitAxis Vec3[T]
-	unitAxis.SetVec3(normal).Normalize()
+	unitAxis.SetVec3(axis).Normalize()
+	dotProduct := v.DotProduct(&unitAxis)
 
-	x := (inverseCos*unitAxis.X*unitAxis.X+cos)*v.X +
-		(inverseCos*unitAxis.X*unitAxis.Y+unitAxis.Z*sin)*v.Y +
-		(inverseCos*unitAxis.X*unitAxis.Z-unitAxis.Y*sin)*v.Z
-
-	y := (inverseCos*unitAxis.X*unitAxis.Y-unitAxis.Z*sin)*v.X +
-		(inverseCos*unitAxis.Y*unitAxis.Y+cos)*v.Y +
-		(inverseCos*unitAxis.Y*unitAxis.Z+unitAxis.X*sin)*v.Z
-
-	z := (inverseCos*unitAxis.X*unitAxis.Z+unitAxis.Y*sin)*v.X +
-		(inverseCos*unitAxis.Y*unitAxis.Z-unitAxis.X*sin)*v.Y +
-		(inverseCos*unitAxis.Z*unitAxis.Z+cos)*v.Z
+	x := cos*v.X + (unitAxis.Y*v.Z-unitAxis.Z*v.Y)*sin + unitAxis.X*dotProduct*inverseCos
+	y := cos*v.Y + (unitAxis.Z*v.X-unitAxis.X*v.Z)*sin + unitAxis.Y*dotProduct*inverseCos
+	z := cos*v.Z + (unitAxis.X*v.Y-unitAxis.Y*v.X)*sin + unitAxis.Z*dotProduct*inverseCos
 
 	v.X = x
 	v.Y = y

@@ -215,6 +215,37 @@ func (m *Mat4x4[T]) SetMat3x3(other *Mat3x3[T]) *Mat4x4[T] {
 	return m
 }
 
+func (m *Mat4x4[T]) SetQuaternion(other *Quaternion[T]) *Mat4x4[T] {
+	xx := other.X * other.X
+	yy := other.Y * other.Y
+	zz := other.Z * other.Z
+	xz := other.X * other.Z
+	xy := other.X * other.Y
+	yz := other.Y * other.Z
+	wx := other.W * other.X
+	wy := other.W * other.Y
+	wz := other.W * other.Z
+
+	m[0][0] = 1.0 - 2.0*(yy+zz)
+	m[0][1] = 2.0 * (xy + wz)
+	m[0][2] = 2.0 * (xz - wy)
+	m[0][3] = 0
+	m[1][0] = 2.0 * (xy - wz)
+	m[1][1] = 1.0 - 2.0*(xx+zz)
+	m[1][2] = 2.0 * (yz + wx)
+	m[1][3] = 0
+	m[2][0] = 2.0 * (xz + wy)
+	m[2][1] = 2.0 * (yz - wx)
+	m[2][2] = 1.0 - 2.0*(xx+yy)
+	m[2][3] = 0
+	m[3][0] = 0
+	m[3][1] = 0
+	m[3][2] = 0
+	m[3][3] = 1
+
+	return m
+}
+
 func (m *Mat4x4[T]) SetColMajor(c1, c2, c3, c4 *Vec4[T]) *Mat4x4[T] {
 	m[0][0] = c1.X
 	m[0][1] = c1.Y

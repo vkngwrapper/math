@@ -20,7 +20,34 @@ func (q *Quaternion[T]) SetAxisAngle(axis *Vec3[T], angle T) *Quaternion[T] {
 	q.X = axis.X * s
 	q.Y = axis.Y * s
 	q.Z = axis.Z * s
-	q.W = angle * 0.5
+	q.W = T(math.Cos(float64(angle * 0.5)))
+
+	return q
+}
+
+func (q *Quaternion[T]) SetRotateX(angle T) *Quaternion[T] {
+	q.X = T(math.Sin(float64(angle * 0.5)))
+	q.Y = 0
+	q.Z = 0
+	q.W = T(math.Cos(float64(angle * 0.5)))
+
+	return q
+}
+
+func (q *Quaternion[T]) SetRotateY(angle T) *Quaternion[T] {
+	q.X = 0
+	q.Y = T(math.Sin(float64(angle * 0.5)))
+	q.Z = 0
+	q.W = T(math.Cos(float64(angle * 0.5)))
+
+	return q
+}
+
+func (q *Quaternion[T]) SetRotateZ(angle T) *Quaternion[T] {
+	q.X = 0
+	q.Y = 0
+	q.Z = T(math.Sin(float64(angle * 0.5)))
+	q.W = T(math.Cos(float64(angle * 0.5)))
 
 	return q
 }
@@ -48,7 +75,7 @@ func (q *Quaternion[T]) SetVectorRotation(origin *Vec3[T], destination *Vec3[T])
 		q.X = rotationAxis.X
 		q.Y = rotationAxis.Y
 		q.Z = rotationAxis.Z
-		q.W = T(math.Pi)
+		q.W = T(math.Cos(math.Pi * 0.5))
 		return q
 	}
 
@@ -194,7 +221,7 @@ func (q *Quaternion[T]) SetMat4x4(m *Mat4x4[T]) *Quaternion[T] {
 
 func (q *Quaternion[T]) SetIntermediate(prev *Quaternion[T], current *Quaternion[T], next *Quaternion[T]) *Quaternion[T] {
 	var inverseCurrent Quaternion[T]
-	inverseCurrent.Inverse()
+	inverseCurrent.SetQuaternion(current).Inverse()
 
 	var nextDiff Quaternion[T]
 	nextDiff.SetMultQuaternion(next, &inverseCurrent).Log()
@@ -203,13 +230,13 @@ func (q *Quaternion[T]) SetIntermediate(prev *Quaternion[T], current *Quaternion
 	prevDiff.SetMultQuaternion(prev, &inverseCurrent).Log()
 
 	factor := T(-1.0 / 4.0)
-	preExp := Quaternion[T]{
-		X: (nextDiff.X + prevDiff.X) * factor,
-		Y: (nextDiff.Y + prevDiff.Y) * factor,
-		Z: (nextDiff.Z + prevDiff.Z) * factor,
-		W: (nextDiff.W + prevDiff.W) * factor,
-	}
-	return preExp.Exp().MultQuaternion(current)
+	q.X = (nextDiff.X + prevDiff.X) * factor
+	q.Y = (nextDiff.Y + prevDiff.Y) * factor
+	q.Z = (nextDiff.Z + prevDiff.Z) * factor
+	q.W = (nextDiff.W + prevDiff.W) * factor
+
+	q.Exp().MultQuaternion(current)
+	return q
 }
 
 func (q *Quaternion[T]) SetMix(lhs, rhs *Quaternion[T], delta T) *Quaternion[T] {
@@ -225,9 +252,9 @@ func (q *Quaternion[T]) SetMix(lhs, rhs *Quaternion[T], delta T) *Quaternion[T] 
 		return q
 	}
 
-	angle := T(math.Acos(float64(cosTheta)))
-	qFactor := T(math.Sin(float64(1.0-delta))) * angle
-	otherFactor := T(math.Sin(float64(delta * angle)))
+	angle := math.Acos(float64(cosTheta))
+	qFactor := T(math.Sin(float64(1.0-delta) * angle))
+	otherFactor := T(math.Sin(float64(delta) * angle))
 	inverseFactor := 1.0 / T(math.Sin(float64(angle)))
 
 	q.X = (lhs.X*qFactor + rhs.X*otherFactor) * inverseFactor
@@ -329,20 +356,15 @@ func (q *Quaternion[T]) SetLerp(lhs, rhs *Quaternion[T], delta T) *Quaternion[T]
 }
 
 func (q *Quaternion[T]) SetMultQuaternion(lhs, rhs *Quaternion[T]) *Quaternion[T] {
-	x := lhs.W*rhs.X + lhs.X*rhs.W + lhs.Y*rhs.Z - lhs.Z*rhs.Y
-	y := lhs.W*rhs.Y + lhs.Y*rhs.W + lhs.Z*rhs.X - lhs.X*rhs.Z
-	z := lhs.W*rhs.Z + lhs.Z*rhs.W + lhs.X*rhs.Y - lhs.Y*rhs.X
-	w := lhs.W*rhs.W - lhs.X*rhs.X - lhs.Y*rhs.Y - lhs.Z*rhs.Z
-
-	q.X = x
-	q.Y = y
-	q.Z = z
-	q.W = w
+	q.X = lhs.W*rhs.X + lhs.X*rhs.W + lhs.Y*rhs.Z - lhs.Z*rhs.Y
+	q.Y = lhs.W*rhs.Y + lhs.Y*rhs.W + lhs.Z*rhs.X - lhs.X*rhs.Z
+	q.Z = lhs.W*rhs.Z + lhs.Z*rhs.W + lhs.X*rhs.Y - lhs.Y*rhs.X
+	q.W = lhs.W*rhs.W - lhs.X*rhs.X - lhs.Y*rhs.Y - lhs.Z*rhs.Z
 
 	return q
 }
 
-func (q *Quaternion[T]) SetQuad(q1, q2, s1, s2 *Quaternion[T], delta T) *Quaternion[T] {
+func (q *Quaternion[T]) SetSquad(q1, q2, s1, s2 *Quaternion[T], delta T) *Quaternion[T] {
 	var qComponent, sComponent Quaternion[T]
 
 	qComponent.SetMix(q1, q2, delta)
@@ -353,7 +375,7 @@ func (q *Quaternion[T]) SetQuad(q1, q2, s1, s2 *Quaternion[T], delta T) *Quatern
 	return q.SetMix(&qComponent, &sComponent, finalDelta)
 }
 
-func (q *Quaternion[T]) SetEulerAngles(yawRad, pitchRad, rollRad float64) *Quaternion[T] {
+func (q *Quaternion[T]) SetEulerAngles(rollRad, yawRad, pitchRad float64) *Quaternion[T] {
 	yawCos := T(math.Cos(yawRad * 0.5))
 	yawSin := T(math.Sin(yawRad * 0.5))
 	pitchCos := T(math.Cos(pitchRad * 0.5))
@@ -363,8 +385,17 @@ func (q *Quaternion[T]) SetEulerAngles(yawRad, pitchRad, rollRad float64) *Quate
 
 	q.W = pitchCos*yawCos*rollCos + pitchSin*yawSin*rollSin
 	q.X = pitchSin*yawCos*rollCos - pitchCos*yawSin*rollSin
-	q.Y = pitchCos*yawSin*rollCos + pitchSin*yawSin*rollSin
+	q.Y = pitchCos*yawSin*rollCos + pitchSin*yawCos*rollSin
 	q.Z = pitchCos*yawCos*rollSin - pitchSin*yawSin*rollCos
+
+	return q
+}
+
+func (q *Quaternion[T]) SetConjugate(other *Quaternion[T]) *Quaternion[T] {
+	q.X = -other.X
+	q.Y = -other.Y
+	q.Z = -other.Z
+	q.W = other.W
 
 	return q
 }
@@ -421,16 +452,6 @@ func (q *Quaternion[T]) Roll() T {
 	x := q.W*q.W + q.X*q.X - q.Y*q.Y - q.Z*q.Z
 
 	return T(math.Atan2(float64(y), float64(x)))
-}
-
-func (q *Quaternion[T]) ExtractRealComponent() T {
-	w := 1.0 - q.X*q.X - q.Y*q.Y - q.Z*q.Z
-
-	if w < 0 {
-		return 0
-	} else {
-		return -T(math.Sqrt(float64(w)))
-	}
 }
 
 func (q *Quaternion[T]) Len() T {
@@ -583,9 +604,11 @@ func (q *Quaternion[T]) Mix(other *Quaternion[T], delta T) *Quaternion[T] {
 		return q
 	}
 
-	angle := T(math.Acos(float64(cosTheta)))
-	qFactor := T(math.Sin(float64(1.0-delta))) * angle
-	otherFactor := T(math.Sin(float64(delta * angle)))
+	angle := math.Acos(float64(cosTheta))
+
+	//(sin((static_cast<T>(1) - a) * angle) * x + sin(a * angle) * y) / sin(angle);
+	qFactor := T(math.Sin(float64(1.0-delta) * angle))
+	otherFactor := T(math.Sin(float64(delta) * angle))
 	inverseFactor := 1.0 / T(math.Sin(float64(angle)))
 
 	q.X = (q.X*qFactor + other.X*otherFactor) * inverseFactor

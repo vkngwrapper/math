@@ -1,5 +1,7 @@
 package math
 
+import "math"
+
 type Mat3Row[T FloatingPoint] [3]T
 type Mat3x3[T FloatingPoint] [3]Mat3Row[T]
 
@@ -41,6 +43,30 @@ func (m *Mat3x3[T]) SetDiagonalVector(v *Vec3[T]) *Mat3x3[T] {
 	m[2][0] = 0
 	m[2][1] = 0
 	m[2][2] = v.Z
+
+	return m
+}
+
+func (m *Mat3x3[T]) SetQuaternion(other *Quaternion[T]) *Mat3x3[T] {
+	xx := other.X * other.X
+	yy := other.Y * other.Y
+	zz := other.Z * other.Z
+	xz := other.X * other.Z
+	xy := other.X * other.Y
+	yz := other.Y * other.Z
+	wx := other.W * other.X
+	wy := other.W * other.Y
+	wz := other.W * other.Z
+
+	m[0][0] = 1.0 - 2.0*(yy+zz)
+	m[0][1] = 2.0 * (xy + wz)
+	m[0][2] = 2.0 * (xz - wy)
+	m[1][0] = 2.0 * (xy - wz)
+	m[1][1] = 1.0 - 2.0*(xx+zz)
+	m[1][2] = 2.0 * (yz + wx)
+	m[2][0] = 2.0 * (xz + wy)
+	m[2][1] = 2.0 * (yz - wx)
+	m[2][2] = 1.0 - 2.0*(xx+yy)
 
 	return m
 }
@@ -127,6 +153,131 @@ func (m *Mat3x3[T]) SetMultMatrix3x3(lhs, rhs *Mat3x3[T]) *Mat3x3[T] {
 	return m
 }
 
+func (m *Mat3x3[T]) SetAxisAngle(axis *Vec3[T], angleRad float64) *Mat3x3[T] {
+	cos := T(math.Cos(angleRad))
+	sin := T(math.Sin(angleRad))
+	inverseCos := T(1) - cos
+
+	var unitAxis Vec3[T]
+	unitAxis.SetVec3(axis).Normalize()
+
+	m[0][0] = inverseCos*unitAxis.X*unitAxis.X + cos
+	m[0][1] = inverseCos*unitAxis.X*unitAxis.Y + unitAxis.Z*sin
+	m[0][2] = inverseCos*unitAxis.X*unitAxis.Z - unitAxis.Y*sin
+	m[1][0] = inverseCos*unitAxis.X*unitAxis.Y - unitAxis.Z*sin
+	m[1][1] = inverseCos*unitAxis.Y*unitAxis.Y + cos
+	m[1][2] = inverseCos*unitAxis.Y*unitAxis.Z + unitAxis.X*sin
+	m[2][0] = inverseCos*unitAxis.X*unitAxis.Z + unitAxis.Y*sin
+	m[2][1] = inverseCos*unitAxis.Y*unitAxis.Z - unitAxis.X*sin
+	m[2][2] = inverseCos*unitAxis.Z*unitAxis.Z + cos
+
+	return m
+}
+
+func (m *Mat3x3[T]) SetRotationEulers(yawRad, pitchRad, rollRad float64) *Mat3x3[T] {
+	yawCos := T(math.Cos(yawRad))
+	pitchCos := T(math.Cos(pitchRad))
+	rollCos := T(math.Cos(rollRad))
+	yawSin := T(math.Sin(yawRad))
+	pitchSin := T(math.Sin(pitchRad))
+	rollSin := T(math.Sin(rollRad))
+
+	m[0][0] = rollCos * yawCos
+	m[0][1] = rollSin*yawCos + pitchSin*yawSin*rollCos
+	m[0][2] = -yawSin * pitchCos
+	m[1][0] = -rollSin * pitchCos
+	m[1][1] = rollCos * pitchCos
+	m[1][2] = pitchSin
+	m[2][0] = yawSin
+	m[2][1] = rollSin*yawSin - yawCos*pitchSin*rollCos
+	m[2][2] = pitchCos * yawCos
+
+	return m
+}
+
+func (m *Mat3x3[T]) SetRotationY(yawRad float64) *Mat3x3[T] {
+	cos := T(math.Cos(yawRad))
+	sin := T(math.Sin(yawRad))
+
+	m00 := cos
+	m02 := -sin
+
+	m20 := sin
+	m22 := cos
+
+	m[0][0] = m00
+	m[0][1] = 0
+	m[0][2] = m02
+	m[1][0] = 0
+	m[1][1] = 1
+	m[1][2] = 0
+	m[2][0] = m20
+	m[2][1] = 0
+	m[2][2] = m22
+
+	return m
+}
+
+func (m *Mat3x3[T]) SetRotationX(pitchRad float64) *Mat3x3[T] {
+	cos := T(math.Cos(pitchRad))
+	sin := T(math.Sin(pitchRad))
+
+	m11 := cos
+	m12 := sin
+
+	m21 := -sin
+	m22 := cos
+
+	m[0][0] = 1
+	m[0][1] = 0
+	m[0][2] = 0
+	m[1][0] = 0
+	m[1][1] = m11
+	m[1][2] = m12
+	m[2][0] = 0
+	m[2][1] = m21
+	m[2][2] = m22
+
+	return m
+}
+
+func (m *Mat3x3[T]) SetRotationZ(rollRad float64) *Mat3x3[T] {
+	cos := T(math.Cos(rollRad))
+	sin := T(math.Sin(rollRad))
+
+	m00 := cos
+	m01 := sin
+
+	m10 := -sin
+	m11 := cos
+
+	m[0][0] = m00
+	m[0][1] = m01
+	m[0][2] = 0
+	m[1][0] = m10
+	m[1][1] = m11
+	m[1][2] = 0
+	m[2][0] = 0
+	m[2][1] = 0
+	m[2][2] = 1
+
+	return m
+}
+
+func (m *Mat3x3[T]) SetScale(x, y, z T) *Mat3x3[T] {
+	m[0][0] = x
+	m[0][1] = 0
+	m[0][2] = 0
+	m[1][0] = 0
+	m[1][1] = y
+	m[1][2] = 0
+	m[2][0] = 0
+	m[2][1] = 0
+	m[2][2] = z
+
+	return m
+}
+
 func (m *Mat3x3[T]) Transpose() *Mat3x3[T] {
 	m[1][0], m[0][1] = m[0][1], m[1][0]
 	m[2][0], m[0][2] = m[0][2], m[2][0]
@@ -199,6 +350,32 @@ func (m *Mat3x3[T]) Orthonormalize() *Mat3x3[T] {
 	return m
 }
 
+func (m *Mat3x3[T]) ApplyTransform(other *Mat3x3[T]) *Mat3x3[T] {
+	m00 := other[0][0]*m[0][0] + other[1][0]*m[0][1] + other[2][0]*m[0][2]
+	m10 := other[0][0]*m[1][0] + other[1][0]*m[1][1] + other[2][0]*m[1][2]
+	m20 := other[0][0]*m[2][0] + other[1][0]*m[2][1] + other[2][0]*m[2][2]
+
+	m01 := other[0][1]*m[0][0] + other[1][1]*m[0][1] + other[2][1]*m[0][2]
+	m11 := other[0][1]*m[1][0] + other[1][1]*m[1][1] + other[2][1]*m[1][2]
+	m21 := other[0][1]*m[2][0] + other[1][1]*m[2][1] + other[2][1]*m[2][2]
+
+	m02 := other[0][2]*m[0][0] + other[1][2]*m[0][1] + other[2][2]*m[0][2]
+	m12 := other[0][2]*m[1][0] + other[1][2]*m[1][1] + other[2][2]*m[1][2]
+	m22 := other[0][2]*m[2][0] + other[1][2]*m[2][1] + other[2][2]*m[2][2]
+
+	m[0][0] = m00
+	m[0][1] = m01
+	m[0][2] = m02
+	m[1][0] = m10
+	m[1][1] = m11
+	m[1][2] = m12
+	m[2][0] = m20
+	m[2][1] = m21
+	m[2][2] = m22
+
+	return m
+}
+
 func (m *Mat3x3[T]) MultMatrix3x3(other *Mat3x3[T]) *Mat3x3[T] {
 	m00 := m[0][0]*other[0][0] + m[1][0]*other[0][1] + m[2][0]*other[0][2]
 	m10 := m[0][0]*other[1][0] + m[1][0]*other[1][1] + m[2][0]*other[1][2]
@@ -262,6 +439,132 @@ func (m *Mat3x3[T]) ShearY(x T) *Mat3x3[T] {
 	m[0][1] = m[0][0]*x + m[0][1]
 	m[1][1] = m[1][0]*x + m[1][1]
 	m[2][1] = m[2][0]*x + m[2][1]
+
+	return m
+}
+
+func (m *Mat3x3[T]) Scale(v *Vec3[T]) *Mat3x3[T] {
+	m[0][0] *= v.X
+	m[0][1] *= v.Y
+	m[0][2] *= v.Z
+	m[1][0] *= v.X
+	m[1][1] *= v.Y
+	m[1][2] *= v.Z
+	m[2][0] *= v.X
+	m[2][1] *= v.Y
+	m[2][2] *= v.Z
+
+	return m
+}
+
+func (m *Mat3x3[T]) RotateAroundAxis(axis *Vec3[T], angleRad float64) *Mat3x3[T] {
+	var unitAxis Vec3[T]
+	unitAxis.SetVec3(axis).Normalize()
+
+	cos := T(math.Cos(angleRad))
+	sin := T(math.Sin(angleRad))
+
+	inverseCos := 1 - cos
+
+	rotate00 := cos + unitAxis.X*unitAxis.X*inverseCos
+	rotate01 := unitAxis.X*unitAxis.Y*inverseCos + sin*unitAxis.Z
+	rotate02 := unitAxis.X*unitAxis.Z*inverseCos - sin*unitAxis.Y
+
+	rotate10 := unitAxis.Y*unitAxis.X*inverseCos - sin*unitAxis.Z
+	rotate11 := cos + unitAxis.Y*unitAxis.Y*inverseCos
+	rotate12 := unitAxis.Y*unitAxis.Z*inverseCos + sin*unitAxis.X
+
+	rotate20 := unitAxis.Z*unitAxis.X*inverseCos + sin*unitAxis.Y
+	rotate21 := unitAxis.Z*unitAxis.Y*inverseCos - sin*unitAxis.X
+	rotate22 := cos + unitAxis.Z*unitAxis.Z*inverseCos
+
+	m00 := rotate00*m[0][0] + rotate10*m[0][1] + rotate20*m[0][2]
+	m01 := rotate01*m[0][0] + rotate11*m[0][1] + rotate21*m[0][2]
+	m02 := rotate02*m[0][0] + rotate12*m[0][1] + rotate22*m[0][2]
+
+	m10 := rotate00*m[1][0] + rotate10*m[1][1] + rotate20*m[1][2]
+	m11 := rotate01*m[1][0] + rotate11*m[1][1] + rotate21*m[1][2]
+	m12 := rotate02*m[1][0] + rotate12*m[1][1] + rotate22*m[1][2]
+
+	m20 := rotate00*m[2][0] + rotate10*m[2][1] + rotate20*m[2][2]
+	m21 := rotate01*m[2][0] + rotate11*m[2][1] + rotate21*m[2][2]
+	m22 := rotate02*m[2][0] + rotate12*m[2][1] + rotate22*m[2][2]
+
+	m[0][0] = m00
+	m[0][1] = m01
+	m[0][2] = m02
+	m[1][0] = m10
+	m[1][1] = m11
+	m[1][2] = m12
+	m[2][0] = m20
+	m[2][1] = m21
+	m[2][2] = m22
+
+	return m
+}
+
+func (m *Mat3x3[T]) RotateX(angleRad float64) *Mat3x3[T] {
+	cos := T(math.Cos(angleRad))
+	sin := T(math.Sin(angleRad))
+
+	m01 := cos*m[0][1] - sin*m[0][2]
+	m11 := cos*m[1][1] - sin*m[1][2]
+	m21 := cos*m[2][1] - sin*m[2][2]
+
+	m02 := sin*m[0][1] + cos*m[0][2]
+	m12 := sin*m[1][1] + cos*m[1][2]
+	m22 := sin*m[2][1] + cos*m[2][2]
+
+	m[0][1] = m01
+	m[1][1] = m11
+	m[2][1] = m21
+	m[0][2] = m02
+	m[1][2] = m12
+	m[2][2] = m22
+
+	return m
+}
+
+func (m *Mat3x3[T]) RotateY(angleRad float64) *Mat3x3[T] {
+	cos := T(math.Cos(angleRad))
+	sin := T(math.Sin(angleRad))
+
+	m00 := cos*m[0][0] + sin*m[0][2]
+	m10 := cos*m[1][0] + sin*m[1][2]
+	m20 := cos*m[2][0] + sin*m[2][2]
+
+	m02 := -sin*m[0][0] + cos*m[0][2]
+	m12 := -sin*m[1][0] + cos*m[1][2]
+	m22 := -sin*m[2][0] + cos*m[2][2]
+
+	m[0][0] = m00
+	m[1][0] = m10
+	m[2][0] = m20
+	m[0][2] = m02
+	m[1][2] = m12
+	m[2][2] = m22
+
+	return m
+}
+
+func (m *Mat3x3[T]) RotateZ(angleRad float64) *Mat3x3[T] {
+	cos := T(math.Cos(angleRad))
+	sin := T(math.Sin(angleRad))
+
+	m00 := cos*m[0][0] - sin*m[0][1]
+	m10 := cos*m[1][0] - sin*m[1][1]
+	m20 := cos*m[2][0] - sin*m[2][1]
+
+	m01 := sin*m[0][0] + cos*m[0][1]
+	m11 := sin*m[1][0] + cos*m[1][1]
+	m21 := sin*m[2][0] + cos*m[2][1]
+
+	m[0][0] = m00
+	m[1][0] = m10
+	m[2][0] = m20
+	m[0][1] = m01
+	m[1][1] = m11
+	m[2][1] = m21
 
 	return m
 }
