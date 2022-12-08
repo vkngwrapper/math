@@ -217,10 +217,9 @@ func TestMat4x4_SetTranslation(t *testing.T) {
 }
 
 func TestMat4x4_Translate_Identity(t *testing.T) {
-	translateVector := Vec3[float32]{1, 2, 3}
 	var translation Mat4x4[float32]
 	translation.SetIdentity()
-	translation.Translate(&translateVector)
+	translation.Translate(1, 2, 3)
 
 	point := Vec4[float32]{5, 6, 7, 1}
 	point.Transform(&translation)
@@ -231,11 +230,9 @@ func TestMat4x4_Translate_Identity(t *testing.T) {
 }
 
 func TestMat4x4_Translate_FromScale(t *testing.T) {
-	translateVector := Vec3[float32]{1, 2, 3}
-
 	var translation Mat4x4[float32]
 	translation.SetScale(2, 3, 2)
-	translation.Translate(&translateVector)
+	translation.Translate(1, 2, 3)
 
 	point := Vec4[float32]{5, 6, 7, 1}
 	point.Transform(&translation)
@@ -246,10 +243,9 @@ func TestMat4x4_Translate_FromScale(t *testing.T) {
 }
 
 func TestMat4x4_Scale_Identity(t *testing.T) {
-	scaleVector := Vec3[float32]{2, 3, 4}
 	var scale Mat4x4[float32]
 	scale.SetIdentity()
-	scale.Scale(&scaleVector)
+	scale.Scale(2, 3, 4)
 
 	point := Vec4[float32]{3, 5, 7, 1}
 	point.Transform(&scale)
@@ -260,10 +256,9 @@ func TestMat4x4_Scale_Identity(t *testing.T) {
 }
 
 func TestMat4x4_Scale_FromTranslate(t *testing.T) {
-	scaleVector := Vec3[float32]{2, 3, 4}
 	var scale Mat4x4[float32]
 	scale.SetTranslation(1, 2, 3)
-	scale.Scale(&scaleVector)
+	scale.Scale(2, 3, 4)
 
 	point := Vec4[float32]{3, 5, 7, 1}
 	point.Transform(&scale)
@@ -647,8 +642,7 @@ func TestMat4x4_IsNormalized(t *testing.T) {
 
 	require.True(t, mat1.IsNormalized(0.0001))
 
-	translate := Vec3[float32]{5, 10, 15}
-	mat1.Translate(&translate)
+	mat1.Translate(5, 10, 15)
 	require.False(t, mat1.IsNormalized(0.0001))
 }
 

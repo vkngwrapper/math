@@ -91,11 +91,8 @@ func BenchmarkTransformVec4VkngMath(b *testing.B) {
 	b.ReportAllocs()
 
 	for i := 0; i < b.N; i++ {
-		translate := Vec3[float32]{1, 1, 1}
-		scale := Vec3[float32]{1.5, 1.5, 1.5}
-
 		var mat Mat4x4[float32]
-		mat.SetIdentity().Translate(&translate).RotateY(1).Scale(&scale)
+		mat.SetIdentity().Translate(1, 1, 1).RotateY(1).Scale(1.5, 1.5, 1.5)
 
 		transform := Vec4[float32]{5, 10, 15, 1}
 		transform.Transform(&mat)

@@ -167,7 +167,7 @@ func (v *Vec3[T]) SetRotateZ(input *Vec3[T], angleRad float64) *Vec3[T] {
 func (v *Vec3[T]) SetNormalizeVec3(input *Vec3[T]) *Vec3[T] {
 	vecLen := input.Len()
 
-	if abs[T](vecLen-1) <= 0.0001 {
+	if abs[T](vecLen-1) < 0.0001 {
 		v.X = input.X
 		v.Y = input.Y
 		v.Z = input.Z
@@ -193,7 +193,7 @@ func (v *Vec3[T]) SetLerp(lhs, rhs *Vec3[T], delta T) *Vec3[T] {
 func (v *Vec3[T]) Normalize() *Vec3[T] {
 	vecLen := v.Len()
 
-	if abs[T](vecLen-1) <= 0.0001 {
+	if abs[T](vecLen-1) < 0.0001 {
 		return v
 	}
 

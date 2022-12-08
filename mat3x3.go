@@ -443,16 +443,16 @@ func (m *Mat3x3[T]) ShearY(x T) *Mat3x3[T] {
 	return m
 }
 
-func (m *Mat3x3[T]) Scale(v *Vec3[T]) *Mat3x3[T] {
-	m[0][0] *= v.X
-	m[0][1] *= v.Y
-	m[0][2] *= v.Z
-	m[1][0] *= v.X
-	m[1][1] *= v.Y
-	m[1][2] *= v.Z
-	m[2][0] *= v.X
-	m[2][1] *= v.Y
-	m[2][2] *= v.Z
+func (m *Mat3x3[T]) Scale(x, y, z T) *Mat3x3[T] {
+	m[0][0] *= x
+	m[0][1] *= y
+	m[0][2] *= z
+	m[1][0] *= x
+	m[1][1] *= y
+	m[1][2] *= z
+	m[2][0] *= x
+	m[2][1] *= y
+	m[2][2] *= z
 
 	return m
 }
