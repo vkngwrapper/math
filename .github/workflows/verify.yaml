@@ -35,13 +35,13 @@ jobs:
       - name: Run Tests
         run: go test -race -coverprofile=coverage.out ./... > coverageout.txt
       - name: Coverage Results
-        if: github.event_name != "pull_request"
+        if: github.event_name != 'pull_request'
         run: cat coverageout.txt
       - name: Write Coverage File
-        if: github.event_name == "pull_request"
+        if: github.event_name == 'pull_request'
         run: go tool cover -html coverage.out -html coverageout.html
       - name: Commenting To PR
-        if: github.event_name == "pull_request"
+        if: github.event_name == 'pull_request'
         uses: thollander/actions-comment-pull-request@v2
         with:
           filePath: coverageout.txt
