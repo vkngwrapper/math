@@ -6,7 +6,7 @@ on:
   pull_request:
 permissions:
   contents: read
-  pull-requests: read
+  pull-requests: write
 jobs:
   golangci:
     runs-on: ubuntu-latest
