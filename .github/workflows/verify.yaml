@@ -5,31 +5,5 @@ permissions:
   contents: read
   pull-requests: write
 jobs:
-  golangci:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Setup Go
-        uses: actions/setup-go@v3
-        with:
-          go-version: 1.19
-      - name: Checkout Repo
-        uses: actions/checkout@v2
-      - name: Run Lint
-        uses: golangci/golangci-lint-action@v3
-        with:
-          version: v1.50
-  test:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Setup Go
-        uses: actions/setup-go@v2
-        with:
-          go-version: 1.19
-      - name: Checkout Repo
-        uses: actions/checkout@v2
-      - name: Verify Dependencies
-        run: go mod verify
-      - name: Run Tests
-        run: go test -race -coverprofile=coverage.out ./...
-      - name: Comment With Coverage
-        uses: seriousben/go-patch-cover-action@v1
+  checks:
+    uses: vkngwrapper/.github/.github/workflows/go-pr-verify.yaml@main
