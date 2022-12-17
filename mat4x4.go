@@ -916,6 +916,35 @@ func (m *Mat4x4[T]) Scale(x, y, z T) *Mat4x4[T] {
 	return m
 }
 
+func (m *Mat4x4[T]) SetRotationAroundAxis(axis *Vec3[T], angleRad float64) *Mat4x4[T] {
+	var unitAxis Vec3[T]
+	unitAxis.SetVec3(axis).Normalize()
+
+	cos := T(math.Cos(angleRad))
+	sin := T(math.Sin(angleRad))
+
+	inverseCos := 1 - cos
+	
+	m[0][0] = cos + unitAxis.X*unitAxis.X*inverseCos
+	m[0][1] = unitAxis.X*unitAxis.Y*inverseCos + sin*unitAxis.Z
+	m[0][2] = unitAxis.X*unitAxis.Z*inverseCos - sin*unitAxis.Y
+	m[0][3] = 0
+	m[1][0] = unitAxis.Y*unitAxis.X*inverseCos - sin*unitAxis.Z
+	m[1][1] = cos + unitAxis.Y*unitAxis.Y*inverseCos
+	m[1][2] = unitAxis.Y*unitAxis.Z*inverseCos + sin*unitAxis.X
+	m[1][3] = 0
+	m[2][0] = unitAxis.Z*unitAxis.X*inverseCos + sin*unitAxis.Y
+	m[2][1] = unitAxis.Z*unitAxis.Y*inverseCos - sin*unitAxis.X
+	m[2][2] = cos + unitAxis.Z*unitAxis.Z*inverseCos
+	m[2][3] = 0
+	m[3][0] = 0
+	m[3][1] = 0
+	m[3][2] = 0
+	m[3][3] = 1
+
+	return m
+}
+
 func (m *Mat4x4[T]) RotateAroundAxis(axis *Vec3[T], angleRad float64) *Mat4x4[T] {
 	var unitAxis Vec3[T]
 	unitAxis.SetVec3(axis).Normalize()

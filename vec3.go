@@ -191,12 +191,13 @@ func (v *Vec3[T]) SetLerp(lhs, rhs *Vec3[T], delta T) *Vec3[T] {
 }
 
 func (v *Vec3[T]) Normalize() *Vec3[T] {
-	vecLen := v.Len()
+	vecLenSqr := v.LenSqr()
 
-	if abs[T](vecLen-1) < 0.0001 {
+	if abs[T](vecLenSqr-1) < 0.0001 {
 		return v
 	}
 
+	vecLen := T(math.Sqrt(float64(vecLenSqr)))
 	inverse := 1.0 / vecLen
 	v.X *= inverse
 	v.Y *= inverse

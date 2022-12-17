@@ -179,7 +179,7 @@ func (v *Vec4[T]) SetSubtractVec4(lhs *Vec4[T], rhs *Vec4[T]) *Vec4[T] {
 	return v
 }
 
-func (v *Vec4[T]) SetScaleVec4(input *Vec4[T], scale T) *Vec4[T] {
+func (v *Vec4[T]) SetScale(input *Vec4[T], scale T) *Vec4[T] {
 	v.X = input.X * scale
 	v.Y = input.Y * scale
 	v.Z = input.Z * scale
@@ -188,7 +188,7 @@ func (v *Vec4[T]) SetScaleVec4(input *Vec4[T], scale T) *Vec4[T] {
 	return v
 }
 
-func (v *Vec4[T]) SetLerpVec4(lhs *Vec4[T], rhs *Vec4[T], delta T) *Vec4[T] {
+func (v *Vec4[T]) SetLerp(lhs *Vec4[T], rhs *Vec4[T], delta T) *Vec4[T] {
 	v.X = lhs.X*(1-delta) + rhs.X*delta
 	v.Y = lhs.Y*(1-delta) + rhs.Y*delta
 	v.Z = lhs.Z*(1-delta) + rhs.Z*delta
@@ -200,7 +200,7 @@ func (v *Vec4[T]) SetLerpVec4(lhs *Vec4[T], rhs *Vec4[T], delta T) *Vec4[T] {
 func (v *Vec4[T]) Normalize() *Vec4[T] {
 	vecLen := v.Len()
 
-	if abs[T](vecLen-1) > 0.0001 {
+	if abs[T](vecLen-1) < 0.0001 {
 		return v
 	}
 

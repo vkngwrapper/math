@@ -540,6 +540,19 @@ func TestMat4x4_GetAxisAngle(t *testing.T) {
 	require.InDelta(t, math.Pi/2, angle, 0.0001)
 }
 
+func TestMat4x4_SetRotationAroundAxis(t *testing.T) {
+	axis := Vec3[float32]{0, 1, 0}
+	var rotation Mat4x4[float32]
+	rotation.SetRotationAroundAxis(&axis, math.Pi)
+
+	point := Vec4[float32]{1, 0, 1, 1}
+	point.Transform(&rotation)
+
+	require.InDelta(t, -1, point.X/point.W, 0.0001)
+	require.InDelta(t, 0, point.Y/point.W, 0.0001)
+	require.InDelta(t, -1, point.Z/point.W, 0.0001)
+}
+
 func TestMat4x4_RotateAroundAxis_Identity(t *testing.T) {
 	axis := Vec3[float32]{0, 1, 0}
 	var rotation Mat4x4[float32]
