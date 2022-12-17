@@ -1,8 +1,5 @@
 name: Verify Code
 on:
-  push:
-    branches:
-      - main
   pull_request:
 permissions:
   contents: read
@@ -33,16 +30,6 @@ jobs:
       - name: Verify Dependencies
         run: go mod verify
       - name: Run Tests
-        if: github.event_name != 'pull_request'
         run: go test -race -coverprofile=coverage.out ./...
-      - name: Run Tests (Store Output)
-        if: github.event_name == 'pull_request'
-        run: go test -race -coverprofile=coverage.out ./... > coverageout.txt
-      - name: Write Coverage File
-        if: success() && github.event_name == 'pull_request'
-        run: go tool cover -html coverage.out -o coverageout.html
-      - name: Commenting To PR
-        if: success() && github.event_name == 'pull_request'
-        uses: thollander/actions-comment-pull-request@v2
-        with:
-          filePath: coverageout.txt
+      - name: Comment With Coverage
+        uses: seriousben/go-patch-cover-action@v1
