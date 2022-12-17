@@ -40,7 +40,7 @@ jobs:
         run: go test -race -coverprofile=coverage.out ./... > coverageout.txt
       - name: Write Coverage File
         if: success() && github.event_name == 'pull_request'
-        run: go tool cover -html coverage.out -html coverageout.html
+        run: go tool cover -html coverage.out -o coverageout.html
       - name: Commenting To PR
         if: success() && github.event_name == 'pull_request'
         uses: thollander/actions-comment-pull-request@v2
