@@ -1,4 +1,4 @@
-name: Verify Code
+name: Pull Request Verify
 on:
   pull_request:
 permissions:
