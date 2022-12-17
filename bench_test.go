@@ -13,28 +13,21 @@ import (
 
 var g3nGlobalOutVec4 math32.Vector4
 var g3nGlobalOutVec3 math32.Vector3
-var g3nGlobalOutQuat math32.Quaternion
-var g3nGlobalOutScalar float32
 
 var mathglGlobalOutVec4 mgl32.Vec4
 var mathglGlobalOutVec3 mgl32.Vec3
-var mathglGlobalOutQuat mgl32.Quat
-var mathglGlobalOutScalar float32
 
 var go3dGlobalOutVec4 vec4.T
 var go3dGlobalOutVec3 vec3.T
-var go3dGlobalOutQuat quaternion.T
-var go3dGlobalOutScalar float32
 
 var vkngMathOutVec4 Vec4[float32]
 var vkngMathOutVec3 Vec3[float32]
 var vkngMathOutQuat Quaternion[float32]
-var vkngMathOutScalar float32
 
 func BenchmarkTransformVec4G3n(b *testing.B) {
 	b.ReportAllocs()
 	for i := 0; i < b.N; i++ {
-		transform := math32.Vector4{5, 10, 15, 1}
+		transform := math32.Vector4{X: 5, Y: 10, Z: 15, W: 1}
 
 		var translateMat, rotateMat, scaleMat math32.Matrix4
 		translateMat.MakeTranslation(1, 1, 1)
@@ -104,8 +97,8 @@ func BenchmarkTransformVec4VkngMath(b *testing.B) {
 func BenchmarkRotateVec3G3n(b *testing.B) {
 	b.ReportAllocs()
 	for i := 0; i < b.N; i++ {
-		transform := math32.Vector3{5, 10, 15}
-		axis := math32.Vector3{1, 0, 0}
+		transform := math32.Vector3{X: 5, Y: 10, Z: 15}
+		axis := math32.Vector3{X: 1, Y: 0, Z: 0}
 
 		transform.ApplyAxisAngle(&axis, math.Pi)
 
@@ -153,8 +146,8 @@ func BenchmarkRotateQuaternionG3n(b *testing.B) {
 	b.ReportAllocs()
 
 	for i := 0; i < b.N; i++ {
-		transform := math32.Vector3{5, 10, 15}
-		euler := math32.Vector3{math.Pi, 0, math.Pi / 2}
+		transform := math32.Vector3{X: 5, Y: 10, Z: 15}
+		euler := math32.Vector3{X: math.Pi, Y: 0, Z: math.Pi / 2}
 
 		var quaternion math32.Quaternion
 
@@ -207,7 +200,7 @@ func BenchmarkMatrixMultTransformG3n(b *testing.B) {
 	b.ReportAllocs()
 
 	for i := 0; i < b.N; i++ {
-		transform := math32.Vector4{5, 10, 15, 1}
+		transform := math32.Vector4{X: 5, Y: 10, Z: 15, W: 1}
 
 		var translateMat, rotateMat, scaleMat math32.Matrix4
 		translateMat.MakeTranslation(1, 1, 1)

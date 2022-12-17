@@ -1,6 +1,6 @@
 module github.com/vkngwrapper/math
 
-go 1.18
+go 1.19
 
 require (
 	github.com/g3n/engine v0.2.0
