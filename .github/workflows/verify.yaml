@@ -33,10 +33,7 @@ jobs:
       - name: Verify Dependencies
         run: go mod verify
       - name: Run Tests
-        run: go test -race -coverprofile=coverage.out ./... > coverageout.txt
-      - name: Coverage Results
-        if: github.event_name != 'pull_request'
-        run: cat coverageout.txt
+        run: go test -race -coverprofile=coverage.out ./...
       - name: Write Coverage File
         if: github.event_name == 'pull_request'
         run: go tool cover -html coverage.out -html coverageout.html
