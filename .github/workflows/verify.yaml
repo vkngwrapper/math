@@ -4,26 +4,20 @@ on:
     branches:
       - main
   pull_request:
-    branches:
-      - main
+permissions:
+  contents: read
+  pull-requests: read
 jobs:
-  build:
+  golangci:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
-      - uses: actions/setup-go@v2
+      - name: Setup Go
+        uses: actions/setup-go@v2
         with:
-          go-version: '1.19'
-      - name: Install Dependencies
-        run: |
-          go version
-          go get -u golang.org/x/lint/golint
-          go get
-      - name: Run Build
-        run: go build ./...
-      - name: Run Vet & Lint
-        run: | 
-          go vet ./...
-          golint ./...
-      - name: Run Tests
-        run: go test -v ./...
+          go-version: 1.19
+      - name: Checkout Repo
+        uses: actions/checkout@v2
+      - name: Run Lint
+        uses: golangci/golangci-lint-action@v3
+        with:
+          version: v1.50
