@@ -6,4 +6,4 @@ permissions:
   pull-requests: write
 jobs:
   checks:
-    uses: vkngwrapper/.github/.github/workflows/go-pr-verify.yaml@main
+    uses: vkngwrapper/.github/.github/workflows/go-pr-pr_verify.yaml@main
