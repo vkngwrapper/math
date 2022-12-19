@@ -9,7 +9,7 @@ import (
 func TestMat3x3_SetMat3x3(t *testing.T) {
 	var input Mat3x3[float32]
 	axis := Vec3[float32]{X: 0.7071, Y: 0.7071, Z: 0}
-	input.SetAxisAngle(&axis, math.Pi/2.0)
+	input.SetRotationAroundAxis(&axis, math.Pi/2.0)
 
 	var m Mat3x3[float32]
 	m.SetMat3x3(&input)
