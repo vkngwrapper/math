@@ -2,17 +2,25 @@ package math
 
 import "math"
 
+// Vec2 is a two-element vector of floating point compatible values that can be used for 2d
+// vector arithmetic
 type Vec2[T FloatingPoint] struct {
 	X T
 	Y T
 }
 
-func (v *Vec2[T]) SetVec2(in *Vec3[T]) *Vec2[T] {
+// SetVec2 overwrites the contents of this vector with the contents of a 2-element vector
+//
+// in - The vector to initialize from
+func (v *Vec2[T]) SetVec2(in *Vec2[T]) *Vec2[T] {
 	v.X = in.X
 	v.Y = in.Y
 	return v
 }
 
+// SetVec3 overwrites the contents of this vector with the first two elements of a 3-element vector
+//
+// in - The vector to initialize from
 func (v *Vec2[T]) SetVec3(in *Vec3[T]) *Vec2[T] {
 	v.X = in.X
 	v.Y = in.Y
@@ -20,6 +28,9 @@ func (v *Vec2[T]) SetVec3(in *Vec3[T]) *Vec2[T] {
 	return v
 }
 
+// SetVec4 overwrites the contents of this vector with the first two elements of a 4-element vector
+//
+// in - The vector to initialize from
 func (v *Vec2[T]) SetVec4(in *Vec4[T]) *Vec2[T] {
 	v.X = in.X
 	v.Y = in.Y
@@ -27,6 +38,10 @@ func (v *Vec2[T]) SetVec4(in *Vec4[T]) *Vec2[T] {
 	return v
 }
 
+// SetHomogenousVec3 overwrites the contents of this vector with the first two elements of a 3-element
+// vector, divided by the third element
+//
+// in - The vector to initialize from
 func (v *Vec2[T]) SetHomogenousVec3(in *Vec3[T]) *Vec2[T] {
 	factor := T(1) / in.Z
 
@@ -36,6 +51,10 @@ func (v *Vec2[T]) SetHomogenousVec3(in *Vec3[T]) *Vec2[T] {
 	return v
 }
 
+// SetHomogenousVec4 overwrites the contents of this vector with the first two elements of a 4-element
+// vector, divided by the fourth element
+//
+// in - The vector to initialize from
 func (v *Vec2[T]) SetHomogenousVec4(in *Vec4[T]) *Vec2[T] {
 	factor := T(1) / in.W
 
@@ -45,6 +64,7 @@ func (v *Vec2[T]) SetHomogenousVec4(in *Vec4[T]) *Vec2[T] {
 	return v
 }
 
+// Normalize converts this vector into a unit vector
 func (v *Vec2[T]) Normalize() *Vec2[T] {
 	vecLen := v.Len()
 
@@ -59,15 +79,22 @@ func (v *Vec2[T]) Normalize() *Vec2[T] {
 	return v
 }
 
+// Len calculates the length of this vector
 func (v *Vec2[T]) Len() T {
 	sqr := float64(v.X*v.X + v.Y*v.Y)
 	return T(math.Sqrt(sqr))
 }
 
+// LenSqr calculates the length-squared of this vector. It is more performant than Len,
+// owing to not require a math.Sqrt call, and may be preferable in cases when only the relative
+// length of two vectors is required, or when comparing the length to 0 or 1
 func (v *Vec2[T]) LenSqr() T {
 	return v.X*v.X + v.Y*v.Y
 }
 
+// AddVec2 adds another provided vector to this one and updates this vector with the results
+//
+// other - The right operand in the add operation
 func (v *Vec2[T]) AddVec2(other *Vec2[T]) *Vec2[T] {
 	v.X += other.X
 	v.Y += other.Y
@@ -75,6 +102,9 @@ func (v *Vec2[T]) AddVec2(other *Vec2[T]) *Vec2[T] {
 	return v
 }
 
+// SubtractVec2 subtracts another provided vector from this one and updates this vector with the results
+//
+// other - The right operand in the subtract operation
 func (v *Vec2[T]) SubtractVec2(other *Vec2[T]) *Vec2[T] {
 	v.X -= other.X
 	v.Y -= other.Y
@@ -82,10 +112,16 @@ func (v *Vec2[T]) SubtractVec2(other *Vec2[T]) *Vec2[T] {
 	return v
 }
 
+// DotProduct calculates and returns the dot product of this vector and another provided vector
+//
+// other - The right operand in the dot product operation
 func (v *Vec2[T]) DotProduct(other *Vec2[T]) T {
 	return v.X*other.X + v.Y*other.Y
 }
 
+// Scale multiplies this vector by the provided scalar factor
+//
+// scale - The scalar to multiply this vector by
 func (v *Vec2[T]) Scale(scale T) *Vec2[T] {
 	v.X *= scale
 	v.Y *= scale
@@ -93,6 +129,12 @@ func (v *Vec2[T]) Scale(scale T) *Vec2[T] {
 	return v
 }
 
+// Equal returns true if every entry in this vector is equal to every entry in the provided vector
+//
+// other - The vector to compare this vector to
+//
+// epsilon - The epsilon value to use in floating point comparisons. This much floating point
+// drift is permitted before the method returns false. 0.0001 is a common epsilon value
 func (v *Vec2[T]) Equal(other *Vec2[T], epsilon T) bool {
 	if abs[T](v.X-other.X) > epsilon {
 		return false
@@ -105,38 +147,12 @@ func (v *Vec2[T]) Equal(other *Vec2[T], epsilon T) bool {
 	return true
 }
 
-func (v *Vec2[T]) GreaterThan(other *Vec2[T]) bool {
-	if v.X <= other.X || v.Y <= other.Y {
-		return false
-	}
-
-	return true
-}
-
-func (v *Vec2[T]) GreaterThanEqual(other *Vec2[T]) bool {
-	if v.X < other.X || v.Y < other.Y {
-		return false
-	}
-
-	return true
-}
-
-func (v *Vec2[T]) LessThan(other *Vec2[T]) bool {
-	if v.X >= other.X || v.Y >= other.Y {
-		return false
-	}
-
-	return true
-}
-
-func (v *Vec2[T]) LessThanEqual(other *Vec2[T]) bool {
-	if v.X > other.X || v.Y > other.Y {
-		return false
-	}
-
-	return true
-}
-
+// Lerp interpolates between this vector and another provided vector, updating this
+// vector to the results of the interpolation
+//
+// other - The target vector in the interpolation operation
+//
+// delta - A value between 0 and 1 indicating how far to interpolate between the two vectors
 func (v *Vec2[T]) Lerp(other *Vec2[T], delta T) *Vec2[T] {
 	v.X = v.X*(1-delta) + other.X*delta
 	v.Y = v.Y*(1-delta) + other.Y*delta
@@ -144,13 +160,9 @@ func (v *Vec2[T]) Lerp(other *Vec2[T], delta T) *Vec2[T] {
 	return v
 }
 
-func (v *Vec2[T]) SetLinearGradient(point0, point1, position *Vec2[T]) T {
-	lineX := point1.X - point0.X
-	lineY := point1.Y - point0.Y
-
-	return (lineX*(position.X-point0.X) + lineY*(position.Y-point0.Y)) / (lineX*lineX + lineY*lineY)
-}
-
+// Rotate rotates this vector around the origin by the provided angle
+//
+// angleRad - The angle to rotate, in radians
 func (v *Vec2[T]) Rotate(angleRad float64) *Vec2[T] {
 	cos := T(math.Cos(angleRad))
 	sin := T(math.Sin(angleRad))
@@ -163,6 +175,9 @@ func (v *Vec2[T]) Rotate(angleRad float64) *Vec2[T] {
 	return v
 }
 
+// Transform multiplies this vector through the provided 2x2 transform matrix
+//
+// m - The transform matrix used to transform this vector
 func (v *Vec2[T]) Transform(m *Mat2x2[T]) *Vec2[T] {
 	x := m[0][0]*v.X + m[1][0]*v.Y
 	y := m[0][1]*v.X + m[1][1]*v.Y
@@ -173,6 +188,10 @@ func (v *Vec2[T]) Transform(m *Mat2x2[T]) *Vec2[T] {
 	return v
 }
 
+// TransformHomogenous multiplies this vector through the provided 3x3 transform matrix
+// and updates this 2d vector with the results by performing a homogenous divide
+//
+// m - The transform matrix used to transform this vector
 func (v *Vec2[T]) TransformHomogenous(m *Mat3x3[T]) *Vec2[T] {
 	x := m[0][0]*v.X + m[1][0]*v.Y + m[2][0]
 	y := m[0][1]*v.X + m[1][1]*v.Y + m[2][1]
