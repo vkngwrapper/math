@@ -161,7 +161,7 @@ func TestMat4x4_SetOrthographic2D(t *testing.T) {
 func TestMat4x4_SetAxisAngle(t *testing.T) {
 	axis := Vec3[float32]{0, 1, 0}
 	var rotation Mat4x4[float32]
-	rotation.SetRotateAroundAxis(&axis, math.Pi)
+	rotation.SetRotationAroundAxis(&axis, math.Pi)
 
 	point := Vec4[float32]{1, 0, 1, 1}
 	point.Transform(&rotation)
@@ -174,7 +174,7 @@ func TestMat4x4_SetAxisAngle(t *testing.T) {
 func TestMat4x4_SetAffineMat4x4(t *testing.T) {
 	axis := Vec3[float32]{0, 0, 1}
 	var rotation Mat4x4[float32]
-	rotation.SetRotateAroundAxis(&axis, math.Pi/2.0)
+	rotation.SetRotationAroundAxis(&axis, math.Pi/2.0)
 
 	var rotation2 Mat4x4[float32]
 	rotation2.SetAffineMat4x4(&rotation)
@@ -524,7 +524,7 @@ func TestMat4x4_SetRotationEulers(t *testing.T) {
 func TestMat4x4_GetAxisAngle(t *testing.T) {
 	axis := Vec3[float32]{0, 1, 0}
 	var axisAngleMat Mat4x4[float32]
-	axisAngleMat.SetRotateAroundAxis(&axis, math.Pi/2)
+	axisAngleMat.SetRotationAroundAxis(&axis, math.Pi/2)
 
 	var eulerMat Mat4x4[float32]
 	eulerMat.SetRotationEulers(math.Pi/2, 0, 0)
@@ -543,7 +543,7 @@ func TestMat4x4_GetAxisAngle(t *testing.T) {
 func TestMat4x4_SetRotationAroundAxis(t *testing.T) {
 	axis := Vec3[float32]{0, 1, 0}
 	var rotation Mat4x4[float32]
-	rotation.SetRotateAroundAxis(&axis, math.Pi)
+	rotation.SetRotationAroundAxis(&axis, math.Pi)
 
 	point := Vec4[float32]{1, 0, 1, 1}
 	point.Transform(&rotation)

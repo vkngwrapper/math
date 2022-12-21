@@ -72,7 +72,7 @@ func TestVec4_SetTransformHomogenous(t *testing.T) {
 
 func TestVec4_SetRotateWithQuaternion(t *testing.T) {
 	var quaternion Quaternion[float32]
-	quaternion.SetRotateY(math.Pi)
+	quaternion.SetRotationY(math.Pi)
 
 	input := Vec4[float32]{X: 1, Y: 3, Z: 5, W: 1}
 

@@ -114,21 +114,21 @@ func (m *Mat4x4[T]) SetFrustum(left, right, bottom, top, nearVal, farVal T) *Mat
 // SetOrientation overwrites the current matrix values with a rotation matrix which rotates
 // from the provided source vector to the provided target vector
 //
-// source - A unit vector indicating the starting direction of the rotation
+// origin - A unit vector indicating the starting direction of the rotation
 //
 // target - A unit vector indicating the target direction of the rotation
-func (m *Mat4x4[T]) SetOrientation(source *Vec3[T], target *Vec3[T]) *Mat4x4[T] {
-	if target.Equal(source, 0.0001) {
+func (m *Mat4x4[T]) SetOrientation(origin *Vec3[T], target *Vec3[T]) *Mat4x4[T] {
+	if target.Equal(origin, 0.0001) {
 		m.SetIdentity()
 		return m
 	}
 
 	var rotationAxis Vec3[T]
-	rotationAxis.SetVec3(source).CrossProduct(target)
+	rotationAxis.SetVec3(origin).CrossProduct(target)
 
-	angle := math.Acos(float64(target.DotProduct(source)))
+	angle := math.Acos(float64(target.DotProduct(origin)))
 
-	return m.SetRotateAroundAxis(&rotationAxis, angle)
+	return m.SetRotationAroundAxis(&rotationAxis, angle)
 }
 
 // SetTranslation overwrites the current matrix values with a transform matrix which translates
@@ -745,7 +745,7 @@ func (m *Mat4x4[T]) SetInterpolateMat4x4(lhs, rhs *Mat4x4[T], delta T) *Mat4x4[T
 	var deltaAngle float64
 	deltaRotation.GetAxisAngle(&deltaAxis, &deltaAngle)
 
-	m.SetRotateAroundAxis(&deltaAxis, deltaAngle).MultMat4x4(&thisRotation)
+	m.SetRotationAroundAxis(&deltaAxis, deltaAngle).MultMat4x4(&thisRotation)
 	m[3][0] = oldMatrix[3][0] + delta*(rhs[3][0]-oldMatrix[3][0])
 	m[3][1] = oldMatrix[3][1] + delta*(rhs[3][1]-oldMatrix[3][1])
 	m[3][2] = oldMatrix[3][2] + delta*(rhs[3][2]-oldMatrix[3][2])
@@ -1113,13 +1113,13 @@ func (m *Mat4x4[T]) Scale(x, y, z T) *Mat4x4[T] {
 	return m
 }
 
-// SetRotateAroundAxis overwrites the current contents of this matrix with a rotation matrix that rotates
+// SetRotationAroundAxis overwrites the current contents of this matrix with a rotation matrix that rotates
 // around the provided axis by the provided angle in radians.
 //
 // axis - A 3-element vector that is normal to the angle of rotation. It does not need to be normalized.
 //
 // angleRad - The amount to rotate in radians
-func (m *Mat4x4[T]) SetRotateAroundAxis(axis *Vec3[T], angleRad float64) *Mat4x4[T] {
+func (m *Mat4x4[T]) SetRotationAroundAxis(axis *Vec3[T], angleRad float64) *Mat4x4[T] {
 	var unitAxis Vec3[T]
 	unitAxis.SetVec3(axis).Normalize()
 
@@ -1487,7 +1487,7 @@ func (m *Mat4x4[T]) InterpolateMat4x4(otherMatrix *Mat4x4[T], delta T) *Mat4x4[T
 	var deltaAngle float64
 	deltaRotation.GetAxisAngle(&deltaAxis, &deltaAngle)
 
-	m.SetRotateAroundAxis(&deltaAxis, deltaAngle).MultMat4x4(&thisRotation)
+	m.SetRotationAroundAxis(&deltaAxis, deltaAngle).MultMat4x4(&thisRotation)
 	m[3][0] = oldMatrix[3][0] + delta*(otherMatrix[3][0]-oldMatrix[3][0])
 	m[3][1] = oldMatrix[3][1] + delta*(otherMatrix[3][1]-oldMatrix[3][1])
 	m[3][2] = oldMatrix[3][2] + delta*(otherMatrix[3][2]-oldMatrix[3][2])

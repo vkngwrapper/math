@@ -9,7 +9,7 @@ import (
 func TestMat3x3_SetMat3x3(t *testing.T) {
 	var input Mat3x3[float32]
 	axis := Vec3[float32]{X: 0.7071, Y: 0.7071, Z: 0}
-	input.SetRotateAroundAxis(&axis, math.Pi/2.0)
+	input.SetRotationAroundAxis(&axis, math.Pi/2.0)
 
 	var m Mat3x3[float32]
 	m.SetMat3x3(&input)
@@ -28,7 +28,7 @@ func TestMat3x3_SetMat3x3(t *testing.T) {
 func TestMat3x3_SetMat4x4(t *testing.T) {
 	var input Mat4x4[float32]
 	axis := Vec3[float32]{X: 0.7071, Y: 0.7071, Z: 0}
-	input.SetRotateAroundAxis(&axis, math.Pi/2.0)
+	input.SetRotationAroundAxis(&axis, math.Pi/2.0)
 
 	var m Mat3x3[float32]
 	m.SetMat4x4(&input)
@@ -179,7 +179,7 @@ func TestMat3x3_SetRotationZ(t *testing.T) {
 func TestMat3x3_SetRotationAroundAxis(t *testing.T) {
 	axis := Vec3[float32]{0, 1, 0}
 	var rotation Mat3x3[float32]
-	rotation.SetRotateAroundAxis(&axis, math.Pi)
+	rotation.SetRotationAroundAxis(&axis, math.Pi)
 
 	point := Vec3[float32]{1, 0, 1}
 	point.Transform(&rotation)

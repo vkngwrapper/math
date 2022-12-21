@@ -795,13 +795,13 @@ func (m *Mat3x3[T]) Scale(x, y, z T) *Mat3x3[T] {
 	return m
 }
 
-// SetRotateAroundAxis overwrites the current contents of this matrix with a rotation matrix that rotates
+// SetRotationAroundAxis overwrites the current contents of this matrix with a rotation matrix that rotates
 // around the provided axis by the provided angle in radians.
 //
 // axis - A 3-element vector that is normal to the angle of rotation. It does not need to be normalized.
 //
 // angleRad - The amount to rotate in radians
-func (m *Mat3x3[T]) SetRotateAroundAxis(axis *Vec3[T], angleRad float64) *Mat3x3[T] {
+func (m *Mat3x3[T]) SetRotationAroundAxis(axis *Vec3[T], angleRad float64) *Mat3x3[T] {
 	var unitAxis Vec3[T]
 	unitAxis.SetVec3(axis).Normalize()
 

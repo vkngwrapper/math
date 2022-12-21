@@ -2,10 +2,13 @@ package math
 
 import "math"
 
+// Quaternion is a 4-element vector that represents a 3d rotation in a way that is immune
+// to gimbal lock
 type Quaternion[T FloatingPoint] struct {
 	X, Y, Z, W T
 }
 
+// SetIdentity overwrites the contents of this quaternion with the identity quaternion
 func (q *Quaternion[T]) SetIdentity() *Quaternion[T] {
 	q.X = 0
 	q.Y = 0
@@ -15,17 +18,30 @@ func (q *Quaternion[T]) SetIdentity() *Quaternion[T] {
 	return q
 }
 
-func (q *Quaternion[T]) SetAxisAngle(axis *Vec3[T], angle T) *Quaternion[T] {
+// SetRotationAroundAxis overwrites the current contents of this quaternion with a quaternion that rotates
+// around the provided axis by the provided angle in radians.
+//
+// axis - A 3-element vector that is normal to the angle of rotation. It does not need to be normalized.
+//
+// angleRad - The amount to rotate in radians
+func (q *Quaternion[T]) SetRotationAroundAxis(axis *Vec3[T], angle T) *Quaternion[T] {
+	var unitAxis Vec3[T]
+	unitAxis.SetVec3(axis).Normalize()
+
 	s := T(math.Sin(float64(angle * 0.5)))
-	q.X = axis.X * s
-	q.Y = axis.Y * s
-	q.Z = axis.Z * s
+	q.X = unitAxis.X * s
+	q.Y = unitAxis.Y * s
+	q.Z = unitAxis.Z * s
 	q.W = T(math.Cos(float64(angle * 0.5)))
 
 	return q
 }
 
-func (q *Quaternion[T]) SetRotateX(angle T) *Quaternion[T] {
+// SetRotationX overwrites the current contents of this quaternion with a quaternion that
+// rotates around the x axis by the specified amount
+//
+// pitchRad - The angle to rotate around the x axis in radians
+func (q *Quaternion[T]) SetRotationX(angle T) *Quaternion[T] {
 	q.X = T(math.Sin(float64(angle * 0.5)))
 	q.Y = 0
 	q.Z = 0
@@ -34,7 +50,11 @@ func (q *Quaternion[T]) SetRotateX(angle T) *Quaternion[T] {
 	return q
 }
 
-func (q *Quaternion[T]) SetRotateY(angle T) *Quaternion[T] {
+// SetRotationY overwrites the current contents of this quaternion with a quaternion that
+// rotates around the y axis by the specified amount
+//
+// yawRad - The angle to rotate around the y axis in radians
+func (q *Quaternion[T]) SetRotationY(angle T) *Quaternion[T] {
 	q.X = 0
 	q.Y = T(math.Sin(float64(angle * 0.5)))
 	q.Z = 0
@@ -43,7 +63,11 @@ func (q *Quaternion[T]) SetRotateY(angle T) *Quaternion[T] {
 	return q
 }
 
-func (q *Quaternion[T]) SetRotateZ(angle T) *Quaternion[T] {
+// SetRotationZ overwrites the current contents of this quaternion with a quaternion that
+// rotates around the z axis by the specified amount
+//
+// rollRad - The angle to rotate around the z axis in radians
+func (q *Quaternion[T]) SetRotationZ(angle T) *Quaternion[T] {
 	q.X = 0
 	q.Y = 0
 	q.Z = T(math.Sin(float64(angle * 0.5)))
@@ -52,8 +76,14 @@ func (q *Quaternion[T]) SetRotateZ(angle T) *Quaternion[T] {
 	return q
 }
 
-func (q *Quaternion[T]) SetVectorRotation(origin *Vec3[T], destination *Vec3[T]) *Quaternion[T] {
-	cosTheta := origin.DotProduct(destination)
+// SetOrientation overwrites the current quaternion with a quaternion which rotates
+// from the provided source vector to the provided target vector
+//
+// origin - A unit vector indicating the starting direction of the rotation
+//
+// target - A unit vector indicating the target direction of the rotation
+func (q *Quaternion[T]) SetOrientation(origin *Vec3[T], target *Vec3[T]) *Quaternion[T] {
+	cosTheta := origin.DotProduct(target)
 
 	if cosTheta >= 0.9999 {
 		q.X = 0
@@ -80,7 +110,7 @@ func (q *Quaternion[T]) SetVectorRotation(origin *Vec3[T], destination *Vec3[T])
 	}
 
 	var rotationAxis Vec3[T]
-	rotationAxis.SetCrossProduct(origin, destination)
+	rotationAxis.SetCrossProduct(origin, target)
 
 	lengthSquared := (1.0 + cosTheta) * 2.0
 	length := T(math.Sqrt(float64(lengthSquared)))
@@ -94,6 +124,9 @@ func (q *Quaternion[T]) SetVectorRotation(origin *Vec3[T], destination *Vec3[T])
 	return q
 }
 
+// SetQuaternion overwrites the current quaternion with the contents of the provided quaternion
+//
+// other - The quaternion to initialize from
 func (q *Quaternion[T]) SetQuaternion(other *Quaternion[T]) *Quaternion[T] {
 	q.X = other.X
 	q.Y = other.Y
@@ -103,6 +136,9 @@ func (q *Quaternion[T]) SetQuaternion(other *Quaternion[T]) *Quaternion[T] {
 	return q
 }
 
+// SetMat3x3 overwrites the current quaternion with the rotation of a provided transform matrix
+//
+// m - The transform matrix to initialize from
 func (q *Quaternion[T]) SetMat3x3(m *Mat3x3[T]) *Quaternion[T] {
 	fourXSquaredMinus1 := m[0][0] - m[1][1] - m[2][2]
 	fourYSquaredMinus1 := m[1][1] - m[0][0] - m[2][2]
@@ -161,6 +197,9 @@ func (q *Quaternion[T]) SetMat3x3(m *Mat3x3[T]) *Quaternion[T] {
 	}
 }
 
+// SetMat4x4 overwrites the current quaternion with the rotation of a provided transform matrix
+//
+// m - The transform matrix to initialize from
 func (q *Quaternion[T]) SetMat4x4(m *Mat4x4[T]) *Quaternion[T] {
 	fourXSquaredMinus1 := m[0][0] - m[1][1] - m[2][2]
 	fourYSquaredMinus1 := m[1][1] - m[0][0] - m[2][2]
@@ -219,6 +258,17 @@ func (q *Quaternion[T]) SetMat4x4(m *Mat4x4[T]) *Quaternion[T] {
 	}
 }
 
+// SetIntermediate overwrites the current quaternion with a SQUAD control point quaternion for
+// the control point corresponding to the 'current' rotation keyframe. This control point is
+// used as an input for the SetSquad method.
+//
+// prev - The keyframe before 'current' - this may be the same as 'current' when 'current' is the
+// first keyframe in a path
+//
+// current - The keyframe we are attempting to retrieve the control point for
+//
+// next - The keyframe after 'current' - this may be the same as 'current' when 'current' is the last
+// keyframe in a path
 func (q *Quaternion[T]) SetIntermediate(prev *Quaternion[T], current *Quaternion[T], next *Quaternion[T]) *Quaternion[T] {
 	var inverseCurrent Quaternion[T]
 	inverseCurrent.SetQuaternion(current).Inverse()
@@ -239,6 +289,16 @@ func (q *Quaternion[T]) SetIntermediate(prev *Quaternion[T], current *Quaternion
 	return q
 }
 
+// SetMix performs an oriented spherical linear interpolation at constant speed between two quaternions
+// and overwrites the current quaternion with the result.
+//
+// lhs - The origin quaternion in the interpolation
+//
+// rhs - The target quaternion in the interpolation
+//
+// delta - The mix factor between the two quaternions- this can be any value: between 0 and 1,
+// the interpolation will move linearly from the lhs to the rhs quaternion. Beyond those bounds,
+// the interpolation oscillates between the two values
 func (q *Quaternion[T]) SetMix(lhs, rhs *Quaternion[T], delta T) *Quaternion[T] {
 	cosTheta := lhs.DotProduct(rhs)
 
@@ -265,22 +325,24 @@ func (q *Quaternion[T]) SetMix(lhs, rhs *Quaternion[T], delta T) *Quaternion[T] 
 	return q
 }
 
-func (q *Quaternion[T]) SetShortMix(lhs, rhs *Quaternion[T], delta T) *Quaternion[T] {
-	if delta <= 0 {
-		return q
-	} else if delta >= 1 {
-		q.X = rhs.X
-		q.Y = rhs.Y
-		q.Z = rhs.Z
-		q.W = rhs.W
-		return q
-	}
+// SetSlerp performs a spherical linear interpolation at constant speed between two quaternions
+// and overwrites the current quaternion with the result.
+//
+// lhs - The origin quaternion in the interpolation
+//
+// rhs - The target quaternion in the interpolation
+//
+// delta - The mix factor between the two quaternions- this can be any value: between 0 and 1,
+// the interpolation will move linearly from the lhs to the rhs quaternion. Beyond those bounds,
+// the interpolation oscillates between the two values
+func (q *Quaternion[T]) SetSlerp(lhs, rhs *Quaternion[T], delta T) *Quaternion[T] {
 
 	var rhs2 Quaternion[T]
 	rhs2.SetQuaternion(rhs)
 
 	cos := lhs.DotProduct(rhs)
 
+	// If cos < 0, the interpolation will take the long way around the sphere
 	if cos < 0 {
 		rhs2.X = -rhs2.X
 		rhs2.Y = -rhs2.Y
@@ -289,43 +351,8 @@ func (q *Quaternion[T]) SetShortMix(lhs, rhs *Quaternion[T], delta T) *Quaternio
 		cos = -cos
 	}
 
-	var k0, k1 T
-	if cos > 0.9999 {
-		k0 = 1.0 - delta
-		k1 = delta
-	} else {
-		sin := T(math.Sqrt(float64(1.0 - cos*cos)))
-		angle := T(math.Atan2(float64(sin), float64(cos)))
-		oneOverSin := 1.0 / sin
-		k0 = T(math.Sin(float64((1.0-delta)*angle))) * oneOverSin
-		k1 = T(math.Sin(float64(delta*angle))) * oneOverSin
-	}
-
-	q.X = k0*lhs.X + k1*rhs2.X
-	q.Y = k0*lhs.Y + k1*rhs2.Y
-	q.Z = k0*lhs.Z + k1*rhs2.Z
-	q.W = k0*lhs.W + k1*rhs2.W
-
-	return q
-}
-
-func (q *Quaternion[T]) SetSlerp(lhs, rhs *Quaternion[T], delta T) *Quaternion[T] {
-	cosTheta := lhs.DotProduct(rhs)
-
-	var tmpRHS Quaternion[T]
-	tmpRHS.SetQuaternion(rhs)
-
-	// If cosTheta < 0, the interpolation will take the long way around the sphere
-	if cosTheta < 0 {
-		tmpRHS.X = -tmpRHS.X
-		tmpRHS.Y = -tmpRHS.Y
-		tmpRHS.Z = -tmpRHS.Z
-		tmpRHS.W = -tmpRHS.W
-		cosTheta = -cosTheta
-	}
-
 	// Perform linear interpolation when costheta is close to 1
-	if cosTheta > 0.9999 {
+	if cos > 0.9999 {
 		q.X = mix[T](lhs.X, rhs.X, delta)
 		q.Y = mix[T](lhs.Y, rhs.Y, delta)
 		q.Z = mix[T](lhs.Z, rhs.Z, delta)
@@ -333,7 +360,7 @@ func (q *Quaternion[T]) SetSlerp(lhs, rhs *Quaternion[T], delta T) *Quaternion[T
 		return q
 	}
 
-	angle := T(math.Acos(float64(cosTheta)))
+	angle := T(math.Acos(float64(cos)))
 	qFactor := T(math.Sin(float64((1.0 - delta) * angle)))
 	otherFactor := T(math.Sin(float64(delta * angle)))
 	inverseFactor := 1.0 / T(math.Sin(float64(angle)))
@@ -346,6 +373,14 @@ func (q *Quaternion[T]) SetSlerp(lhs, rhs *Quaternion[T], delta T) *Quaternion[T
 	return q
 }
 
+// SetLerp performs a linear interpolation between two quaternions at non-constant speed and overwrites
+// this quaternion with the result.
+//
+// lhs - The origin quaternion in the interpolation
+//
+// rhs - The target quaternion in the interpolation
+//
+// delta - The mix factor between the two quaternions and must be a value between 0 and 1
 func (q *Quaternion[T]) SetLerp(lhs, rhs *Quaternion[T], delta T) *Quaternion[T] {
 	q.X = lhs.X*(1-delta) + (rhs.X * delta)
 	q.Y = lhs.Y*(1-delta) + (rhs.Y * delta)
@@ -355,6 +390,12 @@ func (q *Quaternion[T]) SetLerp(lhs, rhs *Quaternion[T], delta T) *Quaternion[T]
 	return q.Normalize()
 }
 
+// SetMultQuaternion multiplies two quaternions together and overwrites the current contents
+// of this quaternion with the results.
+//
+// lhs - The left operand of the multiplication operation
+//
+// rhs - The right operand of the multiplication operation
 func (q *Quaternion[T]) SetMultQuaternion(lhs, rhs *Quaternion[T]) *Quaternion[T] {
 	q.X = lhs.W*rhs.X + lhs.X*rhs.W + lhs.Y*rhs.Z - lhs.Z*rhs.Y
 	q.Y = lhs.W*rhs.Y + lhs.Y*rhs.W + lhs.Z*rhs.X - lhs.X*rhs.Z
@@ -364,18 +405,39 @@ func (q *Quaternion[T]) SetMultQuaternion(lhs, rhs *Quaternion[T]) *Quaternion[T
 	return q
 }
 
-func (q *Quaternion[T]) SetSquad(q1, q2, s1, s2 *Quaternion[T], delta T) *Quaternion[T] {
+// SetSquad interpolates between two keyframes of a SQUAD (Spherical Quadrangle Interpolation)
+// path/animation. It accepts two keyframes, and the control point quaternions that correspond to those
+// keyframes, and produces a spline interpolation between the two keyframes.
+//
+// keyframe1 - The first keyframe rotation to interpolate between
+//
+// keyframe2 - The second keyframe rotation to interpolate between
+//
+// control1 - The control point corresponding to the first keyframe. Can be produced with SetIntermediate
+//
+// control2 - The control point corresponding to the second keyframe. Can be produced with SetIntermediate
+//
+// delta - A value between 0 and 1 indicating how far to interpolate between the two keyframes
+func (q *Quaternion[T]) SetSquad(keyframe1, keyframe2, control1, control2 *Quaternion[T], delta T) *Quaternion[T] {
 	var qComponent, sComponent Quaternion[T]
 
-	qComponent.SetMix(q1, q2, delta)
-	sComponent.SetMix(s1, s2, delta)
+	qComponent.SetMix(keyframe1, keyframe2, delta)
+	sComponent.SetMix(control1, control2, delta)
 
 	finalDelta := 2.0 * (1 - delta) * delta
 
 	return q.SetMix(&qComponent, &sComponent, finalDelta)
 }
 
-func (q *Quaternion[T]) SetEulerAngles(rollRad, yawRad, pitchRad float64) *Quaternion[T] {
+// SetRotationEulers overwrites the current contents of this quaternion with quaternion
+// that rotates first by yaw (y rotation), then by pitch (x rotation), and then by roll (z rotation)
+//
+// yawRad - Angle to rotate yaw in radians
+//
+// pitchRad - Angle to rotate pitch in radians
+//
+// rollRad - Angle to rotate roll in radians
+func (q *Quaternion[T]) SetRotationEulers(rollRad, yawRad, pitchRad float64) *Quaternion[T] {
 	yawCos := T(math.Cos(yawRad * 0.5))
 	yawSin := T(math.Sin(yawRad * 0.5))
 	pitchCos := T(math.Cos(pitchRad * 0.5))
@@ -391,6 +453,10 @@ func (q *Quaternion[T]) SetEulerAngles(rollRad, yawRad, pitchRad float64) *Quate
 	return q
 }
 
+// SetConjugate overwrites the contents of this quaternion with the conjugate of a provided
+// quaternion.
+//
+// other - The quaternion to conjugate
 func (q *Quaternion[T]) SetConjugate(other *Quaternion[T]) *Quaternion[T] {
 	q.X = -other.X
 	q.Y = -other.Y
@@ -400,6 +466,7 @@ func (q *Quaternion[T]) SetConjugate(other *Quaternion[T]) *Quaternion[T] {
 	return q
 }
 
+// Angle retrieves the scalar angle of rotation, in radians, of the quaternion's axis-angle formulation
 func (q *Quaternion[T]) Angle() T {
 	if abs[T](q.W) > cosOneOverTwo[T]() {
 		quatLen := T(math.Sqrt(float64(q.X*q.X + q.Y*q.Y + q.Z*q.Z)))
@@ -409,6 +476,9 @@ func (q *Quaternion[T]) Angle() T {
 	return T(math.Acos(float64(q.W))) * 2
 }
 
+// GetAxis retrieves the vector axis of rotation of the quaternion's axis-angle formulation
+//
+// outAxis - A pointer to a 3-element vector to populate with the axis data
 func (q *Quaternion[T]) GetAxis(outAxis *Vec3[T]) {
 	tmp1 := T(1.0) - q.W*q.W
 
@@ -427,15 +497,19 @@ func (q *Quaternion[T]) GetAxis(outAxis *Vec3[T]) {
 	outAxis.Z = q.Z * tmp2
 }
 
+// EulerAngles retrieves the scalar rotations, in radians, of the quaternion's
+// euler angles
 func (q *Quaternion[T]) EulerAngles() (yaw, pitch, roll T) {
 	return q.Yaw(), q.Pitch(), q.Roll()
 }
 
+// Yaw retrieves the scalar rotation, in radians, of the quaternion's euler yaw
 func (q *Quaternion[T]) Yaw() T {
 	unclamped := (q.X*q.Z - q.W*q.Y) * -2
 	return T(math.Asin(float64(clamp[T](unclamped, -1, 1))))
 }
 
+// Pitch retrieves the scalar rotation, in radians, of the quaternion's euler pitch
 func (q *Quaternion[T]) Pitch() T {
 	y := (q.Y*q.Z + q.W*q.X) * 2
 	x := q.W*q.W - q.X*q.X - q.Y*q.Y + q.Z*q.Z
@@ -447,6 +521,7 @@ func (q *Quaternion[T]) Pitch() T {
 	return T(math.Atan2(float64(y), float64(x)))
 }
 
+// Roll retrieves the scalar rotation, in radians, of the quaternion's euler roll
 func (q *Quaternion[T]) Roll() T {
 	y := 2 * (q.X*q.Y + q.W*q.Z)
 	x := q.W*q.W + q.X*q.X - q.Y*q.Y - q.Z*q.Z
@@ -454,15 +529,19 @@ func (q *Quaternion[T]) Roll() T {
 	return T(math.Atan2(float64(y), float64(x)))
 }
 
+// Len retrieves the square root of the quaternion's dot product with itself
 func (q *Quaternion[T]) Len() T {
 	sqr := float64(q.X*q.X + q.Y*q.Y + q.Z*q.Z + q.W*q.W)
 	return T(math.Sqrt(sqr))
 }
 
+// LenSqr retrieves the quaternion's dot product with itself
 func (q *Quaternion[T]) LenSqr() T {
 	return q.X*q.X + q.Y*q.Y + q.Z*q.Z + q.W*q.W
 }
 
+// Conjugate calculates the conjugate of the current quaternion and updates the quaternion
+// to that conjugate
 func (q *Quaternion[T]) Conjugate() *Quaternion[T] {
 	q.X = -q.X
 	q.Y = -q.Y
@@ -471,6 +550,8 @@ func (q *Quaternion[T]) Conjugate() *Quaternion[T] {
 	return q
 }
 
+// Exp calculates the exponent of the current quaternion and updates the quaternion
+// to that exponent. The exponent is the inverse of the logarithm.
 func (q *Quaternion[T]) Exp() *Quaternion[T] {
 	angle := T(math.Sqrt(float64(q.X*q.X + q.Y*q.Y + q.Z*q.Z)))
 	if angle < 0.0001 {
@@ -493,6 +574,8 @@ func (q *Quaternion[T]) Exp() *Quaternion[T] {
 	return q
 }
 
+// Log calculates the logarithm of the current quaternion and updates the quaternion
+// to that logarithm. The logarithm is the inverse of the exponent.
 func (q *Quaternion[T]) Log() *Quaternion[T] {
 	lenSquared := q.LenSqr()
 	quatLen := T(math.Sqrt(float64(lenSquared)))
@@ -530,6 +613,13 @@ func (q *Quaternion[T]) Log() *Quaternion[T] {
 	return q
 }
 
+// Pow raises the current quaternion to a provided power and updates the quaternion to the
+// calculated quaternion. Pow is understood in terms of the quaternion multiplication operation,
+// so squaring a quaternion is the same as multiplying a quaternion against itself, cubing a
+// quaternion is the same as multiplying it against its square, and so forth.
+//
+// y - A scalar value indicating the power to raise the quaternion to. Can be any value, a quaternion
+// raised to the 0th power is the identity quaternion.
 func (q *Quaternion[T]) Pow(y T) *Quaternion[T] {
 	if abs[T](y) < 0.0001 {
 		q.X = 0
@@ -570,6 +660,7 @@ func (q *Quaternion[T]) Pow(y T) *Quaternion[T] {
 	return q
 }
 
+// Normalize updates the current quaternion to be a unit quaternion
 func (q *Quaternion[T]) Normalize() *Quaternion[T] {
 	oneOverLen := 1.0 / q.Len()
 
@@ -581,6 +672,8 @@ func (q *Quaternion[T]) Normalize() *Quaternion[T] {
 	return q
 }
 
+// Inverse updates the current quaternion to be its own inverse. For unit quaternions,
+// this is the same as the conjugate, but is less performant in order to cover non-unit cases.
 func (q *Quaternion[T]) Inverse() *Quaternion[T] {
 	inverseDotProduct := 1.0 / (q.X*q.X + q.Y*q.Y + q.Z*q.Z + q.W*q.W)
 	q.X = -q.X * inverseDotProduct
@@ -591,6 +684,14 @@ func (q *Quaternion[T]) Inverse() *Quaternion[T] {
 	return q
 }
 
+// Mix performs an oriented spherical linear interpolation at constant speed between this quaternion
+// and another provided quaternion and updates this quaternion to the result
+//
+// other - The target quaternion in the interpolation
+//
+// delta - The mix factor between the two quaternions- this can be any value: between 0 and 1,
+// the interpolation will move linearly from this quaternion to the other quaternion. Beyond those bounds,
+// the interpolation oscillates between the two values
 func (q *Quaternion[T]) Mix(other *Quaternion[T], delta T) *Quaternion[T] {
 	cosTheta := q.DotProduct(other)
 
@@ -619,50 +720,14 @@ func (q *Quaternion[T]) Mix(other *Quaternion[T], delta T) *Quaternion[T] {
 	return q
 }
 
-func (q *Quaternion[T]) ShortMix(other *Quaternion[T], delta T) *Quaternion[T] {
-	if delta <= 0 {
-		return q
-	} else if delta >= 1 {
-		q.X = other.X
-		q.Y = other.Y
-		q.Z = other.Z
-		q.W = other.W
-		return q
-	}
-
-	var other2 Quaternion[T]
-	other2.SetQuaternion(other)
-
-	cos := q.DotProduct(other)
-
-	if cos < 0 {
-		other2.X = -other2.X
-		other2.Y = -other2.Y
-		other2.Z = -other2.Z
-		other2.W = -other2.W
-		cos = -cos
-	}
-
-	var k0, k1 T
-	if cos > 0.9999 {
-		k0 = 1.0 - delta
-		k1 = delta
-	} else {
-		sin := T(math.Sqrt(float64(1.0 - cos*cos)))
-		angle := T(math.Atan2(float64(sin), float64(cos)))
-		oneOverSin := 1.0 / sin
-		k0 = T(math.Sin(float64((1.0-delta)*angle))) * oneOverSin
-		k1 = T(math.Sin(float64(delta*angle))) * oneOverSin
-	}
-
-	q.X = k0*q.X + k1*other2.X
-	q.Y = k0*q.Y + k1*other2.Y
-	q.Z = k0*q.Z + k1*other2.Z
-	q.W = k0*q.W + k1*other2.W
-
-	return q
-}
-
+// Slerp performs a spherical linear interpolation at constant speed between this quaternion and another
+// provided quaternion and updates this quaternion with the result
+//
+// other - The target quaternion in the interpolation
+//
+// delta - The mix factor between the two quaternions- this can be any value: between 0 and 1,
+// the interpolation will move linearly from this quaternion to the other quaternion. Beyond those bounds,
+// the interpolation oscillates between the two values
 func (q *Quaternion[T]) Slerp(other *Quaternion[T], delta T) *Quaternion[T] {
 	cosTheta := q.DotProduct(other)
 
@@ -700,6 +765,12 @@ func (q *Quaternion[T]) Slerp(other *Quaternion[T], delta T) *Quaternion[T] {
 	return q
 }
 
+// Lerp performs a linear interpolation between this quaternion and another provided quaternion
+// at non-constant speed and updates this quaternion with the result.
+//
+// other - The target quaternion in the interpolation
+//
+// delta - The mix factor between the two quaternions, must be a value between 0 and 1
 func (q *Quaternion[T]) Lerp(other *Quaternion[T], delta T) *Quaternion[T] {
 	q.X = q.X*(1-delta) + (other.X * delta)
 	q.Y = q.Y*(1-delta) + (other.Y * delta)
@@ -709,6 +780,9 @@ func (q *Quaternion[T]) Lerp(other *Quaternion[T], delta T) *Quaternion[T] {
 	return q.Normalize()
 }
 
+// RotateX applies a rotation to this quaternion that rotates around the x axis by the specified amount
+//
+// angleRad - The angle to rotate around the x axis in radians
 func (q *Quaternion[T]) RotateX(angleRad float64) *Quaternion[T] {
 	sin := T(math.Sin(angleRad * 0.5))
 	cos := T(math.Cos(angleRad * 0.5))
@@ -726,6 +800,9 @@ func (q *Quaternion[T]) RotateX(angleRad float64) *Quaternion[T] {
 	return q
 }
 
+// RotateY applies a rotation to this quaternion that rotates around the y axis by the specified amount
+//
+// angleRad - The angle to rotate around the y axis in radians
 func (q *Quaternion[T]) RotateY(angleRad float64) *Quaternion[T] {
 	sin := T(math.Sin(angleRad * 0.5))
 	cos := T(math.Cos(angleRad * 0.5))
@@ -743,6 +820,9 @@ func (q *Quaternion[T]) RotateY(angleRad float64) *Quaternion[T] {
 	return q
 }
 
+// RotateZ applies a rotation to this quaternion that rotates around the z axis by the specified amount
+//
+// angleRad - The angle to rotate around the z axis in radians
 func (q *Quaternion[T]) RotateZ(angleRad float64) *Quaternion[T] {
 	sin := T(math.Sin(angleRad * 0.5))
 	cos := T(math.Cos(angleRad * 0.5))
@@ -760,7 +840,16 @@ func (q *Quaternion[T]) RotateZ(angleRad float64) *Quaternion[T] {
 	return q
 }
 
-func (q *Quaternion[T]) RotateNormalizedAxis(unitAxis *Vec3[T], angleRad float64) *Quaternion[T] {
+// RotateAroundAxis rotates this quaternion by applying a rotation around the provided axis by the
+// provided angle in radians
+//
+// axis - A 3-element vector that is normal to the angle of rotation. It does not need to be normalized.
+//
+// angleRad - The amount to rotate in radians
+func (q *Quaternion[T]) RotateAroundAxis(axis *Vec3[T], angleRad float64) *Quaternion[T] {
+	var unitAxis Vec3[T]
+	unitAxis.SetVec3(axis).Normalize()
+
 	sin := T(math.Sin(angleRad * 0.5))
 
 	angleAxisQuat := Quaternion[T]{
@@ -773,22 +862,10 @@ func (q *Quaternion[T]) RotateNormalizedAxis(unitAxis *Vec3[T], angleRad float64
 	return q.MultQuaternion(&angleAxisQuat)
 }
 
-func (q *Quaternion[T]) Rotate(axis *Vec3[T], angleRad float64) *Quaternion[T] {
-	axisLen := axis.Len()
-
-	var unitAxis Vec3[T]
-	unitAxis.SetVec3(axis)
-
-	if abs[T](axisLen-1.0) > 0.0001 {
-		oneOverLen := 1.0 / axisLen
-		unitAxis.X *= oneOverLen
-		unitAxis.Y *= oneOverLen
-		unitAxis.Z *= oneOverLen
-	}
-
-	return q.RotateNormalizedAxis(&unitAxis, angleRad)
-}
-
+// MultQuaternion multiplies this quaternion with a provided quaternion and updates this quaternion
+// with the result
+//
+// other - The quaternion to use as the right operand in the multiplication operation
 func (q *Quaternion[T]) MultQuaternion(other *Quaternion[T]) *Quaternion[T] {
 	x := q.W*other.X + q.X*other.W + q.Y*other.Z - q.Z*other.Y
 	y := q.W*other.Y + q.Y*other.W + q.Z*other.X - q.X*other.Z
@@ -803,10 +880,19 @@ func (q *Quaternion[T]) MultQuaternion(other *Quaternion[T]) *Quaternion[T] {
 	return q
 }
 
+// DotProduct calculates and returns the dot product of this quaternion with another provided quaternion
+//
+// other - The quaternion to use as the right operand in the dot product operation
 func (q *Quaternion[T]) DotProduct(other *Quaternion[T]) T {
 	return q.X*other.X + q.Y*other.Y + q.Z*other.Z + q.W*other.W
 }
 
+// Equal returns true if every entry in this quaternion is equal to every entry in the provided quaternion
+//
+// other - The quaternion to compare this quaternion to
+//
+// epsilon - The epsilon value to use in floating point comparisons. This much floating point
+// drift is permitted before the method returns false. 0.0001 is a common epsilon value
 func (q *Quaternion[T]) Equal(other *Quaternion[T], epsilon T) bool {
 	xDiff := abs[T](q.X - other.X)
 	yDiff := abs[T](q.Y - other.Y)
@@ -814,20 +900,4 @@ func (q *Quaternion[T]) Equal(other *Quaternion[T], epsilon T) bool {
 	wDiff := abs[T](q.W - other.W)
 
 	return xDiff < epsilon && yDiff < epsilon && zDiff < epsilon && wDiff < epsilon
-}
-
-func (q *Quaternion[T]) GreaterThan(other *Quaternion[T]) bool {
-	return q.X > other.X && q.Y > other.Y && q.Z > other.Z && q.W > other.W
-}
-
-func (q *Quaternion[T]) GreaterThanEqual(other *Quaternion[T]) bool {
-	return q.X >= other.X && q.Y >= other.Y && q.Z >= other.Z && q.W >= other.W
-}
-
-func (q *Quaternion[T]) LessThan(other *Quaternion[T]) bool {
-	return q.X < other.X && q.Y < other.Y && q.Z < other.Z && q.W < other.W
-}
-
-func (q *Quaternion[T]) LessThanEqual(other *Quaternion[T]) bool {
-	return q.X <= other.X && q.Y <= other.Y && q.Z <= other.Z && q.W <= other.W
 }

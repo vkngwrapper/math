@@ -87,7 +87,7 @@ func TestQuaternion_RotateZ_CounterClockwise(t *testing.T) {
 func TestQuaternion_Rotate(t *testing.T) {
 	var quat Quaternion[float32]
 	quat.SetIdentity()
-	quat.Rotate(&Vec3[float32]{1, 1, 0}, math.Pi)
+	quat.RotateAroundAxis(&Vec3[float32]{1, 1, 0}, math.Pi)
 
 	vec := Vec3[float32]{-1, 1, 0}
 	vec.RotateWithQuaternion(&quat)
@@ -117,7 +117,7 @@ func TestQuaternion_EulerAngles(t *testing.T) {
 
 func TestQuaternion_SetLerp(t *testing.T) {
 	var quat1 Quaternion[float32]
-	quat1.SetRotateY(math.Pi)
+	quat1.SetRotationY(math.Pi)
 
 	var quat2 Quaternion[float32]
 	quat2.SetQuaternion(&quat1).RotateZ(math.Pi)
@@ -148,7 +148,7 @@ func TestQuaternion_SetLerp(t *testing.T) {
 
 func TestQuaternion_Lerp(t *testing.T) {
 	var quat1 Quaternion[float32]
-	quat1.SetRotateY(math.Pi)
+	quat1.SetRotationY(math.Pi)
 
 	var quat2 Quaternion[float32]
 	quat2.SetQuaternion(&quat1).RotateZ(math.Pi)
@@ -182,7 +182,7 @@ func TestQuaternion_SetVectorRotation_Corner(t *testing.T) {
 	dest := Vec3[float32]{X: 0, Y: 0, Z: 1}
 
 	var quat Quaternion[float32]
-	quat.SetVectorRotation(&origin, &dest)
+	quat.SetOrientation(&origin, &dest)
 
 	var replayDest Vec3[float32]
 	replayDest.SetRotateWithQuaternion(&origin, &quat)
@@ -196,7 +196,7 @@ func TestQuaternion_SetVectorRotation_Line(t *testing.T) {
 	dest := Vec3[float32]{X: -1, Y: 0, Z: 0}
 
 	var quat Quaternion[float32]
-	quat.SetVectorRotation(&origin, &dest)
+	quat.SetOrientation(&origin, &dest)
 
 	var replayDest Vec3[float32]
 	replayDest.SetRotateWithQuaternion(&origin, &quat)
@@ -210,7 +210,7 @@ func TestQuaternion_Inverse(t *testing.T) {
 	dest := Vec3[float32]{X: 0, Y: 0, Z: 1}
 
 	var quat Quaternion[float32]
-	quat.SetVectorRotation(&origin, &dest).Inverse()
+	quat.SetOrientation(&origin, &dest).Inverse()
 
 	var replayOrigin Vec3[float32]
 	replayOrigin.SetRotateWithQuaternion(&dest, &quat)
@@ -222,7 +222,7 @@ func TestQuaternion_Inverse(t *testing.T) {
 func TestQuaternion_SetAxisAngle(t *testing.T) {
 	axis := Vec3[float32]{X: 0, Y: 1, Z: 0}
 	var quat Quaternion[float32]
-	quat.SetAxisAngle(&axis, math.Pi)
+	quat.SetRotationAroundAxis(&axis, math.Pi)
 
 	vec := Vec3[float32]{X: 1, Y: 0, Z: 0}
 	vec.RotateWithQuaternion(&quat)
@@ -242,10 +242,10 @@ func TestQuaternion_SetAxisAngle(t *testing.T) {
 
 func TestQuaternion_DotProduct(t *testing.T) {
 	var quat1 Quaternion[float32]
-	quat1.SetRotateX(math.Pi / 2.0).Normalize()
+	quat1.SetRotationX(math.Pi / 2.0).Normalize()
 
 	var quat2 Quaternion[float32]
-	quat2.SetRotateX(3.0 * math.Pi / 2.0).Normalize()
+	quat2.SetRotationX(3.0 * math.Pi / 2.0).Normalize()
 
 	cosDiff := quat1.DotProduct(&quat2)
 	require.InDelta(t, math.Pi, math.Acos(float64(cosDiff))*2.0, 0.0001)
@@ -295,9 +295,9 @@ func TestQuaternion_SetMat4x4(t *testing.T) {
 
 func TestQuaternion_MultQuaternion(t *testing.T) {
 	var q1, q2, q3 Quaternion[float32]
-	q1.SetRotateX(math.Pi / 4.0)
-	q2.SetRotateX(math.Pi / 4.0)
-	q3.SetRotateX(math.Pi / 2.0)
+	q1.SetRotationX(math.Pi / 4.0)
+	q2.SetRotationX(math.Pi / 4.0)
+	q3.SetRotationX(math.Pi / 2.0)
 
 	q1.MultQuaternion(&q2)
 
@@ -306,19 +306,19 @@ func TestQuaternion_MultQuaternion(t *testing.T) {
 
 func TestQuaternion_MultQuaternion_TwoPart(t *testing.T) {
 	var q1, q2, mult, expected Quaternion[float32]
-	q1.SetRotateY(math.Pi / 2.0)
-	q2.SetRotateX(math.Pi / 2.0)
+	q1.SetRotationY(math.Pi / 2.0)
+	q2.SetRotationX(math.Pi / 2.0)
 
 	mult.SetMultQuaternion(&q1, &q2)
 
-	expected.SetRotateY(math.Pi / 2.0).RotateX(math.Pi / 2.0)
+	expected.SetRotationY(math.Pi / 2.0).RotateX(math.Pi / 2.0)
 
 	require.True(t, expected.Equal(&mult, 0.0001))
 }
 
 func TestQuaternion_SetEulerAngles(t *testing.T) {
 	var eulers Quaternion[float32]
-	eulers.SetEulerAngles(math.Pi/2.0, math.Pi/4.0, math.Pi)
+	eulers.SetRotationEulers(math.Pi/2.0, math.Pi/4.0, math.Pi)
 
 	vec := Vec3[float32]{X: 1, Y: 0, Z: 0}
 	vec.RotateWithQuaternion(&eulers)
@@ -330,7 +330,7 @@ func TestQuaternion_SetEulerAngles(t *testing.T) {
 
 func TestQuaternion_SetConjugate(t *testing.T) {
 	var eulers Quaternion[float32]
-	eulers.SetEulerAngles(math.Pi/2.0, math.Pi/4.0, math.Pi)
+	eulers.SetRotationEulers(math.Pi/2.0, math.Pi/4.0, math.Pi)
 
 	var inverse Quaternion[float32]
 	inverse.SetConjugate(&eulers)
@@ -346,7 +346,7 @@ func TestQuaternion_SetConjugate(t *testing.T) {
 
 func TestQuaternion_Conjugate(t *testing.T) {
 	var eulers Quaternion[float32]
-	eulers.SetEulerAngles(math.Pi/2.0, math.Pi/4.0, math.Pi)
+	eulers.SetRotationEulers(math.Pi/2.0, math.Pi/4.0, math.Pi)
 
 	var inverse Quaternion[float32]
 	inverse.SetQuaternion(&eulers).Conjugate()
@@ -362,7 +362,7 @@ func TestQuaternion_Conjugate(t *testing.T) {
 
 func TestQuaternion_Log(t *testing.T) {
 	var yRot Quaternion[float32]
-	yRot.SetRotateY(math.Pi).Log()
+	yRot.SetRotationY(math.Pi).Log()
 
 	require.InDelta(t, 0.0, yRot.X, 0.0001)
 	require.InDelta(t, math.Pi/2.0, yRot.Y, 0.0001)
@@ -372,7 +372,7 @@ func TestQuaternion_Log(t *testing.T) {
 
 func TestQuaternion_Exp(t *testing.T) {
 	var yRot Quaternion[float32]
-	yRot.SetRotateY(math.Pi).Log().Exp()
+	yRot.SetRotationY(math.Pi).Log().Exp()
 
 	vec := Vec3[float32]{X: 1, Y: 0, Z: 0}
 	vec.RotateWithQuaternion(&yRot)
@@ -384,7 +384,7 @@ func TestQuaternion_Exp(t *testing.T) {
 
 func TestQuaternion_Pow_Zero(t *testing.T) {
 	var yRot Quaternion[float32]
-	yRot.SetRotateY(math.Pi).Pow(0)
+	yRot.SetRotationY(math.Pi).Pow(0)
 
 	require.InDelta(t, 0.0, yRot.X, 0.0001)
 	require.InDelta(t, 0.0, yRot.Y, 0.0001)
@@ -394,7 +394,7 @@ func TestQuaternion_Pow_Zero(t *testing.T) {
 
 func TestQuaternion_Pow_One(t *testing.T) {
 	var yRot Quaternion[float32]
-	yRot.SetRotateY(math.Pi).Pow(1)
+	yRot.SetRotationY(math.Pi).Pow(1)
 
 	vec := Vec3[float32]{X: 1, Y: 0, Z: 0}
 	vec.RotateWithQuaternion(&yRot)
@@ -406,7 +406,7 @@ func TestQuaternion_Pow_One(t *testing.T) {
 
 func TestQuaternion_Pow_Two(t *testing.T) {
 	var yRot Quaternion[float32]
-	yRot.SetRotateY(math.Pi).Pow(2)
+	yRot.SetRotationY(math.Pi).Pow(2)
 
 	vec := Vec3[float32]{X: 1, Y: 0, Z: 0}
 	vec.RotateWithQuaternion(&yRot)
@@ -418,7 +418,7 @@ func TestQuaternion_Pow_Two(t *testing.T) {
 
 func TestQuaternion_Slerp(t *testing.T) {
 	var quat1 Quaternion[float32]
-	quat1.SetRotateY(math.Pi)
+	quat1.SetRotationY(math.Pi)
 
 	var quat2 Quaternion[float32]
 	quat2.SetQuaternion(&quat1).RotateZ(math.Pi)
@@ -449,7 +449,7 @@ func TestQuaternion_Slerp(t *testing.T) {
 
 func TestQuaternion_SetSlerp(t *testing.T) {
 	var quat1 Quaternion[float32]
-	quat1.SetRotateY(math.Pi)
+	quat1.SetRotationY(math.Pi)
 
 	var quat2 Quaternion[float32]
 	quat2.SetQuaternion(&quat1).RotateZ(math.Pi)
@@ -480,7 +480,7 @@ func TestQuaternion_SetSlerp(t *testing.T) {
 
 func TestQuaternion_Mix(t *testing.T) {
 	var quat1 Quaternion[float32]
-	quat1.SetRotateY(math.Pi)
+	quat1.SetRotationY(math.Pi)
 
 	var quat2 Quaternion[float32]
 	quat2.SetQuaternion(&quat1).RotateZ(math.Pi)
@@ -511,7 +511,7 @@ func TestQuaternion_Mix(t *testing.T) {
 
 func TestQuaternion_SetMix(t *testing.T) {
 	var quat1 Quaternion[float32]
-	quat1.SetRotateY(math.Pi)
+	quat1.SetRotationY(math.Pi)
 
 	var quat2 Quaternion[float32]
 	quat2.SetQuaternion(&quat1).RotateZ(math.Pi)
@@ -540,9 +540,9 @@ func TestQuaternion_SetMix(t *testing.T) {
 	require.InDelta(t, 0, halfWay.Z, 0.0001)
 }
 
-func TestQuaternion_ShortMix(t *testing.T) {
+func TestQuaternion_SetMix_UnusualDelta(t *testing.T) {
 	var quat1 Quaternion[float32]
-	quat1.SetRotateY(math.Pi)
+	quat1.SetRotationY(math.Pi)
 
 	var quat2 Quaternion[float32]
 	quat2.SetQuaternion(&quat1).RotateZ(math.Pi)
@@ -561,52 +561,21 @@ func TestQuaternion_ShortMix(t *testing.T) {
 	require.InDelta(t, 0, afterQuat2.Y, 0.0001)
 	require.InDelta(t, 0, afterQuat2.Z, 0.0001)
 
-	var halfWayQuat Quaternion[float32]
-	halfWayQuat.SetQuaternion(&quat1).ShortMix(&quat2, 0.5)
+	var returnToStartQuat Quaternion[float32]
+	returnToStartQuat.SetMix(&quat1, &quat2, 2)
 
-	var halfWay Vec3[float32]
-	halfWay.SetVec3(&start).RotateWithQuaternion(&halfWayQuat)
-	require.InDelta(t, 0, halfWay.X, 0.0001)
-	require.InDelta(t, -1, halfWay.Y, 0.0001)
-	require.InDelta(t, 0, halfWay.Z, 0.0001)
-}
-
-func TestQuaternion_SetShortMix(t *testing.T) {
-	var quat1 Quaternion[float32]
-	quat1.SetRotateY(math.Pi)
-
-	var quat2 Quaternion[float32]
-	quat2.SetQuaternion(&quat1).RotateZ(math.Pi)
-
-	start := Vec3[float32]{X: -1, Y: 0, Z: 0}
-
-	var afterQuat1 Vec3[float32]
-	afterQuat1.SetVec3(&start).RotateWithQuaternion(&quat1)
-	require.InDelta(t, 1, afterQuat1.X, 0.0001)
-	require.InDelta(t, 0, afterQuat1.Y, 0.0001)
-	require.InDelta(t, 0, afterQuat1.Z, 0.0001)
-
-	var afterQuat2 Vec3[float32]
-	afterQuat2.SetVec3(&start).RotateWithQuaternion(&quat2)
-	require.InDelta(t, -1, afterQuat2.X, 0.0001)
-	require.InDelta(t, 0, afterQuat2.Y, 0.0001)
-	require.InDelta(t, 0, afterQuat2.Z, 0.0001)
-
-	var halfWayQuat Quaternion[float32]
-	halfWayQuat.SetShortMix(&quat1, &quat2, 0.5)
-
-	var halfWay Vec3[float32]
-	halfWay.SetVec3(&start).RotateWithQuaternion(&halfWayQuat)
-	require.InDelta(t, 0, halfWay.X, 0.0001)
-	require.InDelta(t, -1, halfWay.Y, 0.0001)
-	require.InDelta(t, 0, halfWay.Z, 0.0001)
+	var returnToStart Vec3[float32]
+	returnToStart.SetVec3(&start).RotateWithQuaternion(&returnToStartQuat)
+	require.InDelta(t, 1, returnToStart.X, 0.0001)
+	require.InDelta(t, 0, returnToStart.Y, 0.0001)
+	require.InDelta(t, 0, returnToStart.Z, 0.0001)
 }
 
 func TestQuaternion_Squad(t *testing.T) {
 	var key1, key2, key3, key4, control3, control4 Quaternion[float32]
 	key1.SetIdentity()
-	key2.SetRotateY(2 * math.Pi / 3.0)
-	key3.SetRotateY(4 * math.Pi / 3.0)
+	key2.SetRotationY(2 * math.Pi / 3.0)
+	key3.SetRotationY(4 * math.Pi / 3.0)
 	key4.SetIdentity()
 
 	control3.SetIntermediate(&key2, &key3, &key4)

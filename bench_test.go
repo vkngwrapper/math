@@ -189,7 +189,7 @@ func BenchmarkRotateQuaternionVkngMath(b *testing.B) {
 	for i := 0; i < b.N; i++ {
 		transform := Vec3[float32]{5, 10, 15}
 		var quat Quaternion[float32]
-		quat.SetEulerAngles(0, math.Pi, math.Pi/2)
+		quat.SetRotationEulers(0, math.Pi, math.Pi/2)
 		transform.RotateWithQuaternion(&quat)
 
 		vkngMathOutQuat = quat
