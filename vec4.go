@@ -2,6 +2,8 @@ package math
 
 import "math"
 
+// Vec4 is a three-element vector of floating point compatible values that can be used for 3d
+// vector arithmetic and transforms
 type Vec4[T FloatingPoint] struct {
 	X T
 	Y T
@@ -9,6 +11,9 @@ type Vec4[T FloatingPoint] struct {
 	W T
 }
 
+// SetVec4 overwrites the contents of this vector with the contents of a 4-element vector
+//
+// in - The vector to initialize from
 func (v *Vec4[T]) SetVec4(in *Vec4[T]) *Vec4[T] {
 	v.X = in.X
 	v.Y = in.Y
@@ -18,6 +23,10 @@ func (v *Vec4[T]) SetVec4(in *Vec4[T]) *Vec4[T] {
 	return v
 }
 
+// SetVec3 overwrites the first three elements of this vector with the first three elements of a 3-element vector.
+// The fourth element of this vector is set to 1.
+//
+// in - The vector to initialize from
 func (v *Vec4[T]) SetVec3(in *Vec3[T]) *Vec4[T] {
 	v.X = in.X
 	v.Y = in.Y
@@ -27,6 +36,10 @@ func (v *Vec4[T]) SetVec3(in *Vec3[T]) *Vec4[T] {
 	return v
 }
 
+// SetVec2 overwrites the first two elements of this vector with the first two elements of a 2-element vector.
+// The third element of this vector is set to 0 and the fourth is set to 1.
+//
+// in - The vector to initialize from
 func (v *Vec4[T]) SetVec2(in *Vec2[T]) *Vec4[T] {
 	v.X = in.X
 	v.Y = in.Y
@@ -36,6 +49,12 @@ func (v *Vec4[T]) SetVec2(in *Vec2[T]) *Vec4[T] {
 	return v
 }
 
+// SetTransform overwrites the contents of this vector with the results of multiplying a provided
+// vector through a provided transform matrix
+//
+// input - The vector to be transformed
+//
+// m - The transform matrix to be used in the transform
 func (v *Vec4[T]) SetTransform(input *Vec4[T], m *Mat4x4[T]) *Vec4[T] {
 	v.X = m[0][0]*input.X + m[1][0]*input.Y + m[2][0]*input.Z + m[3][0]*input.W
 	v.Y = m[0][1]*input.X + m[1][1]*input.Y + m[2][1]*input.Z + m[3][1]*input.W
@@ -45,6 +64,13 @@ func (v *Vec4[T]) SetTransform(input *Vec4[T], m *Mat4x4[T]) *Vec4[T] {
 	return v
 }
 
+// SetTransformHomogenous overwrites the contents of this vector with the results of multiplying
+// a provided vector through a provided transform matrix. A homogenous divide will be performed
+// on the results of the transform.
+//
+// input - The vector to be transformed
+//
+// m - The transform matrix to be used in the transform
 func (v *Vec4[T]) SetTransformHomogenous(input *Vec4[T], m *Mat4x4[T]) *Vec4[T] {
 	w := m[0][3]*input.X + m[1][3]*input.Y + m[2][3]*input.Z + m[3][3]*input.W
 
@@ -56,6 +82,12 @@ func (v *Vec4[T]) SetTransformHomogenous(input *Vec4[T], m *Mat4x4[T]) *Vec4[T] 
 	return v
 }
 
+// SetRotateWithQuaternion overwrites the contents of this vector with the results of rotating
+// a provided vector through a provided quaternion.
+//
+// input - The vector to be rotated
+//
+// q - The quaternion to be used in the rotation
 func (v *Vec4[T]) SetRotateWithQuaternion(input *Vec4[T], q *Quaternion[T]) *Vec4[T] {
 	quatVector := Vec3[T]{q.X, q.Y, q.Z}
 	vec3 := Vec3[T]{input.X, input.Y, input.Z}
@@ -74,6 +106,14 @@ func (v *Vec4[T]) SetRotateWithQuaternion(input *Vec4[T], q *Quaternion[T]) *Vec
 	return v
 }
 
+// SetRotate overwrites the contents of this vector with the results of rotating a
+// provided vector around a provided axis by a provided angle
+//
+// input - The vector to be rotated
+//
+// angleRad - The amount to rotate the vector, in radians
+//
+// axis - The axis around which to rotate the vector
 func (v *Vec4[T]) SetRotate(input *Vec4[T], angleRad float64, normal *Vec3[T]) *Vec4[T] {
 	cos := T(math.Cos(angleRad))
 	sin := T(math.Sin(angleRad))
@@ -96,6 +136,12 @@ func (v *Vec4[T]) SetRotate(input *Vec4[T], angleRad float64, normal *Vec3[T]) *
 	return v
 }
 
+// SetRotateX overwrites the contents of this vector with the results of rotating a
+// provided vector around the x axis by a provided angle
+//
+// input - The vector to be rotated
+//
+// angleRad - The amount to rotate the vector, in radians
 func (v *Vec4[T]) SetRotateX(input *Vec4[T], angleRad float64) *Vec4[T] {
 	cos := T(math.Cos(angleRad))
 	sin := T(math.Sin(angleRad))
@@ -111,6 +157,12 @@ func (v *Vec4[T]) SetRotateX(input *Vec4[T], angleRad float64) *Vec4[T] {
 	return v
 }
 
+// SetRotateY overwrites the contents of this vector with the results of rotating a
+// provided vector around the y axis by a provided angle
+//
+// input - The vector to be rotated
+//
+// angleRad - The amount to rotate the vector, in radians
 func (v *Vec4[T]) SetRotateY(input *Vec4[T], angleRad float64) *Vec4[T] {
 	cos := T(math.Cos(angleRad))
 	sin := T(math.Sin(angleRad))
@@ -126,6 +178,12 @@ func (v *Vec4[T]) SetRotateY(input *Vec4[T], angleRad float64) *Vec4[T] {
 	return v
 }
 
+// SetRotateZ overwrites the contents of this vector with the results of rotating a
+// provided vector around the z axis by a provided angle
+//
+// input - The vector to be rotated
+//
+// angleRad - The amount to rotate the vector, in radians
 func (v *Vec4[T]) SetRotateZ(input *Vec4[T], angleRad float64) *Vec4[T] {
 	cos := T(math.Cos(angleRad))
 	sin := T(math.Sin(angleRad))
@@ -141,6 +199,10 @@ func (v *Vec4[T]) SetRotateZ(input *Vec4[T], angleRad float64) *Vec4[T] {
 	return v
 }
 
+// SetNormalizeVec4 overwrites the contents of this vector with the results of normalizing
+// a provided 4-element vector
+//
+// input - The vector to be normalized
 func (v *Vec4[T]) SetNormalizeVec4(input *Vec4[T]) *Vec4[T] {
 	vecLen := input.Len()
 
@@ -161,6 +223,11 @@ func (v *Vec4[T]) SetNormalizeVec4(input *Vec4[T]) *Vec4[T] {
 	return v
 }
 
+// SetAddVec4 overwrites the contents of this vector with the results of adding two provided vectors
+//
+// lhs - The left operand of the cross product operation
+//
+// rhs - The right operand of the cross product operation
 func (v *Vec4[T]) SetAddVec4(lhs *Vec4[T], rhs *Vec4[T]) *Vec4[T] {
 	v.X = lhs.X + rhs.X
 	v.Y = lhs.Y + rhs.Y
@@ -170,6 +237,12 @@ func (v *Vec4[T]) SetAddVec4(lhs *Vec4[T], rhs *Vec4[T]) *Vec4[T] {
 	return v
 }
 
+// SetSubtractVec4 overwrites the contents of this vector with the results of subtracting two
+// provided vectors
+//
+// lhs - The left operand of the cross product operation
+//
+// rhs - The right operand of the cross product operation
 func (v *Vec4[T]) SetSubtractVec4(lhs *Vec4[T], rhs *Vec4[T]) *Vec4[T] {
 	v.X = lhs.X - rhs.X
 	v.Y = lhs.Y - rhs.Y
@@ -179,6 +252,12 @@ func (v *Vec4[T]) SetSubtractVec4(lhs *Vec4[T], rhs *Vec4[T]) *Vec4[T] {
 	return v
 }
 
+// SetScale overwrites the contents of this vector with the provided vector
+// multiplied by the provided scalar
+//
+// input - The vector to scale
+//
+// scale - The scalar t multiply with the vector
 func (v *Vec4[T]) SetScale(input *Vec4[T], scale T) *Vec4[T] {
 	v.X = input.X * scale
 	v.Y = input.Y * scale
@@ -188,6 +267,14 @@ func (v *Vec4[T]) SetScale(input *Vec4[T], scale T) *Vec4[T] {
 	return v
 }
 
+// SetLerp overwrites the contents of this vector with the results of linear interpolation
+// between two provided vectors
+//
+// lhs - The source vector in the interpolation operation
+//
+// rhs - The target vector in the interpolation operation
+//
+// delta - A value between 0 and 1 indicating how far to interpolate between the two vectors
 func (v *Vec4[T]) SetLerp(lhs *Vec4[T], rhs *Vec4[T], delta T) *Vec4[T] {
 	v.X = lhs.X*(1-delta) + rhs.X*delta
 	v.Y = lhs.Y*(1-delta) + rhs.Y*delta
@@ -197,6 +284,7 @@ func (v *Vec4[T]) SetLerp(lhs *Vec4[T], rhs *Vec4[T], delta T) *Vec4[T] {
 	return v
 }
 
+// Normalize converts this vector into a unit vector
 func (v *Vec4[T]) Normalize() *Vec4[T] {
 	vecLen := v.Len()
 
@@ -213,15 +301,22 @@ func (v *Vec4[T]) Normalize() *Vec4[T] {
 	return v
 }
 
+// Len calculates the length of this vector
 func (v *Vec4[T]) Len() T {
 	sqr := float64(v.X*v.X + v.Y*v.Y + v.Z*v.Z + v.W*v.W)
 	return T(math.Sqrt(sqr))
 }
 
+// LenSqr calculates the length-squared of this vector. It is more performant than Len,
+// owing to not requiring a math.Sqrt call, and may be preferable in cases when only the relative
+// length of two vectors is required, or when comparing the length to 0 or 1
 func (v *Vec4[T]) LenSqr() T {
 	return v.X*v.X + v.Y*v.Y + v.Z*v.Z + v.W*v.W
 }
 
+// AddVec4 adds another provided vector to this one and updates this vector with the results
+//
+// other - The right operand in the add operation
 func (v *Vec4[T]) AddVec4(other *Vec4[T]) *Vec4[T] {
 	v.X += other.X
 	v.Y += other.Y
@@ -231,6 +326,9 @@ func (v *Vec4[T]) AddVec4(other *Vec4[T]) *Vec4[T] {
 	return v
 }
 
+// SubtractVec4 subtracts another provided vector from this one and updates this vector with the results
+//
+// other - The right operand in the subtract operation
 func (v *Vec4[T]) SubtractVec4(other *Vec4[T]) *Vec4[T] {
 	v.X -= other.X
 	v.Y -= other.Y
@@ -240,10 +338,16 @@ func (v *Vec4[T]) SubtractVec4(other *Vec4[T]) *Vec4[T] {
 	return v
 }
 
+// DotProduct calculates and returns the dot product of this vector and another provided vector
+//
+// other - The right operand in the dot product operation
 func (v *Vec4[T]) DotProduct(other *Vec4[T]) T {
 	return v.X*other.X + v.Y*other.Y + v.Z*other.Z + v.W*other.W
 }
 
+// Scale multiplies this vector by the provided scalar factor
+//
+// scale - The scalar to multiply this vector by
 func (v *Vec4[T]) Scale(scale T) *Vec4[T] {
 	v.X *= scale
 	v.Y *= scale
@@ -253,6 +357,12 @@ func (v *Vec4[T]) Scale(scale T) *Vec4[T] {
 	return v
 }
 
+// Equal returns true if every entry in this vector is equal to every entry in the provided vector
+//
+// other - The vector to compare this vector to
+//
+// epsilon - The epsilon value to use in floating point comparisons. This much floating point
+// drift is permitted before the method returns false. 0.0001 is a common epsilon value
 func (v *Vec4[T]) Equal(other *Vec4[T], epsilon T) bool {
 	if abs[T](v.X-other.X) > epsilon {
 		return false
@@ -273,38 +383,10 @@ func (v *Vec4[T]) Equal(other *Vec4[T], epsilon T) bool {
 	return true
 }
 
-func (v *Vec4[T]) GreaterThan(other *Vec4[T]) bool {
-	if v.X <= other.X || v.Y <= other.Y || v.Z <= other.Z || v.W <= other.W {
-		return false
-	}
-
-	return true
-}
-
-func (v *Vec4[T]) GreaterThanEqual(other *Vec4[T]) bool {
-	if v.X < other.X || v.Y < other.Y || v.Z < other.Z || v.W < other.W {
-		return false
-	}
-
-	return true
-}
-
-func (v *Vec4[T]) LessThan(other *Vec4[T]) bool {
-	if v.X >= other.X || v.Y >= other.Y || v.Z >= other.Z || v.W >= other.W {
-		return false
-	}
-
-	return true
-}
-
-func (v *Vec4[T]) LessThanEqual(other *Vec4[T]) bool {
-	if v.X > other.X || v.Y > other.Y || v.Z > other.Z || v.W > other.W {
-		return false
-	}
-
-	return true
-}
-
+// Transform multiplies this vector through the provided transform matrix
+// and updates the vector with the result
+//
+// m - The 4x4 matrix to transform this matrix through
 func (v *Vec4[T]) Transform(m *Mat4x4[T]) *Vec4[T] {
 	x := m[0][0]*v.X + m[1][0]*v.Y + m[2][0]*v.Z + m[3][0]*v.W
 	y := m[0][1]*v.X + m[1][1]*v.Y + m[2][1]*v.Z + m[3][1]*v.W
@@ -319,6 +401,10 @@ func (v *Vec4[T]) Transform(m *Mat4x4[T]) *Vec4[T] {
 	return v
 }
 
+// TransformHomogenous performs a transform with a provided 4x4 matrix. After the transform,
+// a homogenous divide is performed on the results. This vector is updated with the output.
+//
+// m - The 4x4 matrix to transform this matrix through
 func (v *Vec4[T]) TransformHomogenous(m *Mat4x4[T]) *Vec4[T] {
 	x := m[0][0]*v.X + m[1][0]*v.Y + m[2][0]*v.Z + m[3][0]*v.W
 	y := m[0][1]*v.X + m[1][1]*v.Y + m[2][1]*v.Z + m[3][1]*v.W
@@ -333,6 +419,12 @@ func (v *Vec4[T]) TransformHomogenous(m *Mat4x4[T]) *Vec4[T] {
 	return v
 }
 
+// Lerp interpolates between this vector and another provided vector, updating this
+// vector to the results of the interpolation
+//
+// other - The target vector in the interpolation operation
+//
+// delta - A value between 0 and 1 indicating how far to interpolate between the two vectors
 func (v *Vec4[T]) Lerp(other *Vec4[T], delta T) *Vec4[T] {
 	v.X = v.X*(1-delta) + other.X*delta
 	v.Y = v.Y*(1-delta) + other.Y*delta
@@ -342,6 +434,11 @@ func (v *Vec4[T]) Lerp(other *Vec4[T], delta T) *Vec4[T] {
 	return v
 }
 
+// Rotate rotates this vector around the provided axis by the provided angle
+//
+// angleRad - The amount to rotate this vector, in radians
+//
+// axis - The axis to rotate this vector around
 func (v *Vec4[T]) Rotate(angleRad float64, normal *Vec3[T]) *Vec4[T] {
 	cos := T(math.Cos(angleRad))
 	sin := T(math.Sin(angleRad))
@@ -369,6 +466,9 @@ func (v *Vec4[T]) Rotate(angleRad float64, normal *Vec3[T]) *Vec4[T] {
 	return v
 }
 
+// RotateWithQuaternion rotates this vector with the provided quaternion
+//
+// q - The quaternion to rotate this vector with
 func (v *Vec4[T]) RotateWithQuaternion(q *Quaternion[T]) *Vec4[T] {
 	quatVector := Vec3[T]{q.X, q.Y, q.Z}
 	vec3 := Vec3[T]{v.X, v.Y, v.Z}
@@ -386,6 +486,9 @@ func (v *Vec4[T]) RotateWithQuaternion(q *Quaternion[T]) *Vec4[T] {
 	return v
 }
 
+// RotateX rotates this vector around the x axis by a provided angle
+//
+// angleRad - The amount to rotate the vector, in radians
 func (v *Vec4[T]) RotateX(angleRad float64) *Vec4[T] {
 	cos := T(math.Cos(angleRad))
 	sin := T(math.Sin(angleRad))
@@ -399,6 +502,9 @@ func (v *Vec4[T]) RotateX(angleRad float64) *Vec4[T] {
 	return v
 }
 
+// RotateY rotates this vector around the y axis by a provided angle
+//
+// angleRad - The amount to rotate the vector, in radians
 func (v *Vec4[T]) RotateY(angleRad float64) *Vec4[T] {
 	cos := T(math.Cos(angleRad))
 	sin := T(math.Sin(angleRad))
@@ -412,6 +518,9 @@ func (v *Vec4[T]) RotateY(angleRad float64) *Vec4[T] {
 	return v
 }
 
+// RotateZ rotates this vector around the z axis by a provided angle
+//
+// angleRad - The amount to rotate the vector, in radians
 func (v *Vec4[T]) RotateZ(angleRad float64) *Vec4[T] {
 	cos := T(math.Cos(angleRad))
 	sin := T(math.Sin(angleRad))

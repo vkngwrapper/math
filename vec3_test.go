@@ -14,7 +14,7 @@ func TestVec3_SetVec2(t *testing.T) {
 
 	require.InDelta(t, 3.0, vec.X, 0.0001)
 	require.InDelta(t, 7.0, vec.Y, 0.0001)
-	require.InDelta(t, 1.0, vec.Z, 0.0001)
+	require.InDelta(t, 0.0, vec.Z, 0.0001)
 }
 
 func TestVec3_SetVec4(t *testing.T) {
@@ -170,6 +170,17 @@ func TestVec3_AddVec3(t *testing.T) {
 	require.InDelta(t, 6.0, v1.X, 0.0001)
 	require.InDelta(t, 11.0, v1.Y, 0.0001)
 	require.InDelta(t, 17.0, v1.Z, 0.0001)
+}
+
+func TestVec3_SetScale(t *testing.T) {
+	input := Vec3[float32]{X: 1, Y: 2, Z: 4}
+
+	var vec Vec3[float32]
+	vec.SetScale(&input, 3.0)
+
+	require.InDelta(t, 3.0, vec.X, 0.0001)
+	require.InDelta(t, 6.0, vec.Y, 0.0001)
+	require.InDelta(t, 12.0, vec.Z, 0.0001)
 }
 
 func TestVec3_Scale(t *testing.T) {

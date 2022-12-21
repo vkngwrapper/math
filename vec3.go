@@ -305,7 +305,7 @@ func (v *Vec3[T]) Len() T {
 }
 
 // LenSqr calculates the length-squared of this vector. It is more performant than Len,
-// owing to not require a math.Sqrt call, and may be preferable in cases when only the relative
+// owing to not requiring a math.Sqrt call, and may be preferable in cases when only the relative
 // length of two vectors is required, or when comparing the length to 0 or 1
 func (v *Vec3[T]) LenSqr() T {
 	return v.X*v.X + v.Y*v.Y + v.Z*v.Z
@@ -354,6 +354,20 @@ func (v *Vec3[T]) CrossProduct(other *Vec3[T]) *Vec3[T] {
 // other - The right operand in the dot product operation
 func (v *Vec3[T]) DotProduct(other *Vec3[T]) T {
 	return v.X*other.X + v.Y*other.Y + v.Z*other.Z
+}
+
+// SetScale overwrites the contents of this vector with the provided vector
+// multiplied by the provided scalar
+//
+// input - The vector to scale
+//
+// scale - The scalar t multiply with the vector
+func (v *Vec3[T]) SetScale(input *Vec3[T], scale T) *Vec3[T] {
+	v.X = input.X * scale
+	v.Y = input.Y * scale
+	v.Z = input.Z * scale
+
+	return v
 }
 
 // Scale multiplies this vector by the provided scalar factor

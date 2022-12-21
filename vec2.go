@@ -86,7 +86,7 @@ func (v *Vec2[T]) Len() T {
 }
 
 // LenSqr calculates the length-squared of this vector. It is more performant than Len,
-// owing to not require a math.Sqrt call, and may be preferable in cases when only the relative
+// owing to not requiring a math.Sqrt call, and may be preferable in cases when only the relative
 // length of two vectors is required, or when comparing the length to 0 or 1
 func (v *Vec2[T]) LenSqr() T {
 	return v.X*v.X + v.Y*v.Y
