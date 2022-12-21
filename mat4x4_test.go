@@ -174,7 +174,7 @@ func TestMat4x4_SetAxisAngle(t *testing.T) {
 func TestMat4x4_SetAffineMat4x4(t *testing.T) {
 	axis := Vec3[float32]{0, 0, 1}
 	var rotation Mat4x4[float32]
-	rotation.SetAxisAngle(&axis, math.Pi/2.0)
+	rotation.SetRotateAroundAxis(&axis, math.Pi/2.0)
 
 	var rotation2 Mat4x4[float32]
 	rotation2.SetAffineMat4x4(&rotation)
