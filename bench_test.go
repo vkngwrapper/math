@@ -269,7 +269,7 @@ func BenchmarkMatrixMultTransformVkngMath(b *testing.B) {
 		scaleMat.SetScale(1.5, 1.5, 1.5)
 
 		var mat Mat4x4[float32]
-		mat.SetMultMatrix4x4(&translateMat, &rotateMat).MultMatrix4x4(&scaleMat)
+		mat.SetMultMat4x4(&translateMat, &rotateMat).MultMat4x4(&scaleMat)
 
 		transform := Vec4[float32]{5, 10, 15, 1}
 		transform.Transform(&mat)

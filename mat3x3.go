@@ -3,6 +3,9 @@ package math
 import "math"
 
 type Mat3Row[T FloatingPoint] [3]T
+
+// Mat3x3 is a two-dimensional array of floating point-compatible values that can be used
+// for 3x3 matrix arithmetic and affine 3d matrix transformations
 type Mat3x3[T FloatingPoint] [3]Mat3Row[T]
 
 // SetIdentity overwrites the current contents of the matrix with the identity matrix
@@ -85,6 +88,24 @@ func (m *Mat3x3[T]) SetQuaternion(other *Quaternion[T]) *Mat3x3[T] {
 	return m
 }
 
+// SetMat2x2 overwrites the current contents of the matrix with the identity matrix and
+// layers the provided 2x2 matrix over the upper left 2x2 area of the matrix
+//
+// other - The 2x2 matrix to initialize from
+func (m *Mat3x3[T]) SetMat2x2(other *Mat3x3[T]) *Mat3x3[T] {
+	m[0][0] = other[0][0]
+	m[0][1] = other[0][1]
+	m[0][2] = 0
+	m[1][0] = other[1][0]
+	m[1][1] = other[1][1]
+	m[1][2] = 0
+	m[2][0] = 0
+	m[2][1] = 0
+	m[2][2] = 1
+
+	return m
+}
+
 // SetMat3x3 overwrites the current contents of the matrix with the contents of the provided
 // matrix
 //
@@ -161,12 +182,14 @@ func (m *Mat3x3[T]) SetRowMajor(r1, r2, r3 *Vec3[T]) *Mat3x3[T] {
 	return m
 }
 
-// SetMultMatrix3x3 multiplies two 3x3 matrices together and overwrites the current contents
-// of this matrix with the results
+// SetMultMat3x3 multiplies two 3x3 matrices together and overwrites the current contents
+// of this matrix with the results. In Matrix Multiplication between transform matrices,
+// the left matrix is unintuitively applied to the right matrix rather than the other way around.
+// You may prefer to use SetApplyTransform.
 //
 // lhs - The left operand of the multiplication operation
 // rhs - The right operand of the multiplication operation
-func (m *Mat3x3[T]) SetMultMatrix3x3(lhs, rhs *Mat3x3[T]) *Mat3x3[T] {
+func (m *Mat3x3[T]) SetMultMat3x3(lhs, rhs *Mat3x3[T]) *Mat3x3[T] {
 	m00 := lhs[0][0]*rhs[0][0] + lhs[1][0]*rhs[0][1] + lhs[2][0]*rhs[0][2]
 	m10 := lhs[0][0]*rhs[1][0] + lhs[1][0]*rhs[1][1] + lhs[2][0]*rhs[1][2]
 	m20 := lhs[0][0]*rhs[2][0] + lhs[1][0]*rhs[2][1] + lhs[2][0]*rhs[2][2]
@@ -372,7 +395,7 @@ func (m *Mat3x3[T]) SetRotationY(yawRad float64) *Mat3x3[T] {
 // SetRotationX overwrites the current contents of this matrix with a rotation matrix that
 // rotates around the x axis by the specified amount
 //
-// pitchRad - The angle to rotate around the x asis in radians
+// pitchRad - The angle to rotate around the x axis in radians
 func (m *Mat3x3[T]) SetRotationX(pitchRad float64) *Mat3x3[T] {
 	cos := T(math.Cos(pitchRad))
 	sin := T(math.Sin(pitchRad))
@@ -445,7 +468,7 @@ func (m *Mat3x3[T]) SetScale(x, y, z T) *Mat3x3[T] {
 	return m
 }
 
-// Transpose - Mirror this matrix across the diagonal
+// Transpose mirrors this matrix across the diagonal
 func (m *Mat3x3[T]) Transpose() *Mat3x3[T] {
 	m[1][0], m[0][1] = m[0][1], m[1][0]
 	m[2][0], m[0][2] = m[0][2], m[2][0]
@@ -454,7 +477,7 @@ func (m *Mat3x3[T]) Transpose() *Mat3x3[T] {
 	return m
 }
 
-// Inverse - Invert this matrix. If this matrix has no valid inverse, some
+// Inverse inverts this matrix. If this matrix has no valid inverse, some
 // entries will be set to NaN
 func (m *Mat3x3[T]) Inverse() *Mat3x3[T] {
 	determinant := m[0][0]*(m[1][1]*m[2][2]-m[2][1]*m[1][2]) -
@@ -553,13 +576,13 @@ func (m *Mat3x3[T]) ApplyTransform(other *Mat3x3[T]) *Mat3x3[T] {
 	return m
 }
 
-// MultMatrix3x3 multiplies this matrix with the provided matrix and updates this
+// MultMat3x3 multiplies this matrix with the provided matrix and updates this
 // matrix with the results.  In Matrix Multiplication between transform matrices,
 // the left matrix is unintuitively applied to the right matrix rather than the other way around.
 // You may prefer to use ApplyTransform.
 //
 // other - The right hand side of the multiplication operation.
-func (m *Mat3x3[T]) MultMatrix3x3(other *Mat3x3[T]) *Mat3x3[T] {
+func (m *Mat3x3[T]) MultMat3x3(other *Mat3x3[T]) *Mat3x3[T] {
 	m00 := m[0][0]*other[0][0] + m[1][0]*other[0][1] + m[2][0]*other[0][2]
 	m10 := m[0][0]*other[1][0] + m[1][0]*other[1][1] + m[2][0]*other[1][2]
 	m20 := m[0][0]*other[2][0] + m[1][0]*other[2][1] + m[2][0]*other[2][2]
@@ -585,6 +608,10 @@ func (m *Mat3x3[T]) MultMatrix3x3(other *Mat3x3[T]) *Mat3x3[T] {
 	return m
 }
 
+// Proj2D transforms the matrix as a planar projection matrix along the provided
+// normal axis
+//
+// normal - The normal of the plane
 func (m *Mat3x3[T]) Proj2D(normal *Vec3[T]) *Mat3x3[T] {
 	transform00 := 1.0 - normal.X*normal.X
 	transform01 := -normal.X * normal.Y
@@ -768,13 +795,13 @@ func (m *Mat3x3[T]) Scale(x, y, z T) *Mat3x3[T] {
 	return m
 }
 
-// SetRotationAroundAxis overwrites the current contents of this matrix with a rotation matrix that rotates
+// SetRotateAroundAxis overwrites the current contents of this matrix with a rotation matrix that rotates
 // around the provided axis by the provided angle in radians.
 //
 // axis - A 3-element vector that is normal to the angle of rotation. It does not need to be normalized.
 //
 // angleRad - The amount to rotate in radians
-func (m *Mat3x3[T]) SetRotationAroundAxis(axis *Vec3[T], angleRad float64) *Mat3x3[T] {
+func (m *Mat3x3[T]) SetRotateAroundAxis(axis *Vec3[T], angleRad float64) *Mat3x3[T] {
 	var unitAxis Vec3[T]
 	unitAxis.SetVec3(axis).Normalize()
 

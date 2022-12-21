@@ -9,7 +9,7 @@ import (
 func TestMat3x3_SetMat3x3(t *testing.T) {
 	var input Mat3x3[float32]
 	axis := Vec3[float32]{X: 0.7071, Y: 0.7071, Z: 0}
-	input.SetRotationAroundAxis(&axis, math.Pi/2.0)
+	input.SetRotateAroundAxis(&axis, math.Pi/2.0)
 
 	var m Mat3x3[float32]
 	m.SetMat3x3(&input)
@@ -52,7 +52,7 @@ func TestMat3x3_SetMultMatrix3x3(t *testing.T) {
 	second.SetRotationX(math.Pi / 2.0)
 
 	var m3 Mat3x3[float32]
-	m3.SetMultMatrix3x3(&second, &first)
+	m3.SetMultMat3x3(&second, &first)
 
 	input := Vec3[float32]{X: 1, Y: 0, Z: 0}
 	input.Transform(&m3)
@@ -69,7 +69,7 @@ func TestMat3x3_MultMatrix3x3(t *testing.T) {
 	var m3 Mat3x3[float32]
 	m3.SetRotationX(math.Pi / 2.0)
 
-	m3.MultMatrix3x3(&first)
+	m3.MultMat3x3(&first)
 
 	input := Vec3[float32]{X: 1, Y: 0, Z: 0}
 	input.Transform(&m3)
@@ -179,7 +179,7 @@ func TestMat3x3_SetRotationZ(t *testing.T) {
 func TestMat3x3_SetRotationAroundAxis(t *testing.T) {
 	axis := Vec3[float32]{0, 1, 0}
 	var rotation Mat3x3[float32]
-	rotation.SetRotationAroundAxis(&axis, math.Pi)
+	rotation.SetRotateAroundAxis(&axis, math.Pi)
 
 	point := Vec3[float32]{1, 0, 1}
 	point.Transform(&rotation)
@@ -234,7 +234,7 @@ func TestMat3x3_Inverse(t *testing.T) {
 	var identity Mat3x3[float32]
 	identity.SetIdentity()
 
-	require.True(t, mat1.MultMatrix3x3(&inverse).Equal(&identity, 0.0001))
+	require.True(t, mat1.MultMat3x3(&inverse).Equal(&identity, 0.0001))
 }
 
 func TestMat3x3_Orthonormalize(t *testing.T) {

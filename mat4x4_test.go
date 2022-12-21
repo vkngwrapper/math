@@ -50,7 +50,7 @@ func TestInverse4x4(t *testing.T) {
 	var identity Mat4x4[float32]
 	identity.SetIdentity()
 
-	require.True(t, mat1.MultMatrix4x4(&inverse).Equal(&identity, 0.0001))
+	require.True(t, mat1.MultMat4x4(&inverse).Equal(&identity, 0.0001))
 }
 
 func TestTranspose4x4(t *testing.T) {
@@ -161,7 +161,7 @@ func TestMat4x4_SetOrthographic2D(t *testing.T) {
 func TestMat4x4_SetAxisAngle(t *testing.T) {
 	axis := Vec3[float32]{0, 1, 0}
 	var rotation Mat4x4[float32]
-	rotation.SetAxisAngle(&axis, math.Pi)
+	rotation.SetRotateAroundAxis(&axis, math.Pi)
 
 	point := Vec4[float32]{1, 0, 1, 1}
 	point.Transform(&rotation)
@@ -171,13 +171,13 @@ func TestMat4x4_SetAxisAngle(t *testing.T) {
 	require.InDelta(t, -1, point.Z/point.W, 0.0001)
 }
 
-func TestMat4x4_SetMatrixRotationFrom(t *testing.T) {
+func TestMat4x4_SetAffineMat4x4(t *testing.T) {
 	axis := Vec3[float32]{0, 0, 1}
 	var rotation Mat4x4[float32]
 	rotation.SetAxisAngle(&axis, math.Pi/2.0)
 
 	var rotation2 Mat4x4[float32]
-	rotation2.SetMatrixRotationFrom(&rotation)
+	rotation2.SetAffineMat4x4(&rotation)
 
 	var outAxis Vec3[float32]
 	var angle float64
@@ -190,11 +190,11 @@ func TestMat4x4_SetMatrixRotationFrom(t *testing.T) {
 }
 
 func TestMat4x4_SetOrientation(t *testing.T) {
-	normal := Vec3[float32]{1, 0, 0}
-	up := Vec3[float32]{0, 0, 1}
+	target := Vec3[float32]{1, 0, 0}
+	source := Vec3[float32]{0, 0, 1}
 
 	var rotation Mat4x4[float32]
-	rotation.SetOrientation(&normal, &up)
+	rotation.SetOrientation(&source, &target)
 
 	point := Vec4[float32]{1, 0, 1, 1}
 	point.Transform(&rotation)
@@ -524,7 +524,7 @@ func TestMat4x4_SetRotationEulers(t *testing.T) {
 func TestMat4x4_GetAxisAngle(t *testing.T) {
 	axis := Vec3[float32]{0, 1, 0}
 	var axisAngleMat Mat4x4[float32]
-	axisAngleMat.SetAxisAngle(&axis, math.Pi/2)
+	axisAngleMat.SetRotateAroundAxis(&axis, math.Pi/2)
 
 	var eulerMat Mat4x4[float32]
 	eulerMat.SetRotationEulers(math.Pi/2, 0, 0)
@@ -543,7 +543,7 @@ func TestMat4x4_GetAxisAngle(t *testing.T) {
 func TestMat4x4_SetRotationAroundAxis(t *testing.T) {
 	axis := Vec3[float32]{0, 1, 0}
 	var rotation Mat4x4[float32]
-	rotation.SetRotationAroundAxis(&axis, math.Pi)
+	rotation.SetRotateAroundAxis(&axis, math.Pi)
 
 	point := Vec4[float32]{1, 0, 1, 1}
 	point.Transform(&rotation)
@@ -591,7 +591,7 @@ func TestMat4x4_MultMatrix4x4(t *testing.T) {
 	var expected Mat4x4[float32]
 	expected.SetRotationY(math.Pi)
 
-	mat1.MultMatrix4x4(&mat2)
+	mat1.MultMat4x4(&mat2)
 
 	require.True(t, mat1.Equal(&expected, 0.0001))
 	require.False(t, mat2.Equal(&expected, 0.0001))
@@ -608,7 +608,7 @@ func TestMat4x4_SetMultMatrix4x4(t *testing.T) {
 	expected.SetRotationY(math.Pi)
 
 	var result Mat4x4[float32]
-	result.SetMultMatrix4x4(&mat1, &mat2)
+	result.SetMultMat4x4(&mat1, &mat2)
 
 	require.True(t, result.Equal(&expected, 0.0001))
 	require.False(t, mat1.Equal(&expected, 0.0001))
@@ -625,7 +625,7 @@ func TestMat4x4_InterpolateMatrix(t *testing.T) {
 	var expected Mat4x4[float32]
 	expected.SetRotationY(math.Pi / 2.0)
 
-	mat1.InterpolateMatrix(&mat2, 0.5)
+	mat1.InterpolateMat4x4(&mat2, 0.5)
 
 	require.True(t, mat1.Equal(&expected, 0.0001))
 	require.False(t, mat2.Equal(&expected, 0.0001))
@@ -642,7 +642,7 @@ func TestMat4x4_SetInterpolate(t *testing.T) {
 	expected.SetRotationY(math.Pi / 2.0)
 
 	var result Mat4x4[float32]
-	result.SetInterpolate(&mat1, &mat2, 0.5)
+	result.SetInterpolateMat4x4(&mat1, &mat2, 0.5)
 
 	require.True(t, result.Equal(&expected, 0.0001))
 	require.False(t, mat1.Equal(&expected, 0.0001))
