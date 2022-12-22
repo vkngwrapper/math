@@ -198,6 +198,10 @@ func (m *Mat3x3[T]) SetMultMat3x3(lhs, rhs *Mat3x3[T]) {
 // SetApplyTransform applies the right transform matrix to the left transform matrix and overwrites
 // the current contents of this matrix with the result.  "ApplyTransform" is just a matrix multiply
 // with the operands reversed.
+//
+// lhs - The matrix having a transform applied to it
+//
+// rhs - The transform being applied
 func (m *Mat3x3[T]) SetApplyTransform(lhs, rhs *Mat3x3[T]) {
 	m00 := rhs[0][0]*lhs[0][0] + rhs[1][0]*lhs[0][1] + rhs[2][0]*lhs[0][2]
 	m10 := rhs[0][0]*lhs[1][0] + rhs[1][0]*lhs[1][1] + rhs[2][0]*lhs[1][2]

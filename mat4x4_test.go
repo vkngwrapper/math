@@ -586,13 +586,14 @@ func TestMat4x4_RotateAroundAxis_Translate(t *testing.T) {
 
 func TestMat4x4_MultMatrix4x4(t *testing.T) {
 	var mat1 Mat4x4[float32]
-	mat1.SetRotationY(math.Pi / 2.0)
+	mat1.SetTranslation(1, 2, 3)
 
 	var mat2 Mat4x4[float32]
-	mat2.SetRotationY(math.Pi / 2.0)
+	mat2.SetScale(2, 2, 2)
 
 	var expected Mat4x4[float32]
-	expected.SetRotationY(math.Pi)
+	expected.SetScale(2, 2, 2)
+	expected.Translate(1, 2, 3)
 
 	mat1.MultMat4x4(&mat2)
 
@@ -602,16 +603,36 @@ func TestMat4x4_MultMatrix4x4(t *testing.T) {
 
 func TestMat4x4_SetMultMatrix4x4(t *testing.T) {
 	var mat1 Mat4x4[float32]
-	mat1.SetRotationY(math.Pi / 2.0)
+	mat1.SetTranslation(1, 2, 3)
 
 	var mat2 Mat4x4[float32]
-	mat2.SetRotationY(math.Pi / 2.0)
+	mat2.SetScale(2, 2, 2)
 
 	var expected Mat4x4[float32]
-	expected.SetRotationY(math.Pi)
+	expected.SetScale(2, 2, 2)
+	expected.Translate(1, 2, 3)
 
 	var result Mat4x4[float32]
 	result.SetMultMat4x4(&mat1, &mat2)
+
+	require.True(t, result.Equal(&expected, 0.0001))
+	require.False(t, mat1.Equal(&expected, 0.0001))
+	require.False(t, mat2.Equal(&expected, 0.0001))
+}
+
+func TestMat4x4_SetApplyTransform(t *testing.T) {
+	var mat1 Mat4x4[float32]
+	mat1.SetTranslation(1, 2, 3)
+
+	var mat2 Mat4x4[float32]
+	mat2.SetScale(2, 2, 2)
+
+	var expected Mat4x4[float32]
+	expected.SetScale(2, 2, 2)
+	expected.Translate(1, 2, 3)
+
+	var result Mat4x4[float32]
+	result.SetApplyTransform(&mat2, &mat1)
 
 	require.True(t, result.Equal(&expected, 0.0001))
 	require.False(t, mat1.Equal(&expected, 0.0001))
@@ -664,16 +685,17 @@ func TestMat4x4_IsNormalized(t *testing.T) {
 
 func TestMat4x4_ApplyTransform(t *testing.T) {
 	var mat1 Mat4x4[float32]
-	mat1.SetRotationY(math.Pi / 2.0)
+	mat1.SetTranslation(1, 2, 3)
 
 	var mat2 Mat4x4[float32]
-	mat2.SetRotationY(math.Pi / 2.0)
+	mat2.SetScale(2, 2, 2)
 
 	var expected Mat4x4[float32]
-	expected.SetRotationY(math.Pi)
+	expected.SetScale(2, 2, 2)
+	expected.Translate(1, 2, 3)
 
-	mat1.ApplyTransform(&mat2)
+	mat2.ApplyTransform(&mat1)
 
-	require.True(t, mat1.Equal(&expected, 0.0001))
-	require.False(t, mat2.Equal(&expected, 0.0001))
+	require.False(t, mat1.Equal(&expected, 0.0001))
+	require.True(t, mat2.Equal(&expected, 0.0001))
 }
