@@ -9,7 +9,7 @@ type Mat3Row[T FloatingPoint] [3]T
 type Mat3x3[T FloatingPoint] [3]Mat3Row[T]
 
 // SetIdentity overwrites the current contents of the matrix with the identity matrix
-func (m *Mat3x3[T]) SetIdentity() *Mat3x3[T] {
+func (m *Mat3x3[T]) SetIdentity() {
 	m[0][0] = 1
 	m[0][1] = 0
 	m[0][2] = 0
@@ -19,15 +19,13 @@ func (m *Mat3x3[T]) SetIdentity() *Mat3x3[T] {
 	m[2][0] = 0
 	m[2][1] = 0
 	m[2][2] = 1
-
-	return m
 }
 
 // SetDiagonalScalar overwrites the current contents of the matrix with an identity matrix,
 // multiplied by the provided scalar value
 //
 // s - The scalar value to multiply the matrix entries by
-func (m *Mat3x3[T]) SetDiagonalScalar(s T) *Mat3x3[T] {
+func (m *Mat3x3[T]) SetDiagonalScalar(s T) {
 	m[0][0] = s
 	m[0][1] = 0
 	m[0][2] = 0
@@ -37,8 +35,6 @@ func (m *Mat3x3[T]) SetDiagonalScalar(s T) *Mat3x3[T] {
 	m[2][0] = 0
 	m[2][1] = 0
 	m[2][2] = s
-
-	return m
 }
 
 // SetDiagonalVector overwrites the current contents of the matrix with an identity matrix,
@@ -46,7 +42,7 @@ func (m *Mat3x3[T]) SetDiagonalScalar(s T) *Mat3x3[T] {
 // element corresponding to a column in the matrix
 //
 // v - The vector containing the diagonal entries that will be populated into the matrix
-func (m *Mat3x3[T]) SetDiagonalVector(v *Vec3[T]) *Mat3x3[T] {
+func (m *Mat3x3[T]) SetDiagonalVector(v *Vec3[T]) {
 	m[0][0] = v.X
 	m[0][1] = 0
 	m[0][2] = 0
@@ -56,15 +52,13 @@ func (m *Mat3x3[T]) SetDiagonalVector(v *Vec3[T]) *Mat3x3[T] {
 	m[2][0] = 0
 	m[2][1] = 0
 	m[2][2] = v.Z
-
-	return m
 }
 
 // SetQuaternion overwrites the current contents of the matrix with a rotation matrix
 // providing the same rotation as a provided quaternion
 //
 // other - A quaternion whose rotation will be written into this matrix
-func (m *Mat3x3[T]) SetQuaternion(other *Quaternion[T]) *Mat3x3[T] {
+func (m *Mat3x3[T]) SetQuaternion(other *Quaternion[T]) {
 	xx := other.X * other.X
 	yy := other.Y * other.Y
 	zz := other.Z * other.Z
@@ -84,15 +78,13 @@ func (m *Mat3x3[T]) SetQuaternion(other *Quaternion[T]) *Mat3x3[T] {
 	m[2][0] = 2.0 * (xz + wy)
 	m[2][1] = 2.0 * (yz - wx)
 	m[2][2] = 1.0 - 2.0*(xx+yy)
-
-	return m
 }
 
 // SetMat2x2 overwrites the current contents of the matrix with the identity matrix and
 // layers the provided 2x2 matrix over the upper left 2x2 area of the matrix
 //
 // other - The 2x2 matrix to initialize from
-func (m *Mat3x3[T]) SetMat2x2(other *Mat3x3[T]) *Mat3x3[T] {
+func (m *Mat3x3[T]) SetMat2x2(other *Mat3x3[T]) {
 	m[0][0] = other[0][0]
 	m[0][1] = other[0][1]
 	m[0][2] = 0
@@ -102,15 +94,13 @@ func (m *Mat3x3[T]) SetMat2x2(other *Mat3x3[T]) *Mat3x3[T] {
 	m[2][0] = 0
 	m[2][1] = 0
 	m[2][2] = 1
-
-	return m
 }
 
 // SetMat3x3 overwrites the current contents of the matrix with the contents of the provided
 // matrix
 //
 // other - The matrix to initialize from
-func (m *Mat3x3[T]) SetMat3x3(other *Mat3x3[T]) *Mat3x3[T] {
+func (m *Mat3x3[T]) SetMat3x3(other *Mat3x3[T]) {
 	m[0][0] = other[0][0]
 	m[0][1] = other[0][1]
 	m[0][2] = other[0][2]
@@ -120,15 +110,13 @@ func (m *Mat3x3[T]) SetMat3x3(other *Mat3x3[T]) *Mat3x3[T] {
 	m[2][0] = other[2][0]
 	m[2][1] = other[2][1]
 	m[2][2] = other[2][2]
-
-	return m
 }
 
 // SetMat4x4 overwrites the current contents of the matrix with the upper left
 // 3x3 area of a 4x4 matrix
 //
 // other - The 4x4 matrix to initialize from
-func (m *Mat3x3[T]) SetMat4x4(other *Mat4x4[T]) *Mat3x3[T] {
+func (m *Mat3x3[T]) SetMat4x4(other *Mat4x4[T]) {
 	m[0][0] = other[0][0]
 	m[0][1] = other[0][1]
 	m[0][2] = other[0][2]
@@ -138,8 +126,6 @@ func (m *Mat3x3[T]) SetMat4x4(other *Mat4x4[T]) *Mat3x3[T] {
 	m[2][0] = other[2][0]
 	m[2][1] = other[2][1]
 	m[2][2] = other[2][2]
-
-	return m
 }
 
 // SetColMajor overwrites the current contents of the matrix with 3 matrix columns
@@ -148,7 +134,7 @@ func (m *Mat3x3[T]) SetMat4x4(other *Mat4x4[T]) *Mat3x3[T] {
 // c1 - The first column of the matrix
 // c2 - The second column of the matrix
 // c3 - The third column of the matrix
-func (m *Mat3x3[T]) SetColMajor(c1, c2, c3 *Vec3[T]) *Mat3x3[T] {
+func (m *Mat3x3[T]) SetColMajor(c1, c2, c3 *Vec3[T]) {
 	m[0][0] = c1.X
 	m[0][1] = c1.Y
 	m[0][2] = c1.Z
@@ -158,8 +144,6 @@ func (m *Mat3x3[T]) SetColMajor(c1, c2, c3 *Vec3[T]) *Mat3x3[T] {
 	m[2][0] = c3.X
 	m[2][1] = c3.Y
 	m[2][2] = c3.Z
-
-	return m
 }
 
 // SetRowMajor overwrites the current contents of the matrix with 3 matrix rows
@@ -168,7 +152,7 @@ func (m *Mat3x3[T]) SetColMajor(c1, c2, c3 *Vec3[T]) *Mat3x3[T] {
 // r1 - The first row of the matrix
 // r2 - The second row of the matrix
 // r3 - The third row of the matrix
-func (m *Mat3x3[T]) SetRowMajor(r1, r2, r3 *Vec3[T]) *Mat3x3[T] {
+func (m *Mat3x3[T]) SetRowMajor(r1, r2, r3 *Vec3[T]) {
 	m[0][0] = r1.X
 	m[1][0] = r1.Y
 	m[2][0] = r2.Z
@@ -178,8 +162,6 @@ func (m *Mat3x3[T]) SetRowMajor(r1, r2, r3 *Vec3[T]) *Mat3x3[T] {
 	m[0][2] = r3.X
 	m[1][2] = r3.Y
 	m[2][2] = r3.Z
-
-	return m
 }
 
 // SetMultMat3x3 multiplies two 3x3 matrices together and overwrites the current contents
@@ -189,7 +171,7 @@ func (m *Mat3x3[T]) SetRowMajor(r1, r2, r3 *Vec3[T]) *Mat3x3[T] {
 //
 // lhs - The left operand of the multiplication operation
 // rhs - The right operand of the multiplication operation
-func (m *Mat3x3[T]) SetMultMat3x3(lhs, rhs *Mat3x3[T]) *Mat3x3[T] {
+func (m *Mat3x3[T]) SetMultMat3x3(lhs, rhs *Mat3x3[T]) {
 	m00 := lhs[0][0]*rhs[0][0] + lhs[1][0]*rhs[0][1] + lhs[2][0]*rhs[0][2]
 	m10 := lhs[0][0]*rhs[1][0] + lhs[1][0]*rhs[1][1] + lhs[2][0]*rhs[1][2]
 	m20 := lhs[0][0]*rhs[2][0] + lhs[1][0]*rhs[2][1] + lhs[2][0]*rhs[2][2]
@@ -211,14 +193,12 @@ func (m *Mat3x3[T]) SetMultMat3x3(lhs, rhs *Mat3x3[T]) *Mat3x3[T] {
 	m[2][0] = m20
 	m[2][1] = m21
 	m[2][2] = m22
-
-	return m
 }
 
 // SetApplyTransform applies the right transform matrix to the left transform matrix and overwrites
 // the current contents of this matrix with the result.  "ApplyTransform" is just a matrix multiply
 // with the operands reversed.
-func (m *Mat3x3[T]) SetApplyTransform(lhs, rhs *Mat3x3[T]) *Mat3x3[T] {
+func (m *Mat3x3[T]) SetApplyTransform(lhs, rhs *Mat3x3[T]) {
 	m00 := rhs[0][0]*lhs[0][0] + rhs[1][0]*lhs[0][1] + rhs[2][0]*lhs[0][2]
 	m10 := rhs[0][0]*lhs[1][0] + rhs[1][0]*lhs[1][1] + rhs[2][0]*lhs[1][2]
 	m20 := rhs[0][0]*lhs[2][0] + rhs[1][0]*lhs[2][1] + rhs[2][0]*lhs[2][2]
@@ -240,8 +220,6 @@ func (m *Mat3x3[T]) SetApplyTransform(lhs, rhs *Mat3x3[T]) *Mat3x3[T] {
 	m[2][0] = m20
 	m[2][1] = m21
 	m[2][2] = m22
-
-	return m
 }
 
 // GetAxisAngle retrieves the axis and angle of rotation for this matrix, if it is a rotation matrix.
@@ -344,7 +322,7 @@ func (m *Mat3x3[T]) GetAxisAngle(outAxis *Vec3[T], outAngleRad *float64) {
 // pitchRad - Angle to rotate pitch in radians
 //
 // rollRad - Angle to rotate roll in radians
-func (m *Mat3x3[T]) SetRotationEulers(yawRad, pitchRad, rollRad float64) *Mat3x3[T] {
+func (m *Mat3x3[T]) SetRotationEulers(yawRad, pitchRad, rollRad float64) {
 	yawCos := T(math.Cos(yawRad))
 	pitchCos := T(math.Cos(pitchRad))
 	rollCos := T(math.Cos(rollRad))
@@ -361,15 +339,13 @@ func (m *Mat3x3[T]) SetRotationEulers(yawRad, pitchRad, rollRad float64) *Mat3x3
 	m[2][0] = yawSin
 	m[2][1] = rollSin*yawSin - yawCos*pitchSin*rollCos
 	m[2][2] = pitchCos * yawCos
-
-	return m
 }
 
 // SetRotationY overwrites the current contents of this matrix with a rotation matrix that
 // rotates around the y axis by the specified amount
 //
 // yawRad - The angle to rotate around the y axis in radians
-func (m *Mat3x3[T]) SetRotationY(yawRad float64) *Mat3x3[T] {
+func (m *Mat3x3[T]) SetRotationY(yawRad float64) {
 	cos := T(math.Cos(yawRad))
 	sin := T(math.Sin(yawRad))
 
@@ -388,15 +364,13 @@ func (m *Mat3x3[T]) SetRotationY(yawRad float64) *Mat3x3[T] {
 	m[2][0] = m20
 	m[2][1] = 0
 	m[2][2] = m22
-
-	return m
 }
 
 // SetRotationX overwrites the current contents of this matrix with a rotation matrix that
 // rotates around the x axis by the specified amount
 //
 // pitchRad - The angle to rotate around the x axis in radians
-func (m *Mat3x3[T]) SetRotationX(pitchRad float64) *Mat3x3[T] {
+func (m *Mat3x3[T]) SetRotationX(pitchRad float64) {
 	cos := T(math.Cos(pitchRad))
 	sin := T(math.Sin(pitchRad))
 
@@ -415,15 +389,13 @@ func (m *Mat3x3[T]) SetRotationX(pitchRad float64) *Mat3x3[T] {
 	m[2][0] = 0
 	m[2][1] = m21
 	m[2][2] = m22
-
-	return m
 }
 
 // SetRotationZ overwrites the current contents of this matrix with a rotation matrix that
 // rotates around the z axis by the specified amount
 //
 // rollRad - The angle to rotate around the z axis in radians
-func (m *Mat3x3[T]) SetRotationZ(rollRad float64) *Mat3x3[T] {
+func (m *Mat3x3[T]) SetRotationZ(rollRad float64) {
 	cos := T(math.Cos(rollRad))
 	sin := T(math.Sin(rollRad))
 
@@ -442,8 +414,6 @@ func (m *Mat3x3[T]) SetRotationZ(rollRad float64) *Mat3x3[T] {
 	m[2][0] = 0
 	m[2][1] = 0
 	m[2][2] = 1
-
-	return m
 }
 
 // SetScale overwrites the current contents of this matrix with a transform matrix that scales
@@ -454,7 +424,7 @@ func (m *Mat3x3[T]) SetRotationZ(rollRad float64) *Mat3x3[T] {
 // y - Factor to scale by along the y axis
 //
 // z - Factor to scale by along the z axis
-func (m *Mat3x3[T]) SetScale(x, y, z T) *Mat3x3[T] {
+func (m *Mat3x3[T]) SetScale(x, y, z T) {
 	m[0][0] = x
 	m[0][1] = 0
 	m[0][2] = 0
@@ -464,22 +434,18 @@ func (m *Mat3x3[T]) SetScale(x, y, z T) *Mat3x3[T] {
 	m[2][0] = 0
 	m[2][1] = 0
 	m[2][2] = z
-
-	return m
 }
 
 // Transpose mirrors this matrix across the diagonal
-func (m *Mat3x3[T]) Transpose() *Mat3x3[T] {
+func (m *Mat3x3[T]) Transpose() {
 	m[1][0], m[0][1] = m[0][1], m[1][0]
 	m[2][0], m[0][2] = m[0][2], m[2][0]
 	m[2][1], m[1][2] = m[1][2], m[2][1]
-
-	return m
 }
 
 // Inverse inverts this matrix. If this matrix has no valid inverse, some
 // entries will be set to NaN
-func (m *Mat3x3[T]) Inverse() *Mat3x3[T] {
+func (m *Mat3x3[T]) Inverse() {
 	determinant := m[0][0]*(m[1][1]*m[2][2]-m[2][1]*m[1][2]) -
 		m[1][0]*(m[0][1]*m[2][2]-m[2][1]*m[0][2]) +
 		m[2][0]*(m[0][1]*m[1][2]-m[1][1]*m[0][2])
@@ -504,14 +470,12 @@ func (m *Mat3x3[T]) Inverse() *Mat3x3[T] {
 	m[0][2] = m02
 	m[1][2] = m12
 	m[2][2] = m22
-
-	return m
 }
 
 // Orthonormalize this matrix. All 3 columns will be normalized and made to lie
 // at right angles to one another. Only the first column is guaranteed to maintain
 // its current direction.
-func (m *Mat3x3[T]) Orthonormalize() *Mat3x3[T] {
+func (m *Mat3x3[T]) Orthonormalize() {
 	col0 := Vec3[T]{m[0][0], m[0][1], m[0][2]}
 	col1 := Vec3[T]{m[1][0], m[1][1], m[1][2]}
 	col2 := Vec3[T]{m[2][0], m[2][1], m[2][2]}
@@ -542,15 +506,13 @@ func (m *Mat3x3[T]) Orthonormalize() *Mat3x3[T] {
 	m[2][0] = col2.X
 	m[2][1] = col2.Y
 	m[2][2] = col2.Z
-
-	return m
 }
 
 // ApplyTransform applies the provided transform matrix to this transform matrix. "Apply
 // Transform" is just a matrix multiply with the operands reversed.
 //
 // other - The transform matrix to apply
-func (m *Mat3x3[T]) ApplyTransform(other *Mat3x3[T]) *Mat3x3[T] {
+func (m *Mat3x3[T]) ApplyTransform(other *Mat3x3[T]) {
 	m00 := other[0][0]*m[0][0] + other[1][0]*m[0][1] + other[2][0]*m[0][2]
 	m10 := other[0][0]*m[1][0] + other[1][0]*m[1][1] + other[2][0]*m[1][2]
 	m20 := other[0][0]*m[2][0] + other[1][0]*m[2][1] + other[2][0]*m[2][2]
@@ -572,8 +534,6 @@ func (m *Mat3x3[T]) ApplyTransform(other *Mat3x3[T]) *Mat3x3[T] {
 	m[2][0] = m20
 	m[2][1] = m21
 	m[2][2] = m22
-
-	return m
 }
 
 // MultMat3x3 multiplies this matrix with the provided matrix and updates this
@@ -582,7 +542,7 @@ func (m *Mat3x3[T]) ApplyTransform(other *Mat3x3[T]) *Mat3x3[T] {
 // You may prefer to use ApplyTransform.
 //
 // other - The right hand side of the multiplication operation.
-func (m *Mat3x3[T]) MultMat3x3(other *Mat3x3[T]) *Mat3x3[T] {
+func (m *Mat3x3[T]) MultMat3x3(other *Mat3x3[T]) {
 	m00 := m[0][0]*other[0][0] + m[1][0]*other[0][1] + m[2][0]*other[0][2]
 	m10 := m[0][0]*other[1][0] + m[1][0]*other[1][1] + m[2][0]*other[1][2]
 	m20 := m[0][0]*other[2][0] + m[1][0]*other[2][1] + m[2][0]*other[2][2]
@@ -604,15 +564,13 @@ func (m *Mat3x3[T]) MultMat3x3(other *Mat3x3[T]) *Mat3x3[T] {
 	m[2][0] = m20
 	m[2][1] = m21
 	m[2][2] = m22
-
-	return m
 }
 
 // Proj2D transforms the matrix as a planar projection matrix along the provided
 // normal axis
 //
 // normal - The normal of the plane
-func (m *Mat3x3[T]) Proj2D(normal *Vec3[T]) *Mat3x3[T] {
+func (m *Mat3x3[T]) Proj2D(normal *Vec3[T]) {
 	transform00 := 1.0 - normal.X*normal.X
 	transform01 := -normal.X * normal.Y
 	transform10 := -normal.X * normal.Y
@@ -633,8 +591,6 @@ func (m *Mat3x3[T]) Proj2D(normal *Vec3[T]) *Mat3x3[T] {
 	m[1][1] = m11
 	m[2][0] = m20
 	m[2][1] = m21
-
-	return m
 }
 
 // SetShearX overwrites this matrix with a shear matrix that shears along the X
@@ -643,7 +599,7 @@ func (m *Mat3x3[T]) Proj2D(normal *Vec3[T]) *Mat3x3[T] {
 // y - y shear factor
 //
 // z - z shear factor
-func (m *Mat3x3[T]) SetShearX(y, z T) *Mat3x3[T] {
+func (m *Mat3x3[T]) SetShearX(y, z T) {
 	m[0][0] = 1
 	m[1][0] = 0
 	m[2][0] = 0
@@ -653,8 +609,6 @@ func (m *Mat3x3[T]) SetShearX(y, z T) *Mat3x3[T] {
 	m[0][2] = z
 	m[1][2] = 0
 	m[2][2] = 1
-
-	return m
 }
 
 // ShearX applies a shear transform to this matrix along the X axis by the provided
@@ -663,7 +617,7 @@ func (m *Mat3x3[T]) SetShearX(y, z T) *Mat3x3[T] {
 // y - y shear factor
 //
 // z - z shear factor
-func (m *Mat3x3[T]) ShearX(y, z T) *Mat3x3[T] {
+func (m *Mat3x3[T]) ShearX(y, z T) {
 
 	m01 := y*m[0][0] + m[0][1]
 	m11 := y*m[1][0] + m[1][1]
@@ -679,8 +633,6 @@ func (m *Mat3x3[T]) ShearX(y, z T) *Mat3x3[T] {
 	m[1][2] = m12
 	m[2][1] = m21
 	m[2][2] = m22
-
-	return m
 }
 
 // SetShearY overwrites this matrix with a shear matrix that shears along the Y
@@ -689,7 +641,7 @@ func (m *Mat3x3[T]) ShearX(y, z T) *Mat3x3[T] {
 // x - x shear factor
 //
 // z - z shear factor
-func (m *Mat3x3[T]) SetShearY(x, z T) *Mat3x3[T] {
+func (m *Mat3x3[T]) SetShearY(x, z T) {
 	m[0][0] = 1
 	m[1][0] = x
 	m[2][0] = 0
@@ -699,8 +651,6 @@ func (m *Mat3x3[T]) SetShearY(x, z T) *Mat3x3[T] {
 	m[0][2] = 0
 	m[1][2] = z
 	m[2][2] = 1
-
-	return m
 }
 
 // ShearY applies a shear transform to this matrix along the Y axis by the provided
@@ -709,7 +659,7 @@ func (m *Mat3x3[T]) SetShearY(x, z T) *Mat3x3[T] {
 // x - x shear factor
 //
 // z - z shear factor
-func (m *Mat3x3[T]) ShearY(x, z T) *Mat3x3[T] {
+func (m *Mat3x3[T]) ShearY(x, z T) {
 	m00 := m[0][0] + x*m[0][1]
 	m10 := m[1][0] + x*m[1][1]
 	m20 := m[2][0] + x*m[2][1]
@@ -724,8 +674,6 @@ func (m *Mat3x3[T]) ShearY(x, z T) *Mat3x3[T] {
 	m[1][2] = m12
 	m[2][0] = m20
 	m[2][2] = m22
-
-	return m
 }
 
 // SetShearZ overwrites this matrix with a shear matrix that shears along the Z
@@ -734,7 +682,7 @@ func (m *Mat3x3[T]) ShearY(x, z T) *Mat3x3[T] {
 // x - x shear factor
 //
 // y - y shear factor
-func (m *Mat3x3[T]) SetShearZ(x, y T) *Mat3x3[T] {
+func (m *Mat3x3[T]) SetShearZ(x, y T) {
 	m[0][0] = 1
 	m[1][0] = 0
 	m[2][0] = x
@@ -744,8 +692,6 @@ func (m *Mat3x3[T]) SetShearZ(x, y T) *Mat3x3[T] {
 	m[0][2] = 0
 	m[1][2] = 0
 	m[2][2] = 1
-
-	return m
 }
 
 // ShearZ applies a shear transform to this matrix along the Z axis by the provided
@@ -754,7 +700,7 @@ func (m *Mat3x3[T]) SetShearZ(x, y T) *Mat3x3[T] {
 // x - x shear factor
 //
 // y - y shear factor
-func (m *Mat3x3[T]) ShearZ(x, y T) *Mat3x3[T] {
+func (m *Mat3x3[T]) ShearZ(x, y T) {
 
 	m00 := m[0][0] + x*m[0][2]
 	m10 := m[1][0] + x*m[1][2]
@@ -770,8 +716,6 @@ func (m *Mat3x3[T]) ShearZ(x, y T) *Mat3x3[T] {
 	m[1][1] = m11
 	m[2][0] = m20
 	m[2][1] = m21
-
-	return m
 }
 
 // Scale applies a scale transform to this matrix that scales vectors by the 3 provided scalars
@@ -781,7 +725,7 @@ func (m *Mat3x3[T]) ShearZ(x, y T) *Mat3x3[T] {
 // y - Factor to scale by along the y axis
 //
 // z - Factor to scale by along the z axis
-func (m *Mat3x3[T]) Scale(x, y, z T) *Mat3x3[T] {
+func (m *Mat3x3[T]) Scale(x, y, z T) {
 	m[0][0] *= x
 	m[0][1] *= y
 	m[0][2] *= z
@@ -791,8 +735,6 @@ func (m *Mat3x3[T]) Scale(x, y, z T) *Mat3x3[T] {
 	m[2][0] *= x
 	m[2][1] *= y
 	m[2][2] *= z
-
-	return m
 }
 
 // SetRotationAroundAxis overwrites the current contents of this matrix with a rotation matrix that rotates
@@ -801,9 +743,10 @@ func (m *Mat3x3[T]) Scale(x, y, z T) *Mat3x3[T] {
 // axis - A 3-element vector that is normal to the angle of rotation. It does not need to be normalized.
 //
 // angleRad - The amount to rotate in radians
-func (m *Mat3x3[T]) SetRotationAroundAxis(axis *Vec3[T], angleRad float64) *Mat3x3[T] {
+func (m *Mat3x3[T]) SetRotationAroundAxis(axis *Vec3[T], angleRad float64) {
 	var unitAxis Vec3[T]
-	unitAxis.SetVec3(axis).Normalize()
+	unitAxis.SetVec3(axis)
+	unitAxis.Normalize()
 
 	cos := T(math.Cos(angleRad))
 	sin := T(math.Sin(angleRad))
@@ -819,8 +762,6 @@ func (m *Mat3x3[T]) SetRotationAroundAxis(axis *Vec3[T], angleRad float64) *Mat3
 	m[2][0] = unitAxis.Z*unitAxis.X*inverseCos + sin*unitAxis.Y
 	m[2][1] = unitAxis.Z*unitAxis.Y*inverseCos - sin*unitAxis.X
 	m[2][2] = cos + unitAxis.Z*unitAxis.Z*inverseCos
-
-	return m
 }
 
 // RotateAroundAxis transforms this matrix by applying a rotation around the provided axis by the
@@ -829,9 +770,10 @@ func (m *Mat3x3[T]) SetRotationAroundAxis(axis *Vec3[T], angleRad float64) *Mat3
 // axis - A 3-element vector that is normal to the angle of rotation. It does not need to be normalized.
 //
 // angleRad - The amount to rotate in radians
-func (m *Mat3x3[T]) RotateAroundAxis(axis *Vec3[T], angleRad float64) *Mat3x3[T] {
+func (m *Mat3x3[T]) RotateAroundAxis(axis *Vec3[T], angleRad float64) {
 	var unitAxis Vec3[T]
-	unitAxis.SetVec3(axis).Normalize()
+	unitAxis.SetVec3(axis)
+	unitAxis.Normalize()
 
 	cos := T(math.Cos(angleRad))
 	sin := T(math.Sin(angleRad))
@@ -871,14 +813,12 @@ func (m *Mat3x3[T]) RotateAroundAxis(axis *Vec3[T], angleRad float64) *Mat3x3[T]
 	m[2][0] = m20
 	m[2][1] = m21
 	m[2][2] = m22
-
-	return m
 }
 
 // RotateX applies a transformation to this matrix that rotates around the x axis by the specified amount
 //
 // angleRad - The angle to rotate around the x axis in radians
-func (m *Mat3x3[T]) RotateX(angleRad float64) *Mat3x3[T] {
+func (m *Mat3x3[T]) RotateX(angleRad float64) {
 	cos := T(math.Cos(angleRad))
 	sin := T(math.Sin(angleRad))
 
@@ -896,14 +836,12 @@ func (m *Mat3x3[T]) RotateX(angleRad float64) *Mat3x3[T] {
 	m[0][2] = m02
 	m[1][2] = m12
 	m[2][2] = m22
-
-	return m
 }
 
 // RotateY applies a transformation to this matrix that rotates around the y axis by the specified amount
 //
 // angleRad - The angle to rotate around the y axis in radians
-func (m *Mat3x3[T]) RotateY(angleRad float64) *Mat3x3[T] {
+func (m *Mat3x3[T]) RotateY(angleRad float64) {
 	cos := T(math.Cos(angleRad))
 	sin := T(math.Sin(angleRad))
 
@@ -921,14 +859,12 @@ func (m *Mat3x3[T]) RotateY(angleRad float64) *Mat3x3[T] {
 	m[0][2] = m02
 	m[1][2] = m12
 	m[2][2] = m22
-
-	return m
 }
 
 // RotateZ applies a transformation to this matrix that rotates around the z axis by the specified amount
 //
 // angleRad - The angle to rotate around the z axis in radians
-func (m *Mat3x3[T]) RotateZ(angleRad float64) *Mat3x3[T] {
+func (m *Mat3x3[T]) RotateZ(angleRad float64) {
 	cos := T(math.Cos(angleRad))
 	sin := T(math.Sin(angleRad))
 
@@ -946,8 +882,6 @@ func (m *Mat3x3[T]) RotateZ(angleRad float64) *Mat3x3[T] {
 	m[0][1] = m01
 	m[1][1] = m11
 	m[2][1] = m21
-
-	return m
 }
 
 // IsNormalized returns true if every row and every column in this matrix has a length of 1

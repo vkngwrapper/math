@@ -230,11 +230,13 @@ func TestMat3x3_Inverse(t *testing.T) {
 		{0.3, 0.5, 0.7},
 	}
 	var inverse Mat3x3[float32]
-	inverse.SetMat3x3(&mat1).Inverse()
+	inverse.SetMat3x3(&mat1)
+	inverse.Inverse()
 	var identity Mat3x3[float32]
 	identity.SetIdentity()
 
-	require.True(t, mat1.MultMat3x3(&inverse).Equal(&identity, 0.0001))
+	mat1.MultMat3x3(&inverse)
+	require.True(t, mat1.Equal(&identity, 0.0001))
 }
 
 func TestMat3x3_Orthonormalize(t *testing.T) {

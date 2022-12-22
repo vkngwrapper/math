@@ -44,7 +44,8 @@ func TestVec4_SetVec4(t *testing.T) {
 
 func TestVec4_SetTransform(t *testing.T) {
 	var mat Mat4x4[float32]
-	mat.SetScale(2, 2, 2).Translate(1, 1, 1)
+	mat.SetScale(2, 2, 2)
+	mat.Translate(1, 1, 1)
 	input := Vec4[float32]{X: 1, Y: 3, Z: 5, W: 1}
 
 	var v4 Vec4[float32]

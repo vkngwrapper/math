@@ -46,11 +46,13 @@ func TestInverse4x4(t *testing.T) {
 		{0.4, 0.3, 0.2, 0.6},
 	}
 	var inverse Mat4x4[float32]
-	inverse.SetMat4x4(&mat1).Inverse()
+	inverse.SetMat4x4(&mat1)
+	inverse.Inverse()
 	var identity Mat4x4[float32]
 	identity.SetIdentity()
 
-	require.True(t, mat1.MultMat4x4(&inverse).Equal(&identity, 0.0001))
+	mat1.MultMat4x4(&inverse)
+	require.True(t, mat1.Equal(&identity, 0.0001))
 }
 
 func TestTranspose4x4(t *testing.T) {
@@ -67,7 +69,8 @@ func TestTranspose4x4(t *testing.T) {
 		{3, 7, 11, 15},
 	}
 
-	require.True(t, expected.Equal(mat.Transpose(), 0.0001))
+	mat.Transpose()
+	require.True(t, expected.Equal(&mat, 0.0001))
 }
 
 func TestMat4x4_SetFrustum(t *testing.T) {

@@ -12,71 +12,60 @@ type Vec2[T FloatingPoint] struct {
 // SetVec2 overwrites the contents of this vector with the contents of a 2-element vector
 //
 // in - The vector to initialize from
-func (v *Vec2[T]) SetVec2(in *Vec2[T]) *Vec2[T] {
+func (v *Vec2[T]) SetVec2(in *Vec2[T]) {
 	v.X = in.X
 	v.Y = in.Y
-	return v
 }
 
 // SetVec3 overwrites the contents of this vector with the first two elements of a 3-element vector
 //
 // in - The vector to initialize from
-func (v *Vec2[T]) SetVec3(in *Vec3[T]) *Vec2[T] {
+func (v *Vec2[T]) SetVec3(in *Vec3[T]) {
 	v.X = in.X
 	v.Y = in.Y
-
-	return v
 }
 
 // SetVec4 overwrites the contents of this vector with the first two elements of a 4-element vector
 //
 // in - The vector to initialize from
-func (v *Vec2[T]) SetVec4(in *Vec4[T]) *Vec2[T] {
+func (v *Vec2[T]) SetVec4(in *Vec4[T]) {
 	v.X = in.X
 	v.Y = in.Y
-
-	return v
 }
 
 // SetHomogenousVec3 overwrites the contents of this vector with the first two elements of a 3-element
 // vector, divided by the third element
 //
 // in - The vector to initialize from
-func (v *Vec2[T]) SetHomogenousVec3(in *Vec3[T]) *Vec2[T] {
+func (v *Vec2[T]) SetHomogenousVec3(in *Vec3[T]) {
 	factor := T(1) / in.Z
 
 	v.X = in.X * factor
 	v.Y = in.Y * factor
-
-	return v
 }
 
 // SetHomogenousVec4 overwrites the contents of this vector with the first two elements of a 4-element
 // vector, divided by the fourth element
 //
 // in - The vector to initialize from
-func (v *Vec2[T]) SetHomogenousVec4(in *Vec4[T]) *Vec2[T] {
+func (v *Vec2[T]) SetHomogenousVec4(in *Vec4[T]) {
 	factor := T(1) / in.W
 
 	v.X = in.X * factor
 	v.Y = in.Y * factor
-
-	return v
 }
 
 // Normalize converts this vector into a unit vector
-func (v *Vec2[T]) Normalize() *Vec2[T] {
+func (v *Vec2[T]) Normalize() {
 	vecLen := v.Len()
 
 	if abs[T](vecLen-1) > 0.0001 {
-		return v
+		return
 	}
 
 	inverse := 1.0 / vecLen
 	v.X *= inverse
 	v.Y *= inverse
-
-	return v
 }
 
 // Len calculates the length of this vector
@@ -95,21 +84,17 @@ func (v *Vec2[T]) LenSqr() T {
 // AddVec2 adds another provided vector to this one and updates this vector with the results
 //
 // other - The right operand in the add operation
-func (v *Vec2[T]) AddVec2(other *Vec2[T]) *Vec2[T] {
+func (v *Vec2[T]) AddVec2(other *Vec2[T]) {
 	v.X += other.X
 	v.Y += other.Y
-
-	return v
 }
 
 // SubtractVec2 subtracts another provided vector from this one and updates this vector with the results
 //
 // other - The right operand in the subtract operation
-func (v *Vec2[T]) SubtractVec2(other *Vec2[T]) *Vec2[T] {
+func (v *Vec2[T]) SubtractVec2(other *Vec2[T]) {
 	v.X -= other.X
 	v.Y -= other.Y
-
-	return v
 }
 
 // DotProduct calculates and returns the dot product of this vector and another provided vector
@@ -122,11 +107,9 @@ func (v *Vec2[T]) DotProduct(other *Vec2[T]) T {
 // Scale multiplies this vector by the provided scalar factor
 //
 // scale - The scalar to multiply this vector by
-func (v *Vec2[T]) Scale(scale T) *Vec2[T] {
+func (v *Vec2[T]) Scale(scale T) {
 	v.X *= scale
 	v.Y *= scale
-
-	return v
 }
 
 // Equal returns true if every entry in this vector is equal to every entry in the provided vector
@@ -153,17 +136,15 @@ func (v *Vec2[T]) Equal(other *Vec2[T], epsilon T) bool {
 // other - The target vector in the interpolation operation
 //
 // delta - A value between 0 and 1 indicating how far to interpolate between the two vectors
-func (v *Vec2[T]) Lerp(other *Vec2[T], delta T) *Vec2[T] {
+func (v *Vec2[T]) Lerp(other *Vec2[T], delta T) {
 	v.X = v.X*(1-delta) + other.X*delta
 	v.Y = v.Y*(1-delta) + other.Y*delta
-
-	return v
 }
 
 // Rotate rotates this vector around the origin by the provided angle
 //
 // angleRad - The angle to rotate, in radians
-func (v *Vec2[T]) Rotate(angleRad float64) *Vec2[T] {
+func (v *Vec2[T]) Rotate(angleRad float64) {
 	cos := T(math.Cos(angleRad))
 	sin := T(math.Sin(angleRad))
 
@@ -172,27 +153,24 @@ func (v *Vec2[T]) Rotate(angleRad float64) *Vec2[T] {
 
 	v.X = x
 	v.Y = y
-	return v
 }
 
 // Transform multiplies this vector through the provided 2x2 transform matrix
 //
 // m - The transform matrix used to transform this vector
-func (v *Vec2[T]) Transform(m *Mat2x2[T]) *Vec2[T] {
+func (v *Vec2[T]) Transform(m *Mat2x2[T]) {
 	x := m[0][0]*v.X + m[1][0]*v.Y
 	y := m[0][1]*v.X + m[1][1]*v.Y
 
 	v.X = x
 	v.Y = y
-
-	return v
 }
 
 // TransformHomogenous multiplies this vector through the provided 3x3 transform matrix
 // and updates this 2d vector with the results by performing a homogenous divide
 //
 // m - The transform matrix used to transform this vector
-func (v *Vec2[T]) TransformHomogenous(m *Mat3x3[T]) *Vec2[T] {
+func (v *Vec2[T]) TransformHomogenous(m *Mat3x3[T]) {
 	x := m[0][0]*v.X + m[1][0]*v.Y + m[2][0]
 	y := m[0][1]*v.X + m[1][1]*v.Y + m[2][1]
 	z := m[0][2]*v.X + m[1][2]*v.Y + m[2][2]
@@ -200,6 +178,4 @@ func (v *Vec2[T]) TransformHomogenous(m *Mat3x3[T]) *Vec2[T] {
 	factor := 1.0 / z
 	v.X = x * factor
 	v.Y = y * factor
-
-	return v
 }

@@ -79,9 +79,9 @@ func TestVec3_SetTransform(t *testing.T) {
 func TestVec3_SetTransformHomogenous(t *testing.T) {
 	v1 := Vec3[float32]{X: 1, Y: 2, Z: 3}
 	var mat Mat4x4[float32]
-	mat.SetScale(2, 2, 2).
-		Translate(1.5, 3.4, 5.3).
-		Scale(2, 2, 2)
+	mat.SetScale(2, 2, 2)
+	mat.Translate(1.5, 3.4, 5.3)
+	mat.Scale(2, 2, 2)
 
 	var vec Vec3[float32]
 	vec.SetTransformHomogenous(&v1, &mat)
@@ -94,9 +94,9 @@ func TestVec3_SetTransformHomogenous(t *testing.T) {
 func TestVec3_TransformHomogenous(t *testing.T) {
 	v1 := Vec3[float32]{X: 1, Y: 2, Z: 3}
 	var mat Mat4x4[float32]
-	mat.SetScale(2, 2, 2).
-		Translate(1.5, 3.4, 5.3).
-		Scale(2, 2, 2)
+	mat.SetScale(2, 2, 2)
+	mat.Translate(1.5, 3.4, 5.3)
+	mat.Scale(2, 2, 2)
 
 	v1.TransformHomogenous(&mat)
 

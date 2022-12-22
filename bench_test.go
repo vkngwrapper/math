@@ -38,7 +38,8 @@ func BenchmarkTransformVec4G3n(b *testing.B) {
 		mat.MultiplyMatrices(
 			&translateMat,
 			&rotateMat,
-		).Multiply(&scaleMat)
+		)
+		mat.Scale(&math32.Vector3{X: 1.5, Y: 1.5, Z: 1.5})
 
 		g3nGlobalOutVec4 = *(transform.ApplyMatrix4(&mat))
 	}
@@ -70,9 +71,9 @@ func BenchmarkTransformVec4Go3D(b *testing.B) {
 		rotate.AssignYRotation(1)
 
 		mat := mat4.Ident
-		mat.Translate(&translate).
-			MultMatrix(&rotate).
-			ScaleVec3(&scale)
+		mat.Translate(&translate)
+		mat.MultMatrix(&rotate)
+		mat.ScaleVec3(&scale)
 		transform := vec4.T{5, 10, 15, 1}
 		mat.TransformVec4(&transform)
 
@@ -85,7 +86,10 @@ func BenchmarkTransformVec4VkngMath(b *testing.B) {
 
 	for i := 0; i < b.N; i++ {
 		var mat Mat4x4[float32]
-		mat.SetIdentity().Translate(1, 1, 1).RotateY(1).Scale(1.5, 1.5, 1.5)
+		mat.SetIdentity()
+		mat.Translate(1, 1, 1)
+		mat.RotateY(1)
+		mat.Scale(1.5, 1.5, 1.5)
 
 		transform := Vec4[float32]{5, 10, 15, 1}
 		transform.Transform(&mat)
@@ -211,7 +215,8 @@ func BenchmarkMatrixMultTransformG3n(b *testing.B) {
 		mat.MultiplyMatrices(
 			&translateMat,
 			&rotateMat,
-		).Multiply(&scaleMat)
+		)
+		mat.Multiply(&scaleMat)
 
 		g3nGlobalOutVec4 = *(transform.ApplyMatrix4(&mat))
 	}
@@ -221,10 +226,10 @@ func BenchmarkMatrixMultTransformMatGL(b *testing.B) {
 	b.ReportAllocs()
 
 	for i := 0; i < b.N; i++ {
-		mat := mgl32.Ident4().
-			Mul4(mgl32.Translate3D(1, 1, 1)).
-			Mul4(mgl32.HomogRotate3DY(1)).
-			Mul4(mgl32.Scale3D(1.5, 1.5, 1.5))
+		mat := mgl32.Translate3D(1, 1, 1)
+		mat.Mul4(mgl32.HomogRotate3DY(1))
+		mat.Mul4(mgl32.Scale3D(1.5, 1.5, 1.5))
+
 		transform := mgl32.Vec4{5.0, 10.0, 15.0, 1.0}
 		transform = mat.Mul4x1(transform)
 
@@ -249,8 +254,8 @@ func BenchmarkMatrixMultTransformGo3D(b *testing.B) {
 		scaleMat.ScaleVec3(&scale)
 
 		var mat mat4.T
-		mat.AssignMul(&translateMat, &rotate).
-			MultMatrix(&scaleMat)
+		mat.AssignMul(&translateMat, &rotate)
+		mat.MultMatrix(&scaleMat)
 		transform := vec4.T{5, 10, 15, 1}
 		mat.TransformVec4(&transform)
 
@@ -269,7 +274,8 @@ func BenchmarkMatrixMultTransformVkngMath(b *testing.B) {
 		scaleMat.SetScale(1.5, 1.5, 1.5)
 
 		var mat Mat4x4[float32]
-		mat.SetMultMat4x4(&translateMat, &rotateMat).MultMat4x4(&scaleMat)
+		mat.SetMultMat4x4(&translateMat, &rotateMat)
+		mat.MultMat4x4(&scaleMat)
 
 		transform := Vec4[float32]{5, 10, 15, 1}
 		transform.Transform(&mat)
