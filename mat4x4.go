@@ -612,6 +612,56 @@ func (m *Mat4x4[T]) SetPerspective(fovYRad float64, aspectRatio, zNear, zFar T) 
 	m[3][3] = 0
 }
 
+// SetAdaptiveNearPlanePerspective overwrites the current contents of this matrix with a projection matrix
+// that is used to render in a 3d perspective.  The near plane will be derived from the width and height, but
+// clamped to a minimum and maximum that were passed in
+//
+// fovYRad - The vertical field of view of the projection, in radians
+//
+// aspectRatio - The aspect ratio of the viewport
+//
+// zFar - The far clipping plane's distance from the origin
+//
+// zMinNear - The absolute minimum near plane distance permitted
+//
+// zMaxNear - The absolute maximum near plane distance permitted
+func (m *Mat4x4[T]) SetAdaptiveNearPlanePerspective(fovYRad float64, aspectRatio, zFar, zMinNear, zMaxNear T) {
+	tanHalfFovY := T(math.Tan(fovYRad * 0.5))
+	w := 1 / (aspectRatio * tanHalfFovY)
+	h := 1 / tanHalfFovY
+
+	var desiredNear T
+	if w > h {
+		desiredNear = h * 12
+	} else {
+		desiredNear = w * 12
+	}
+
+	near := desiredNear
+	if desiredNear > zMaxNear {
+		near = zMaxNear
+	} else if desiredNear < zMinNear {
+		near = zMinNear
+	}
+
+	m[0][0] = w
+	m[0][1] = 0
+	m[0][2] = 0
+	m[0][3] = 0
+	m[1][0] = 0
+	m[1][1] = -h
+	m[1][2] = 0
+	m[1][3] = 0
+	m[2][0] = 0
+	m[2][1] = 0
+	m[2][2] = zFar / (near - zFar)
+	m[2][3] = -1
+	m[3][0] = 0
+	m[3][1] = 0
+	m[3][2] = -(zFar * near) / (zFar - near)
+	m[3][3] = 0
+}
+
 // SetLookAt overwrites the current contents of this matrix with a view matrix that is used
 // to view a scene, given a particular camera position and orientation
 //

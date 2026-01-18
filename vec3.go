@@ -171,6 +171,26 @@ func (v *Vec3[T]) SetRotate(input *Vec3[T], angleRad float64, axis *Vec3[T]) {
 		(inverseCos*unitAxis.Z*unitAxis.Z+cos)*input.Z
 }
 
+// SetRotateTowards is like SetRotate, except instead of accepting the axis vector, it accepts a
+// unit vector that is perpendicular toward the input vector and rotates along the plane defined
+// by the two vectors.  If angleRad = pi/2, the result will be equal to the towards vector
+//
+// input - The vector to be rotated
+//
+// angleRad - The amount to rotate the vector, in radians.  If negative, the rotation will be
+//
+//	away from the towards vector
+//
+// towards - The vector the input vector should be rotated towards
+func (v *Vec3[T]) SetRotateTowards(input *Vec3[T], angleRad float64, towards *Vec3[T]) {
+	cos := T(math.Cos(angleRad))
+	sin := T(math.Sin(angleRad))
+
+	v.X = cos*input.X + sin*towards.X
+	v.Y = cos*input.Y + sin*towards.Y
+	v.Z = cos*input.Z + sin*towards.Z
+}
+
 // SetRotateX overwrites the contents of this vector with the results of rotating a
 // provided 3-element vector around the x axis by a provided angle
 //
@@ -553,4 +573,23 @@ func (v *Vec3[T]) TransformHomogenous(m *Mat4x4[T]) {
 	v.X = x * factor
 	v.Y = y * factor
 	v.Z = z * factor
+}
+
+func EulersToVectors[T FloatingPoint](pitchRadians, yawRadians, rollRadians float64, forward, right, up *Vec3[T]) {
+	pitchSin := math.Sin(pitchRadians)
+	pitchCos := math.Cos(pitchRadians)
+	yawSin := math.Sin(yawRadians)
+	yawCos := math.Cos(yawRadians)
+	rollSin := math.Sin(rollRadians)
+	rollCos := math.Cos(rollRadians)
+
+	forward.X = T(pitchCos * yawCos)
+	forward.Y = T(pitchCos * yawSin)
+	forward.Z = T(-pitchSin)
+	right.X = T(-1*rollSin*pitchSin*yawCos + -1*rollCos*-yawSin)
+	right.Y = T(-1*rollSin*pitchSin*yawSin + -1*rollCos*yawCos)
+	right.Z = T(-1 * rollSin * pitchCos)
+	up.X = T(rollCos*pitchSin*yawCos + -rollSin*-yawSin)
+	up.Y = T(rollCos*pitchSin*yawSin + -rollSin*yawCos)
+	up.Z = T(rollCos * pitchCos)
 }
