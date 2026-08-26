@@ -2,14 +2,14 @@ package math
 
 import "math"
 
-type Mat4Row [4]float32
+type Mat4Row[T FloatingPoint] [4]T
 
 // Mat4x4 is a two-dimensional array of floating point-compatible values that can be used
 // for 4x4 matrix arithmetic and all 3d matrix transformations
-type Mat4x4 [4]Mat4Row
+type Mat4x4[T FloatingPoint] [4]Mat4Row[T]
 
 // SetIdentity overwrites the current contents of the matrix with the identity matrix
-func (m *Mat4x4) SetIdentity() {
+func (m *Mat4x4[T]) SetIdentity() {
 	m[0][0] = 1
 	m[0][1] = 0
 	m[0][2] = 0
@@ -32,7 +32,7 @@ func (m *Mat4x4) SetIdentity() {
 // multiplied by the provided scalar value
 //
 // s - The scalar value to multiply the matrix entries by
-func (m *Mat4x4) SetDiagonalScalar(s float32) {
+func (m *Mat4x4[T]) SetDiagonalScalar(s T) {
 	m[0][0] = s
 	m[0][1] = 0
 	m[0][2] = 0
@@ -56,23 +56,23 @@ func (m *Mat4x4) SetDiagonalScalar(s float32) {
 // element corresponding to a column in the matrix
 //
 // v - The vector containing the diagonal entries that will be populated into the matrix
-func (m *Mat4x4) SetDiagonalVector(v *Vec4) {
-	m[0][0] = v.X()
+func (m *Mat4x4[T]) SetDiagonalVector(v *Vec4[T]) {
+	m[0][0] = v.X
 	m[0][1] = 0
 	m[0][2] = 0
 	m[0][3] = 0
 	m[1][0] = 0
-	m[1][1] = v.Y()
+	m[1][1] = v.Y
 	m[1][2] = 0
 	m[1][3] = 0
 	m[2][0] = 0
 	m[2][1] = 0
-	m[2][2] = v.Z()
+	m[2][2] = v.Z
 	m[2][3] = 0
 	m[3][0] = 0
 	m[3][1] = 0
 	m[3][2] = 0
-	m[3][3] = v.W()
+	m[3][3] = v.W
 }
 
 // SetFrustum overwrites the current matrix values with a projection matrix for a frustum
@@ -84,7 +84,7 @@ func (m *Mat4x4) SetDiagonalVector(v *Vec4) {
 // top - The top boundary of the view frustum
 // nearVal - The near clipping plane distance from origin
 // farVal - The far clipping plane distance from origin
-func (m *Mat4x4) SetFrustum(left, right, bottom, top, nearVal, farVal float32) {
+func (m *Mat4x4[T]) SetFrustum(left, right, bottom, top, nearVal, farVal T) {
 	m[0][0] = (2 * nearVal) / (right - left)
 	m[0][1] = 0
 	m[0][2] = 0
@@ -109,13 +109,13 @@ func (m *Mat4x4) SetFrustum(left, right, bottom, top, nearVal, farVal float32) {
 // origin - A unit vector indicating the starting direction of the rotation
 //
 // target - A unit vector indicating the target direction of the rotation
-func (m *Mat4x4) SetOrientation(origin *Vec3, target *Vec3) {
+func (m *Mat4x4[T]) SetOrientation(origin *Vec3[T], target *Vec3[T]) {
 	if target.Equal(origin, 0.0001) {
 		m.SetIdentity()
 		return
 	}
 
-	var rotationAxis Vec3
+	var rotationAxis Vec3[T]
 	rotationAxis.SetVec3(origin)
 	rotationAxis.CrossProduct(target)
 
@@ -132,11 +132,23 @@ func (m *Mat4x4) SetOrientation(origin *Vec3, target *Vec3) {
 // y - The amount to translate along the y axis
 //
 // z - The amount to translate along the z axis
-func (m *Mat4x4) SetTranslation(x, y, z float32) {
-	m[0] = [4]float32{1, 0, 0, 0}
-	m[1] = [4]float32{0, 1, 0, 0}
-	m[2] = [4]float32{0, 0, 1, 0}
-	m[3] = [4]float32{x, y, z, 1}
+func (m *Mat4x4[T]) SetTranslation(x, y, z T) {
+	m[0][0] = 1
+	m[0][1] = 0
+	m[0][2] = 0
+	m[0][3] = 0
+	m[1][0] = 0
+	m[1][1] = 1
+	m[1][2] = 0
+	m[1][3] = 0
+	m[2][0] = 0
+	m[2][1] = 0
+	m[2][2] = 1
+	m[2][3] = 0
+	m[3][0] = x
+	m[3][1] = y
+	m[3][2] = z
+	m[3][3] = 1
 }
 
 // SetScale overwrites the current contents of this matrix with a transform matrix that scales
@@ -147,18 +159,30 @@ func (m *Mat4x4) SetTranslation(x, y, z float32) {
 // y - Factor to scale by along the y axis
 //
 // z - Factor to scale by along the z axis
-func (m *Mat4x4) SetScale(x, y, z float32) {
-	m[0] = [4]float32{x, 0, 0, 0}
-	m[1] = [4]float32{0, y, 0, 0}
-	m[2] = [4]float32{0, 0, z, 0}
-	m[3] = [4]float32{0, 0, 0, 1}
+func (m *Mat4x4[T]) SetScale(x, y, z T) {
+	m[0][0] = x
+	m[0][1] = 0
+	m[0][2] = 0
+	m[0][3] = 0
+	m[1][0] = 0
+	m[1][1] = y
+	m[1][2] = 0
+	m[1][3] = 0
+	m[2][0] = 0
+	m[2][1] = 0
+	m[2][2] = z
+	m[2][3] = 0
+	m[3][0] = 0
+	m[3][1] = 0
+	m[3][2] = 0
+	m[3][3] = 1
 }
 
 // SetMat4x4 overwrites the current contents of the matrix with the contents of the provided
 // matrix
 //
 // other - The matrix to initialize from
-func (m *Mat4x4) SetMat4x4(other *Mat4x4) {
+func (m *Mat4x4[T]) SetMat4x4(other *Mat4x4[T]) {
 	m[0][0] = other[0][0]
 	m[0][1] = other[0][1]
 	m[0][2] = other[0][2]
@@ -181,7 +205,7 @@ func (m *Mat4x4) SetMat4x4(other *Mat4x4) {
 // layers the provided 3x3 matrix over the upper left 3x3 area
 //
 // other - The 3x3 matrix to initialize from
-func (m *Mat4x4) SetMat3x3(other *Mat3x3) {
+func (m *Mat4x4[T]) SetMat3x3(other *Mat3x3[T]) {
 	m[0][0] = other[0][0]
 	m[0][1] = other[0][1]
 	m[0][2] = other[0][2]
@@ -204,7 +228,7 @@ func (m *Mat4x4) SetMat3x3(other *Mat3x3) {
 // layers the provided 2x2 matrix over the upper left 2x2 area of the matrix
 //
 // other - The 2x2 matrix to initialize from
-func (m *Mat4x4) SetMat2x2(other *Mat2x2) {
+func (m *Mat4x4[T]) SetMat2x2(other *Mat2x2[T]) {
 	m[0][0] = other[0][0]
 	m[0][1] = other[0][1]
 	m[0][2] = 0
@@ -227,7 +251,7 @@ func (m *Mat4x4) SetMat2x2(other *Mat2x2) {
 // that contains the rotation of the provided Quaternion
 //
 // other - The quaternion to initialize from
-func (m *Mat4x4) SetQuaternion(other *Quaternion) {
+func (m *Mat4x4[T]) SetQuaternion(other *Quaternion[T]) {
 	xx := other.X * other.X
 	yy := other.Y * other.Y
 	zz := other.Z * other.Z
@@ -263,23 +287,23 @@ func (m *Mat4x4) SetQuaternion(other *Quaternion) {
 // c2 - The second column of the matrix
 // c3 - The third column of the matrix
 // c4 - The fourth column of the matrix
-func (m *Mat4x4) SetColMajor(c1, c2, c3, c4 *Vec4) {
-	m[0][0] = c1.X()
-	m[0][1] = c1.Y()
-	m[0][2] = c1.Z()
-	m[0][3] = c1.W()
-	m[1][0] = c2.X()
-	m[1][1] = c2.Y()
-	m[1][2] = c2.Z()
-	m[1][3] = c2.W()
-	m[2][0] = c3.X()
-	m[2][1] = c3.Y()
-	m[2][2] = c3.Z()
-	m[2][3] = c3.W()
-	m[3][0] = c4.X()
-	m[3][1] = c4.Y()
-	m[3][2] = c4.Z()
-	m[3][3] = c4.W()
+func (m *Mat4x4[T]) SetColMajor(c1, c2, c3, c4 *Vec4[T]) {
+	m[0][0] = c1.X
+	m[0][1] = c1.Y
+	m[0][2] = c1.Z
+	m[0][3] = c1.W
+	m[1][0] = c2.X
+	m[1][1] = c2.Y
+	m[1][2] = c2.Z
+	m[1][3] = c2.W
+	m[2][0] = c3.X
+	m[2][1] = c3.Y
+	m[2][2] = c3.Z
+	m[2][3] = c3.W
+	m[3][0] = c4.X
+	m[3][1] = c4.Y
+	m[3][2] = c4.Z
+	m[3][3] = c4.W
 }
 
 // SetRowMajor overwrites the current contents of the matrix with 4 matrix rows
@@ -289,23 +313,23 @@ func (m *Mat4x4) SetColMajor(c1, c2, c3, c4 *Vec4) {
 // r2 - The second row of the matrix
 // r3 - The third row of the matrix
 // r4 - The fourth row of the matrix
-func (m *Mat4x4) SetRowMajor(r1, r2, r3, r4 *Vec4) {
-	m[0][0] = r1.X()
-	m[1][0] = r1.Y()
-	m[2][0] = r2.Z()
-	m[3][0] = r3.W()
-	m[0][1] = r2.X()
-	m[1][1] = r2.Y()
-	m[2][1] = r2.Z()
-	m[3][1] = r2.W()
-	m[0][2] = r3.X()
-	m[1][2] = r3.Y()
-	m[2][2] = r3.Z()
-	m[3][2] = r3.W()
-	m[0][3] = r4.X()
-	m[1][3] = r4.Y()
-	m[2][3] = r4.Z()
-	m[3][3] = r4.W()
+func (m *Mat4x4[T]) SetRowMajor(r1, r2, r3, r4 *Vec4[T]) {
+	m[0][0] = r1.X
+	m[1][0] = r1.Y
+	m[2][0] = r2.Z
+	m[3][0] = r3.W
+	m[0][1] = r2.X
+	m[1][1] = r2.Y
+	m[2][1] = r2.Z
+	m[3][1] = r2.W
+	m[0][2] = r3.X
+	m[1][2] = r3.Y
+	m[2][2] = r3.Z
+	m[3][2] = r3.W
+	m[0][3] = r4.X
+	m[1][3] = r4.Y
+	m[2][3] = r4.Z
+	m[3][3] = r4.W
 }
 
 // SetRotationEulers overwrites the current contents of this matrix with a rotation matrix
@@ -316,13 +340,13 @@ func (m *Mat4x4) SetRowMajor(r1, r2, r3, r4 *Vec4) {
 // pitchRad - Angle to rotate pitch in radians
 //
 // rollRad - Angle to rotate roll in radians
-func (m *Mat4x4) SetRotationEulers(yawRad, pitchRad, rollRad float64) {
-	yawCos := float32(math.Cos(yawRad))
-	pitchCos := float32(math.Cos(pitchRad))
-	rollCos := float32(math.Cos(rollRad))
-	yawSin := float32(math.Sin(yawRad))
-	pitchSin := float32(math.Sin(pitchRad))
-	rollSin := float32(math.Sin(rollRad))
+func (m *Mat4x4[T]) SetRotationEulers(yawRad, pitchRad, rollRad float64) {
+	yawCos := T(math.Cos(yawRad))
+	pitchCos := T(math.Cos(pitchRad))
+	rollCos := T(math.Cos(rollRad))
+	yawSin := T(math.Sin(yawRad))
+	pitchSin := T(math.Sin(pitchRad))
+	rollSin := T(math.Sin(rollRad))
 
 	m[0][0] = rollCos * yawCos
 	m[0][1] = rollSin*yawCos + pitchSin*yawSin*rollCos
@@ -346,23 +370,41 @@ func (m *Mat4x4) SetRotationEulers(yawRad, pitchRad, rollRad float64) {
 // rotates around the y axis by the specified amount
 //
 // yawRad - The angle to rotate around the y axis in radians
-func (m *Mat4x4) SetRotationY(yawRad float64) {
-	cos := float32(math.Cos(yawRad))
-	sin := float32(math.Sin(yawRad))
+func (m *Mat4x4[T]) SetRotationY(yawRad float64) {
+	cos := T(math.Cos(yawRad))
+	sin := T(math.Sin(yawRad))
 
-	m[0] = [4]float32{cos, 0, -sin, 0}
-	m[1] = [4]float32{0, 1, 0, 0}
-	m[2] = [4]float32{sin, 0, cos, 0}
-	m[3] = [4]float32{0, 0, 0, 1}
+	m00 := cos
+	m02 := -sin
+
+	m20 := sin
+	m22 := cos
+
+	m[0][0] = m00
+	m[0][1] = 0
+	m[0][2] = m02
+	m[0][3] = 0
+	m[1][0] = 0
+	m[1][1] = 1
+	m[1][2] = 0
+	m[1][3] = 0
+	m[2][0] = m20
+	m[2][1] = 0
+	m[2][2] = m22
+	m[2][3] = 0
+	m[3][0] = 0
+	m[3][1] = 0
+	m[3][2] = 0
+	m[3][3] = 1
 }
 
 // SetRotationX overwrites the current contents of this matrix with a rotation matrix that
 // rotates around the x axis by the specified amount
 //
 // pitchRad - The angle to rotate around the x axis in radians
-func (m *Mat4x4) SetRotationX(pitchRad float64) {
-	cos := float32(math.Cos(pitchRad))
-	sin := float32(math.Sin(pitchRad))
+func (m *Mat4x4[T]) SetRotationX(pitchRad float64) {
+	cos := T(math.Cos(pitchRad))
+	sin := T(math.Sin(pitchRad))
 
 	m11 := cos
 	m12 := sin
@@ -392,9 +434,9 @@ func (m *Mat4x4) SetRotationX(pitchRad float64) {
 // rotates around the z axis by the specified amount
 //
 // rollRad - The angle to rotate around the z axis in radians
-func (m *Mat4x4) SetRotationZ(rollRad float64) {
-	cos := float32(math.Cos(rollRad))
-	sin := float32(math.Sin(rollRad))
+func (m *Mat4x4[T]) SetRotationZ(rollRad float64) {
+	cos := T(math.Cos(rollRad))
+	sin := T(math.Sin(rollRad))
 
 	m00 := cos
 	m01 := sin
@@ -425,7 +467,7 @@ func (m *Mat4x4) SetRotationZ(rollRad float64) {
 // 3x3 portion of this matrix.
 //
 // other - The 4x4 matrix to copy from
-func (m *Mat4x4) SetAffineMat4x4(other *Mat4x4) {
+func (m *Mat4x4[T]) SetAffineMat4x4(other *Mat4x4[T]) {
 	m[0][0] = other[0][0]
 	m[0][1] = other[0][1]
 	m[0][2] = other[0][2]
@@ -452,8 +494,8 @@ func (m *Mat4x4) SetAffineMat4x4(other *Mat4x4) {
 // aspectRatio - The aspect ratio of the viewport
 //
 // zNear - The near clipping plane's distance from the origin
-func (m *Mat4x4) SetInfinitePerspective(fovYRad float64, aspectRatio, zNear float32) {
-	r := float32(math.Tan(fovYRad/2)) * zNear
+func (m *Mat4x4[T]) SetInfinitePerspective(fovYRad float64, aspectRatio, zNear T) {
+	r := T(math.Tan(fovYRad/2)) * zNear
 	left := -r * aspectRatio
 	right := r * aspectRatio
 	bottom := -r
@@ -487,7 +529,7 @@ func (m *Mat4x4) SetInfinitePerspective(fovYRad float64, aspectRatio, zNear floa
 // bottom - The bottom boundary of the viewport
 //
 // top - The top boundary of the viewport
-func (m *Mat4x4) SetOrthographic2D(left, right, bottom, top float32) {
+func (m *Mat4x4[T]) SetOrthographic2D(left, right, bottom, top T) {
 	m[0][0] = 2 / (right - left)
 	m[0][1] = 0
 	m[0][2] = 0
@@ -520,7 +562,7 @@ func (m *Mat4x4) SetOrthographic2D(left, right, bottom, top float32) {
 // zNear - The near clipping plane's distance from the origin
 //
 // zFar - The far clipping plane's distance from the origin
-func (m *Mat4x4) SetOrthographic(left, right, bottom, top, zNear, zFar float32) {
+func (m *Mat4x4[T]) SetOrthographic(left, right, bottom, top, zNear, zFar T) {
 	m[0][0] = 2 / (right - left)
 	m[0][1] = 0
 	m[0][2] = 0
@@ -549,8 +591,8 @@ func (m *Mat4x4) SetOrthographic(left, right, bottom, top, zNear, zFar float32) 
 // zNear - The near clipping plane's distance from the origin
 //
 // zFar - The far clipping plane's distance from the origin
-func (m *Mat4x4) SetPerspective(fovYRad float64, aspectRatio, zNear, zFar float32) {
-	tanHalfFovY := float32(math.Tan(fovYRad * 0.5))
+func (m *Mat4x4[T]) SetPerspective(fovYRad float64, aspectRatio, zNear, zFar T) {
+	tanHalfFovY := T(math.Tan(fovYRad * 0.5))
 
 	m[0][0] = 1 / (aspectRatio * tanHalfFovY)
 	m[0][1] = 0
@@ -583,12 +625,12 @@ func (m *Mat4x4) SetPerspective(fovYRad float64, aspectRatio, zNear, zFar float3
 // zMinNear - The absolute minimum near plane distance permitted
 //
 // zMaxNear - The absolute maximum near plane distance permitted
-func (m *Mat4x4) SetAdaptiveNearPlanePerspective(fovYRad float64, aspectRatio, zFar, zMinNear, zMaxNear float32) {
-	tanHalfFovY := float32(math.Tan(fovYRad * 0.5))
+func (m *Mat4x4[T]) SetAdaptiveNearPlanePerspective(fovYRad float64, aspectRatio, zFar, zMinNear, zMaxNear T) {
+	tanHalfFovY := T(math.Tan(fovYRad * 0.5))
 	w := 1 / (aspectRatio * tanHalfFovY)
 	h := 1 / tanHalfFovY
 
-	var desiredNear float32
+	var desiredNear T
 	if w > h {
 		desiredNear = h * 12
 	} else {
@@ -628,18 +670,18 @@ func (m *Mat4x4) SetAdaptiveNearPlanePerspective(fovYRad float64, aspectRatio, z
 // target - A 3d vector indicating the point the camera is focusing on
 //
 // up - A 3d vector indicating the camera's up direction
-func (m *Mat4x4) SetLookAt(eyePosition *Vec3, target *Vec3, up *Vec3) {
-	var f Vec3
+func (m *Mat4x4[T]) SetLookAt(eyePosition *Vec3[T], target *Vec3[T], up *Vec3[T]) {
+	var f Vec3[T]
 	f.SetVec3(target)
 	f.SubtractVec3(eyePosition)
 	f.Normalize()
 
-	var s Vec3
+	var s Vec3[T]
 	s.SetVec3(&f)
 	s.CrossProduct(up)
 	s.Normalize()
 
-	var u Vec3
+	var u Vec3[T]
 	u.SetVec3(&s)
 	u.CrossProduct(&f)
 
@@ -668,8 +710,23 @@ func (m *Mat4x4) SetLookAt(eyePosition *Vec3, target *Vec3, up *Vec3) {
 //
 // lhs - The left operand of the multiplication operation
 // rhs - The right operand of the multiplication operation
-func (m *Mat4x4) SetMultMat4x4(lhs, rhs *Mat4x4) {
-	MulMatrix(lhs, rhs, m)
+func (m *Mat4x4[T]) SetMultMat4x4(lhs, rhs *Mat4x4[T]) {
+	m[0][0] = lhs[0][0]*rhs[0][0] + lhs[1][0]*rhs[0][1] + lhs[2][0]*rhs[0][2] + lhs[3][0]*rhs[0][3]
+	m[0][1] = lhs[0][1]*rhs[0][0] + lhs[1][1]*rhs[0][1] + lhs[2][1]*rhs[0][2] + lhs[3][1]*rhs[0][3]
+	m[0][2] = lhs[0][2]*rhs[0][0] + lhs[1][2]*rhs[0][1] + lhs[2][2]*rhs[0][2] + lhs[3][2]*rhs[0][3]
+	m[0][3] = lhs[0][3]*rhs[0][0] + lhs[1][3]*rhs[0][1] + lhs[2][3]*rhs[0][2] + lhs[3][3]*rhs[0][3]
+	m[1][0] = lhs[0][0]*rhs[1][0] + lhs[1][0]*rhs[1][1] + lhs[2][0]*rhs[1][2] + lhs[3][0]*rhs[1][3]
+	m[1][1] = lhs[0][1]*rhs[1][0] + lhs[1][1]*rhs[1][1] + lhs[2][1]*rhs[1][2] + lhs[3][1]*rhs[1][3]
+	m[1][2] = lhs[0][2]*rhs[1][0] + lhs[1][2]*rhs[1][1] + lhs[2][2]*rhs[1][2] + lhs[3][2]*rhs[1][3]
+	m[1][3] = lhs[0][3]*rhs[1][0] + lhs[1][3]*rhs[1][1] + lhs[2][3]*rhs[1][2] + lhs[3][3]*rhs[1][3]
+	m[2][0] = lhs[0][0]*rhs[2][0] + lhs[1][0]*rhs[2][1] + lhs[2][0]*rhs[2][2] + lhs[3][0]*rhs[2][3]
+	m[2][1] = lhs[0][1]*rhs[2][0] + lhs[1][1]*rhs[2][1] + lhs[2][1]*rhs[2][2] + lhs[3][1]*rhs[2][3]
+	m[2][2] = lhs[0][2]*rhs[2][0] + lhs[1][2]*rhs[2][1] + lhs[2][2]*rhs[2][2] + lhs[3][2]*rhs[2][3]
+	m[2][3] = lhs[0][3]*rhs[2][0] + lhs[1][3]*rhs[2][1] + lhs[2][3]*rhs[2][2] + lhs[3][3]*rhs[2][3]
+	m[3][0] = lhs[0][0]*rhs[3][0] + lhs[1][0]*rhs[3][1] + lhs[2][0]*rhs[3][2] + lhs[3][0]*rhs[3][3]
+	m[3][1] = lhs[0][1]*rhs[3][0] + lhs[1][1]*rhs[3][1] + lhs[2][1]*rhs[3][2] + lhs[3][1]*rhs[3][3]
+	m[3][2] = lhs[0][2]*rhs[3][0] + lhs[1][2]*rhs[3][1] + lhs[2][2]*rhs[3][2] + lhs[3][2]*rhs[3][3]
+	m[3][3] = lhs[0][3]*rhs[3][0] + lhs[1][3]*rhs[3][1] + lhs[2][3]*rhs[3][2] + lhs[3][3]*rhs[3][3]
 }
 
 // SetApplyTransform applies the right transform matrix to the left transform matrix and overwrites
@@ -679,7 +736,7 @@ func (m *Mat4x4) SetMultMat4x4(lhs, rhs *Mat4x4) {
 // lhs - The matrix having a transform applied to it
 //
 // rhs - The transform being applied
-func (m *Mat4x4) SetApplyTransform(lhs, rhs *Mat4x4) {
+func (m *Mat4x4[T]) SetApplyTransform(lhs, rhs *Mat4x4[T]) {
 	m[0][0] = rhs[0][0]*lhs[0][0] + rhs[1][0]*lhs[0][1] + rhs[2][0]*lhs[0][2] + rhs[3][0]*lhs[0][3]
 	m[0][1] = rhs[0][1]*lhs[0][0] + rhs[1][1]*lhs[0][1] + rhs[2][1]*lhs[0][2] + rhs[3][1]*lhs[0][3]
 	m[0][2] = rhs[0][2]*lhs[0][0] + rhs[1][2]*lhs[0][1] + rhs[2][2]*lhs[0][2] + rhs[3][2]*lhs[0][3]
@@ -707,21 +764,21 @@ func (m *Mat4x4) SetApplyTransform(lhs, rhs *Mat4x4) {
 // rhs - The "end" transform matrix in this interpolation
 //
 // delta - A value between 0 and 1 indicating how far to interpolate between the two matrices
-func (m *Mat4x4) SetInterpolateMat4x4(lhs, rhs *Mat4x4, delta float32) {
-	var oldMatrix Mat4x4
+func (m *Mat4x4[T]) SetInterpolateMat4x4(lhs, rhs *Mat4x4[T], delta T) {
+	var oldMatrix Mat4x4[T]
 	oldMatrix.SetMat4x4(lhs)
 
-	var thisRotation Mat4x4
+	var thisRotation Mat4x4[T]
 	thisRotation.SetAffineMat4x4(lhs)
 
-	var transposedRotation Mat4x4
+	var transposedRotation Mat4x4[T]
 	transposedRotation.SetMat4x4(&thisRotation)
 	transposedRotation.Transpose()
 
-	var deltaRotation Mat4x4
+	var deltaRotation Mat4x4[T]
 	deltaRotation.SetMultMat4x4(rhs, &transposedRotation)
 
-	var deltaAxis Vec3
+	var deltaAxis Vec3[T]
 	var deltaAngle float64
 	deltaRotation.GetAxisAngle(&deltaAxis, &deltaAngle)
 
@@ -739,61 +796,61 @@ func (m *Mat4x4) SetInterpolateMat4x4(lhs, rhs *Mat4x4, delta float32) {
 // to the angle of rotation.
 //
 // outAngleRad - A pointer to a float64 that will be populated with the amount to rotate in radians
-func (m *Mat4x4) GetAxisAngle(outAxis *Vec3, outAngleRad *float64) {
-	epsilon := float32(0.01)
-	epsilon2 := float32(0.1)
+func (m *Mat4x4[T]) GetAxisAngle(outAxis *Vec3[T], outAngleRad *float64) {
+	epsilon := T(0.01)
+	epsilon2 := T(0.1)
 
-	if (abs(m[1][0]-m[0][1]) < epsilon) &&
-		(abs(m[2][0]-m[0][2]) < epsilon) &&
-		(abs(m[2][1]-m[1][2]) < epsilon) {
+	if (abs[T](m[1][0]-m[0][1]) < epsilon) &&
+		(abs[T](m[2][0]-m[0][2]) < epsilon) &&
+		(abs[T](m[2][1]-m[1][2]) < epsilon) {
 
-		if (abs(m[1][0]+m[0][1]) < epsilon2) &&
-			(abs(m[2][0]+m[0][2]) < epsilon2) &&
-			(abs(m[2][1]+m[1][2]) < epsilon2) &&
-			(abs(m[0][0]+m[1][1]+m[2][2]-3) < epsilon2) {
+		if (abs[T](m[1][0]+m[0][1]) < epsilon2) &&
+			(abs[T](m[2][0]+m[0][2]) < epsilon2) &&
+			(abs[T](m[2][1]+m[1][2]) < epsilon2) &&
+			(abs[T](m[0][0]+m[1][1]+m[2][2]-T(3)) < epsilon2) {
 
 			*outAngleRad = 0
-			outAxis.X = 1
-			outAxis.Y = 0
-			outAxis.Z = 0
+			outAxis.X = T(1)
+			outAxis.Y = T(0)
+			outAxis.Z = T(0)
 			return
 		}
 
 		*outAngleRad = math.Pi
-		xx := (m[0][0] + 1) * 0.5
-		yy := (m[1][1] + 1) * 0.5
-		zz := (m[2][2] + 1) * 0.5
-		xy := (m[1][0] + m[0][1]) * 0.25
-		xz := (m[2][0] + m[0][2]) * 0.25
-		yz := (m[2][1] + m[1][2]) * 0.25
+		xx := (m[0][0] + T(1)) * T(0.5)
+		yy := (m[1][1] + T(1)) * T(0.5)
+		zz := (m[2][2] + T(1)) * T(0.5)
+		xy := (m[1][0] + m[0][1]) * T(0.25)
+		xz := (m[2][0] + m[0][2]) * T(0.25)
+		yz := (m[2][1] + m[1][2]) * T(0.25)
 
 		if xx > yy && xx > zz {
 			if xx < epsilon {
-				outAxis.X = 0
-				outAxis.Y = 0.7071
-				outAxis.Z = 0.7071
+				outAxis.X = T(0)
+				outAxis.Y = T(0.7071)
+				outAxis.Z = T(0.7071)
 			} else {
-				outAxis.X = float32(math.Sqrt(float64(xx)))
+				outAxis.X = T(math.Sqrt(float64(xx)))
 				outAxis.Y = xy / outAxis.X
 				outAxis.Z = xz / outAxis.X
 			}
 		} else if yy > zz {
 			if yy < epsilon {
-				outAxis.X = 0.7071
-				outAxis.Y = 0
-				outAxis.Z = 0.7071
+				outAxis.X = T(0.7071)
+				outAxis.Y = T(0)
+				outAxis.Z = T(0.7071)
 			} else {
-				outAxis.Y = float32(math.Sqrt(float64(yy)))
+				outAxis.Y = T(math.Sqrt(float64(yy)))
 				outAxis.X = xy / outAxis.Y
 				outAxis.Z = yz / outAxis.Z
 			}
 		} else {
 			if zz < epsilon {
-				outAxis.X = 0.7071
-				outAxis.Y = 0.7071
-				outAxis.Z = 0
+				outAxis.X = T(0.7071)
+				outAxis.Y = T(0.7071)
+				outAxis.Z = T(0)
 			} else {
-				outAxis.Z = float32(math.Sqrt(float64(zz)))
+				outAxis.Z = T(math.Sqrt(float64(zz)))
 				outAxis.X = xz / outAxis.Z
 				outAxis.Y = yz / outAxis.Z
 			}
@@ -804,13 +861,13 @@ func (m *Mat4x4) GetAxisAngle(outAxis *Vec3, outAngleRad *float64) {
 	sSquared := (m[2][1]-m[1][2])*(m[2][1]-m[1][2]) +
 		(m[2][0]-m[0][2])*(m[2][0]-m[0][2]) +
 		(m[1][0]-m[0][1])*(m[1][0]-m[0][1])
-	s := float32(math.Sqrt(float64(sSquared)))
+	s := T(math.Sqrt(float64(sSquared)))
 
-	if s < 0.001 {
-		s = 1
+	if s < T(0.001) {
+		s = T(1)
 	}
 
-	angleCos := (m[0][0] + m[1][1] + m[2][2] - 1) * 0.5
+	angleCos := (m[0][0] + m[1][1] + m[2][2] - T(1)) * T(0.5)
 	if angleCos < -1 {
 		*outAngleRad = math.Pi
 	} else if angleCos > 1 {
@@ -825,7 +882,7 @@ func (m *Mat4x4) GetAxisAngle(outAxis *Vec3, outAngleRad *float64) {
 }
 
 // Transpose mirrors this matrix across the diagonal
-func (m *Mat4x4) Transpose() {
+func (m *Mat4x4[T]) Transpose() {
 	m[1][0], m[0][1] = m[0][1], m[1][0]
 	m[2][0], m[0][2] = m[0][2], m[2][0]
 	m[2][1], m[1][2] = m[1][2], m[2][1]
@@ -837,7 +894,7 @@ func (m *Mat4x4) Transpose() {
 
 // Inverse inverts this matrix. If this matrix has no valid inverse, some
 // entries will be set to NaN
-func (m *Mat4x4) Inverse() {
+func (m *Mat4x4[T]) Inverse() {
 	coefficient0 := m[2][2]*m[3][3] - m[3][2]*m[2][3]
 	coefficient2 := m[1][2]*m[3][3] - m[3][2]*m[1][3]
 	coefficient3 := m[1][2]*m[2][3] - m[2][2]*m[1][3]
@@ -881,9 +938,9 @@ func (m *Mat4x4) Inverse() {
 
 	determinant := m[0][0]*m00 + m[0][1]*m10 + m[0][2]*m20 + m[0][3]*m30
 
-	var oneOverDeterminant float32
+	var oneOverDeterminant T
 	if determinant < 0.0001 {
-		oneOverDeterminant = float32(math.NaN())
+		oneOverDeterminant = T(math.NaN())
 	} else {
 		oneOverDeterminant = 1.0 / determinant
 	}
@@ -912,24 +969,94 @@ func (m *Mat4x4) Inverse() {
 // You may prefer to use ApplyTransform.
 //
 // other - The right hand side of the multiplication operation.
-func (m *Mat4x4) MultMat4x4(other *Mat4x4) {
-	MulMatrix(m, other, m)
+func (m *Mat4x4[T]) MultMat4x4(other *Mat4x4[T]) {
+	m00 := m[0][0]*other[0][0] + m[1][0]*other[0][1] + m[2][0]*other[0][2] + m[3][0]*other[0][3]
+	m10 := m[0][0]*other[1][0] + m[1][0]*other[1][1] + m[2][0]*other[1][2] + m[3][0]*other[1][3]
+	m20 := m[0][0]*other[2][0] + m[1][0]*other[2][1] + m[2][0]*other[2][2] + m[3][0]*other[2][3]
+	m30 := m[0][0]*other[3][0] + m[1][0]*other[3][1] + m[2][0]*other[3][2] + m[3][0]*other[3][3]
+
+	m01 := m[0][1]*other[0][0] + m[1][1]*other[0][1] + m[2][1]*other[0][2] + m[3][1]*other[0][3]
+	m11 := m[0][1]*other[1][0] + m[1][1]*other[1][1] + m[2][1]*other[1][2] + m[3][1]*other[1][3]
+	m21 := m[0][1]*other[2][0] + m[1][1]*other[2][1] + m[2][1]*other[2][2] + m[3][1]*other[2][3]
+	m31 := m[0][1]*other[3][0] + m[1][1]*other[3][1] + m[2][1]*other[3][2] + m[3][1]*other[3][3]
+
+	m02 := m[0][2]*other[0][0] + m[1][2]*other[0][1] + m[2][2]*other[0][2] + m[3][2]*other[0][3]
+	m12 := m[0][2]*other[1][0] + m[1][2]*other[1][1] + m[2][2]*other[1][2] + m[3][2]*other[1][3]
+	m22 := m[0][2]*other[2][0] + m[1][2]*other[2][1] + m[2][2]*other[2][2] + m[3][2]*other[2][3]
+	m32 := m[0][2]*other[3][0] + m[1][2]*other[3][1] + m[2][2]*other[3][2] + m[3][2]*other[3][3]
+
+	m03 := m[0][3]*other[0][0] + m[1][3]*other[0][1] + m[2][3]*other[0][2] + m[3][3]*other[0][3]
+	m13 := m[0][3]*other[1][0] + m[1][3]*other[1][1] + m[2][3]*other[1][2] + m[3][3]*other[1][3]
+	m23 := m[0][3]*other[2][0] + m[1][3]*other[2][1] + m[2][3]*other[2][2] + m[3][3]*other[2][3]
+	m33 := m[0][3]*other[3][0] + m[1][3]*other[3][1] + m[2][3]*other[3][2] + m[3][3]*other[3][3]
+
+	m[0][0] = m00
+	m[0][1] = m01
+	m[0][2] = m02
+	m[0][3] = m03
+	m[1][0] = m10
+	m[1][1] = m11
+	m[1][2] = m12
+	m[1][3] = m13
+	m[2][0] = m20
+	m[2][1] = m21
+	m[2][2] = m22
+	m[2][3] = m23
+	m[3][0] = m30
+	m[3][1] = m31
+	m[3][2] = m32
+	m[3][3] = m33
 }
 
 // ApplyTransform applies the provided transform matrix to this transform matrix. "Apply
 // Transform" is just a matrix multiply with the operands reversed.
 //
 // other - The transform matrix to apply
-func (m *Mat4x4) ApplyTransform(transform *Mat4x4) {
-	MulMatrix(transform, m, m)
+func (m *Mat4x4[T]) ApplyTransform(transform *Mat4x4[T]) {
+	m00 := transform[0][0]*m[0][0] + transform[1][0]*m[0][1] + transform[2][0]*m[0][2] + transform[3][0]*m[0][3]
+	m10 := transform[0][0]*m[1][0] + transform[1][0]*m[1][1] + transform[2][0]*m[1][2] + transform[3][0]*m[1][3]
+	m20 := transform[0][0]*m[2][0] + transform[1][0]*m[2][1] + transform[2][0]*m[2][2] + transform[3][0]*m[2][3]
+	m30 := transform[0][0]*m[3][0] + transform[1][0]*m[3][1] + transform[2][0]*m[3][2] + transform[3][0]*m[3][3]
+
+	m01 := transform[0][1]*m[0][0] + transform[1][1]*m[0][1] + transform[2][1]*m[0][2] + transform[3][1]*m[0][3]
+	m11 := transform[0][1]*m[1][0] + transform[1][1]*m[1][1] + transform[2][1]*m[1][2] + transform[3][1]*m[1][3]
+	m21 := transform[0][1]*m[2][0] + transform[1][1]*m[2][1] + transform[2][1]*m[2][2] + transform[3][1]*m[2][3]
+	m31 := transform[0][1]*m[3][0] + transform[1][1]*m[3][1] + transform[2][1]*m[3][2] + transform[3][1]*m[3][3]
+
+	m02 := transform[0][2]*m[0][0] + transform[1][2]*m[0][1] + transform[2][2]*m[0][2] + transform[3][2]*m[0][3]
+	m12 := transform[0][2]*m[1][0] + transform[1][2]*m[1][1] + transform[2][2]*m[1][2] + transform[3][2]*m[1][3]
+	m22 := transform[0][2]*m[2][0] + transform[1][2]*m[2][1] + transform[2][2]*m[2][2] + transform[3][2]*m[2][3]
+	m32 := transform[0][2]*m[3][0] + transform[1][2]*m[3][1] + transform[2][2]*m[3][2] + transform[3][2]*m[3][3]
+
+	m03 := transform[0][3]*m[0][0] + transform[1][3]*m[0][1] + transform[2][3]*m[0][2] + transform[3][3]*m[0][3]
+	m13 := transform[0][3]*m[1][0] + transform[1][3]*m[1][1] + transform[2][3]*m[1][2] + transform[3][3]*m[1][3]
+	m23 := transform[0][3]*m[2][0] + transform[1][3]*m[2][1] + transform[2][3]*m[2][2] + transform[3][3]*m[2][3]
+	m33 := transform[0][3]*m[3][0] + transform[1][3]*m[3][1] + transform[2][3]*m[3][2] + transform[3][3]*m[3][3]
+
+	m[0][0] = m00
+	m[0][1] = m01
+	m[0][2] = m02
+	m[0][3] = m03
+	m[1][0] = m10
+	m[1][1] = m11
+	m[1][2] = m12
+	m[1][3] = m13
+	m[2][0] = m20
+	m[2][1] = m21
+	m[2][2] = m22
+	m[2][3] = m23
+	m[3][0] = m30
+	m[3][1] = m31
+	m[3][2] = m32
+	m[3][3] = m33
 }
 
 // Proj3D transforms the matrix as a planar projection matrix along the provided
 // normal axis
 //
 // normal - The normal of the plane
-func (m *Mat4x4) Proj3D(normal *Vec3) {
-	var proj Mat4x4
+func (m *Mat4x4[T]) Proj3D(normal *Vec3[T]) {
+	var proj Mat4x4[T]
 	proj[0][0] = 1 - normal.X*normal.X
 	proj[0][1] = -normal.X * normal.Y
 	proj[0][2] = -normal.X * normal.Z
@@ -958,7 +1085,7 @@ func (m *Mat4x4) Proj3D(normal *Vec3) {
 // y - Amount to translate along the y axis
 //
 // z - Amount to translate along the z axis
-func (m *Mat4x4) Translate(x, y, z float32) {
+func (m *Mat4x4[T]) Translate(x, y, z T) {
 	m00 := m[0][0] + x*m[0][3]
 	m10 := m[1][0] + x*m[1][3]
 	m20 := m[2][0] + x*m[2][3]
@@ -995,7 +1122,7 @@ func (m *Mat4x4) Translate(x, y, z float32) {
 // y - Factor to scale by along the y axis
 //
 // z - Factor to scale by along the z axis
-func (m *Mat4x4) Scale(x, y, z float32) {
+func (m *Mat4x4[T]) Scale(x, y, z T) {
 	m[0][0] *= x
 	m[0][1] *= y
 	m[0][2] *= z
@@ -1016,13 +1143,13 @@ func (m *Mat4x4) Scale(x, y, z float32) {
 // axis - A 3-element vector that is normal to the angle of rotation. It does not need to be normalized.
 //
 // angleRad - The amount to rotate in radians
-func (m *Mat4x4) SetRotationAroundAxis(axis *Vec3, angleRad float64) {
-	var unitAxis Vec3
+func (m *Mat4x4[T]) SetRotationAroundAxis(axis *Vec3[T], angleRad float64) {
+	var unitAxis Vec3[T]
 	unitAxis.SetVec3(axis)
 	unitAxis.Normalize()
 
-	cos := float32(math.Cos(angleRad))
-	sin := float32(math.Sin(angleRad))
+	cos := T(math.Cos(angleRad))
+	sin := T(math.Sin(angleRad))
 
 	inverseCos := 1 - cos
 
@@ -1050,13 +1177,13 @@ func (m *Mat4x4) SetRotationAroundAxis(axis *Vec3, angleRad float64) {
 // axis - A 3-element vector that is normal to the angle of rotation. It does not need to be normalized.
 //
 // angleRad - The amount to rotate in radians
-func (m *Mat4x4) RotateAroundAxis(axis *Vec3, angleRad float64) {
-	var unitAxis Vec3
+func (m *Mat4x4[T]) RotateAroundAxis(axis *Vec3[T], angleRad float64) {
+	var unitAxis Vec3[T]
 	unitAxis.SetVec3(axis)
 	unitAxis.Normalize()
 
-	cos := float32(math.Cos(angleRad))
-	sin := float32(math.Sin(angleRad))
+	cos := T(math.Cos(angleRad))
+	sin := T(math.Sin(angleRad))
 
 	inverseCos := 1 - cos
 
@@ -1105,9 +1232,9 @@ func (m *Mat4x4) RotateAroundAxis(axis *Vec3, angleRad float64) {
 // RotateX applies a transformation to this matrix that rotates around the x axis by the specified amount
 //
 // angleRad - The angle to rotate around the x axis in radians
-func (m *Mat4x4) RotateX(angleRad float64) {
-	cos := float32(math.Cos(angleRad))
-	sin := float32(math.Sin(angleRad))
+func (m *Mat4x4[T]) RotateX(angleRad float64) {
+	cos := T(math.Cos(angleRad))
+	sin := T(math.Sin(angleRad))
 
 	m01 := cos*m[0][1] - sin*m[0][2]
 	m11 := cos*m[1][1] - sin*m[1][2]
@@ -1132,9 +1259,9 @@ func (m *Mat4x4) RotateX(angleRad float64) {
 // RotateY applies a transformation to this matrix that rotates around the y axis by the specified amount
 //
 // angleRad - The angle to rotate around the y axis in radians
-func (m *Mat4x4) RotateY(angleRad float64) {
-	cos := float32(math.Cos(angleRad))
-	sin := float32(math.Sin(angleRad))
+func (m *Mat4x4[T]) RotateY(angleRad float64) {
+	cos := T(math.Cos(angleRad))
+	sin := T(math.Sin(angleRad))
 
 	m00 := cos*m[0][0] + sin*m[0][2]
 	m10 := cos*m[1][0] + sin*m[1][2]
@@ -1159,9 +1286,9 @@ func (m *Mat4x4) RotateY(angleRad float64) {
 // RotateZ applies a transformation to this matrix that rotates around the z axis by the specified amount
 //
 // angleRad - The angle to rotate around the z axis in radians
-func (m *Mat4x4) RotateZ(angleRad float64) {
-	cos := float32(math.Cos(angleRad))
-	sin := float32(math.Sin(angleRad))
+func (m *Mat4x4[T]) RotateZ(angleRad float64) {
+	cos := T(math.Cos(angleRad))
+	sin := T(math.Sin(angleRad))
 
 	m00 := cos*m[0][0] - sin*m[0][1]
 	m10 := cos*m[1][0] - sin*m[1][1]
@@ -1189,7 +1316,7 @@ func (m *Mat4x4) RotateZ(angleRad float64) {
 // y - y shear factor
 //
 // z - z shear factor
-func (m *Mat4x4) SetShearX(y, z float32) {
+func (m *Mat4x4[T]) SetShearX(y, z T) {
 	m[0][0] = 1
 	m[1][0] = 0
 	m[2][0] = 0
@@ -1214,7 +1341,7 @@ func (m *Mat4x4) SetShearX(y, z float32) {
 // y - y shear factor
 //
 // z - z shear factor
-func (m *Mat4x4) ShearX(y, z float32) {
+func (m *Mat4x4[T]) ShearX(y, z T) {
 
 	m01 := y*m[0][0] + m[0][1]
 	m11 := y*m[1][0] + m[1][1]
@@ -1242,7 +1369,7 @@ func (m *Mat4x4) ShearX(y, z float32) {
 // x - x shear factor
 //
 // z - z shear factor
-func (m *Mat4x4) SetShearY(x, z float32) {
+func (m *Mat4x4[T]) SetShearY(x, z T) {
 	m[0][0] = 1
 	m[1][0] = x
 	m[2][0] = 0
@@ -1267,7 +1394,7 @@ func (m *Mat4x4) SetShearY(x, z float32) {
 // x - x shear factor
 //
 // z - z shear factor
-func (m *Mat4x4) ShearY(x, z float32) {
+func (m *Mat4x4[T]) ShearY(x, z T) {
 	m00 := m[0][0] + x*m[0][1]
 	m10 := m[1][0] + x*m[1][1]
 	m20 := m[2][0] + x*m[2][1]
@@ -1294,7 +1421,7 @@ func (m *Mat4x4) ShearY(x, z float32) {
 // x - x shear factor
 //
 // y - y shear factor
-func (m *Mat4x4) SetShearZ(x, y float32) {
+func (m *Mat4x4[T]) SetShearZ(x, y T) {
 	m[0][0] = 1
 	m[1][0] = 0
 	m[2][0] = x
@@ -1319,7 +1446,7 @@ func (m *Mat4x4) SetShearZ(x, y float32) {
 // x - x shear factor
 //
 // y - y shear factor
-func (m *Mat4x4) ShearZ(x, y float32) {
+func (m *Mat4x4[T]) ShearZ(x, y T) {
 
 	m00 := m[0][0] + x*m[0][2]
 	m10 := m[1][0] + x*m[1][2]
@@ -1347,21 +1474,21 @@ func (m *Mat4x4) ShearZ(x, y float32) {
 // otherMatrix - The "end" transform matrix in the interpolation
 //
 // delta - A value between 0 and 1 indicating how far to interpolate between this matrix and the other
-func (m *Mat4x4) InterpolateMat4x4(otherMatrix *Mat4x4, delta float32) {
-	var oldMatrix Mat4x4
+func (m *Mat4x4[T]) InterpolateMat4x4(otherMatrix *Mat4x4[T], delta T) {
+	var oldMatrix Mat4x4[T]
 	oldMatrix.SetMat4x4(m)
 
-	var thisRotation Mat4x4
+	var thisRotation Mat4x4[T]
 	thisRotation.SetAffineMat4x4(m)
 
-	var transposedRotation Mat4x4
+	var transposedRotation Mat4x4[T]
 	transposedRotation.SetMat4x4(&thisRotation)
 	transposedRotation.Transpose()
 
-	var deltaRotation Mat4x4
+	var deltaRotation Mat4x4[T]
 	deltaRotation.SetMultMat4x4(otherMatrix, &transposedRotation)
 
-	var deltaAxis Vec3
+	var deltaAxis Vec3[T]
 	var deltaAngle float64
 	deltaRotation.GetAxisAngle(&deltaAxis, &deltaAngle)
 
@@ -1375,17 +1502,17 @@ func (m *Mat4x4) InterpolateMat4x4(otherMatrix *Mat4x4, delta float32) {
 //
 // epsilon - The epsilon value to use in floating point comparisons. This much floating point
 // drift is permitted before the method returns false. 0.0001 is a common epsilon value
-func (m *Mat4x4) IsNormalized(epsilon float32) bool {
+func (m *Mat4x4[T]) IsNormalized(epsilon T) bool {
 	for i := 0; i < 4; i++ {
-		column := abs(m[i][0]*m[i][0] + m[i][1]*m[i][1] + m[i][2]*m[i][2] + m[i][3]*m[i][3])
-		if column-1 > 2*epsilon {
+		column := abs[T](m[i][0]*m[i][0] + m[i][1]*m[i][1] + m[i][2]*m[i][2] + m[i][3]*m[i][3])
+		if column-T(1) > T(2)*epsilon {
 			return false
 		}
 	}
 
 	for i := 0; i < 4; i++ {
-		row := abs(m[0][i]*m[0][i] + m[1][i]*m[1][i] + m[2][i]*m[2][i] + m[3][i]*m[3][i])
-		for row-1 > 2*epsilon {
+		row := abs[T](m[0][i]*m[0][i] + m[1][i]*m[1][i] + m[2][i]*m[2][i] + m[3][i]*m[3][i])
+		for row-T(1) > T(2)*epsilon {
 			return false
 		}
 	}
@@ -1397,9 +1524,9 @@ func (m *Mat4x4) IsNormalized(epsilon float32) bool {
 //
 // epsilon - The epsilon value to use in floating point comparisons. This much floating point
 // drift is permitted before the method returns false. 0.0001 is a common epsilon value
-func (m *Mat4x4) IsNull(epsilon float32) bool {
+func (m *Mat4x4[T]) IsNull(epsilon T) bool {
 	for i := 0; i < 4; i++ {
-		column := abs(m[i][0]*m[i][0] + m[i][1]*m[i][1] + m[i][2]*m[i][2] + m[i][3]*m[i][3])
+		column := abs[T](m[i][0]*m[i][0] + m[i][1]*m[i][1] + m[i][2]*m[i][2] + m[i][3]*m[i][3])
 		if column > epsilon {
 			return false
 		}
@@ -1414,10 +1541,10 @@ func (m *Mat4x4) IsNull(epsilon float32) bool {
 //
 // epsilon - The epsilon value to use in floating point comparisons. This much floating point
 // drift is permitted before the method returns false. 0.0001 is a common epsilon value
-func (m *Mat4x4) Equal(other *Mat4x4, epsilon float32) bool {
+func (m *Mat4x4[T]) Equal(other *Mat4x4[T], epsilon T) bool {
 	for i := 0; i < 4; i++ {
 		for j := 0; j < 4; j++ {
-			if abs(m[i][j]-other[i][j]) > epsilon {
+			if abs[T](m[i][j]-other[i][j]) > epsilon {
 				return false
 			}
 		}

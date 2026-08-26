@@ -2,14 +2,14 @@ package math
 
 import "math"
 
-type Mat3Row [3]float32
+type Mat3Row[T FloatingPoint] [3]T
 
 // Mat3x3 is a two-dimensional array of floating point-compatible values that can be used
 // for 3x3 matrix arithmetic and affine 3d matrix transformations
-type Mat3x3 [3]Mat3Row
+type Mat3x3[T FloatingPoint] [3]Mat3Row[T]
 
 // SetIdentity overwrites the current contents of the matrix with the identity matrix
-func (m *Mat3x3) SetIdentity() {
+func (m *Mat3x3[T]) SetIdentity() {
 	m[0][0] = 1
 	m[0][1] = 0
 	m[0][2] = 0
@@ -25,7 +25,7 @@ func (m *Mat3x3) SetIdentity() {
 // multiplied by the provided scalar value
 //
 // s - The scalar value to multiply the matrix entries by
-func (m *Mat3x3) SetDiagonalScalar(s float32) {
+func (m *Mat3x3[T]) SetDiagonalScalar(s T) {
 	m[0][0] = s
 	m[0][1] = 0
 	m[0][2] = 0
@@ -42,7 +42,7 @@ func (m *Mat3x3) SetDiagonalScalar(s float32) {
 // element corresponding to a column in the matrix
 //
 // v - The vector containing the diagonal entries that will be populated into the matrix
-func (m *Mat3x3) SetDiagonalVector(v *Vec3) {
+func (m *Mat3x3[T]) SetDiagonalVector(v *Vec3[T]) {
 	m[0][0] = v.X
 	m[0][1] = 0
 	m[0][2] = 0
@@ -58,7 +58,7 @@ func (m *Mat3x3) SetDiagonalVector(v *Vec3) {
 // providing the same rotation as a provided quaternion
 //
 // other - A quaternion whose rotation will be written into this matrix
-func (m *Mat3x3) SetQuaternion(other *Quaternion) {
+func (m *Mat3x3[T]) SetQuaternion(other *Quaternion[T]) {
 	xx := other.X * other.X
 	yy := other.Y * other.Y
 	zz := other.Z * other.Z
@@ -84,7 +84,7 @@ func (m *Mat3x3) SetQuaternion(other *Quaternion) {
 // layers the provided 2x2 matrix over the upper left 2x2 area of the matrix
 //
 // other - The 2x2 matrix to initialize from
-func (m *Mat3x3) SetMat2x2(other *Mat3x3) {
+func (m *Mat3x3[T]) SetMat2x2(other *Mat3x3[T]) {
 	m[0][0] = other[0][0]
 	m[0][1] = other[0][1]
 	m[0][2] = 0
@@ -100,7 +100,7 @@ func (m *Mat3x3) SetMat2x2(other *Mat3x3) {
 // matrix
 //
 // other - The matrix to initialize from
-func (m *Mat3x3) SetMat3x3(other *Mat3x3) {
+func (m *Mat3x3[T]) SetMat3x3(other *Mat3x3[T]) {
 	m[0][0] = other[0][0]
 	m[0][1] = other[0][1]
 	m[0][2] = other[0][2]
@@ -116,7 +116,7 @@ func (m *Mat3x3) SetMat3x3(other *Mat3x3) {
 // 3x3 area of a 4x4 matrix
 //
 // other - The 4x4 matrix to initialize from
-func (m *Mat3x3) SetMat4x4(other *Mat4x4) {
+func (m *Mat3x3[T]) SetMat4x4(other *Mat4x4[T]) {
 	m[0][0] = other[0][0]
 	m[0][1] = other[0][1]
 	m[0][2] = other[0][2]
@@ -134,7 +134,7 @@ func (m *Mat3x3) SetMat4x4(other *Mat4x4) {
 // c1 - The first column of the matrix
 // c2 - The second column of the matrix
 // c3 - The third column of the matrix
-func (m *Mat3x3) SetColMajor(c1, c2, c3 *Vec3) {
+func (m *Mat3x3[T]) SetColMajor(c1, c2, c3 *Vec3[T]) {
 	m[0][0] = c1.X
 	m[0][1] = c1.Y
 	m[0][2] = c1.Z
@@ -152,7 +152,7 @@ func (m *Mat3x3) SetColMajor(c1, c2, c3 *Vec3) {
 // r1 - The first row of the matrix
 // r2 - The second row of the matrix
 // r3 - The third row of the matrix
-func (m *Mat3x3) SetRowMajor(r1, r2, r3 *Vec3) {
+func (m *Mat3x3[T]) SetRowMajor(r1, r2, r3 *Vec3[T]) {
 	m[0][0] = r1.X
 	m[1][0] = r1.Y
 	m[2][0] = r2.Z
@@ -171,7 +171,7 @@ func (m *Mat3x3) SetRowMajor(r1, r2, r3 *Vec3) {
 //
 // lhs - The left operand of the multiplication operation
 // rhs - The right operand of the multiplication operation
-func (m *Mat3x3) SetMultMat3x3(lhs, rhs *Mat3x3) {
+func (m *Mat3x3[T]) SetMultMat3x3(lhs, rhs *Mat3x3[T]) {
 	m00 := lhs[0][0]*rhs[0][0] + lhs[1][0]*rhs[0][1] + lhs[2][0]*rhs[0][2]
 	m10 := lhs[0][0]*rhs[1][0] + lhs[1][0]*rhs[1][1] + lhs[2][0]*rhs[1][2]
 	m20 := lhs[0][0]*rhs[2][0] + lhs[1][0]*rhs[2][1] + lhs[2][0]*rhs[2][2]
@@ -202,7 +202,7 @@ func (m *Mat3x3) SetMultMat3x3(lhs, rhs *Mat3x3) {
 // lhs - The matrix having a transform applied to it
 //
 // rhs - The transform being applied
-func (m *Mat3x3) SetApplyTransform(lhs, rhs *Mat3x3) {
+func (m *Mat3x3[T]) SetApplyTransform(lhs, rhs *Mat3x3[T]) {
 	m00 := rhs[0][0]*lhs[0][0] + rhs[1][0]*lhs[0][1] + rhs[2][0]*lhs[0][2]
 	m10 := rhs[0][0]*lhs[1][0] + rhs[1][0]*lhs[1][1] + rhs[2][0]*lhs[1][2]
 	m20 := rhs[0][0]*lhs[2][0] + rhs[1][0]*lhs[2][1] + rhs[2][0]*lhs[2][2]
@@ -233,61 +233,61 @@ func (m *Mat3x3) SetApplyTransform(lhs, rhs *Mat3x3) {
 // to the angle of rotation.
 //
 // outAngleRad - A pointer to a float64 that will be populated with the amount to rotate in radians
-func (m *Mat3x3) GetAxisAngle(outAxis *Vec3, outAngleRad *float64) {
-	epsilon := float32(0.01)
-	epsilon2 := float32(0.1)
+func (m *Mat3x3[T]) GetAxisAngle(outAxis *Vec3[T], outAngleRad *float64) {
+	epsilon := T(0.01)
+	epsilon2 := T(0.1)
 
-	if (abs(m[1][0]-m[0][1]) < epsilon) &&
-		(abs(m[2][0]-m[0][2]) < epsilon) &&
-		(abs(m[2][1]-m[1][2]) < epsilon) {
+	if (abs[T](m[1][0]-m[0][1]) < epsilon) &&
+		(abs[T](m[2][0]-m[0][2]) < epsilon) &&
+		(abs[T](m[2][1]-m[1][2]) < epsilon) {
 
-		if (abs(m[1][0]+m[0][1]) < epsilon2) &&
-			(abs(m[2][0]+m[0][2]) < epsilon2) &&
-			(abs(m[2][1]+m[1][2]) < epsilon2) &&
-			(abs(m[0][0]+m[1][1]+m[2][2]-3) < epsilon2) {
+		if (abs[T](m[1][0]+m[0][1]) < epsilon2) &&
+			(abs[T](m[2][0]+m[0][2]) < epsilon2) &&
+			(abs[T](m[2][1]+m[1][2]) < epsilon2) &&
+			(abs[T](m[0][0]+m[1][1]+m[2][2]-T(3)) < epsilon2) {
 
 			*outAngleRad = 0
-			outAxis.X = 1
-			outAxis.Y = 0
-			outAxis.Z = 0
+			outAxis.X = T(1)
+			outAxis.Y = T(0)
+			outAxis.Z = T(0)
 			return
 		}
 
 		*outAngleRad = math.Pi
-		xx := (m[0][0] + 1) * 0.5
-		yy := (m[1][1] + 1) * 0.5
-		zz := (m[2][2] + 1) * 0.5
-		xy := (m[1][0] + m[0][1]) * 0.25
-		xz := (m[2][0] + m[0][2]) * 0.25
-		yz := (m[2][1] + m[1][2]) * 0.25
+		xx := (m[0][0] + T(1)) * T(0.5)
+		yy := (m[1][1] + T(1)) * T(0.5)
+		zz := (m[2][2] + T(1)) * T(0.5)
+		xy := (m[1][0] + m[0][1]) * T(0.25)
+		xz := (m[2][0] + m[0][2]) * T(0.25)
+		yz := (m[2][1] + m[1][2]) * T(0.25)
 
 		if xx > yy && xx > zz {
 			if xx < epsilon {
-				outAxis.X = 0
-				outAxis.Y = 0.7071
-				outAxis.Z = 0.7071
+				outAxis.X = T(0)
+				outAxis.Y = T(0.7071)
+				outAxis.Z = T(0.7071)
 			} else {
-				outAxis.X = float32(math.Sqrt(float64(xx)))
+				outAxis.X = T(math.Sqrt(float64(xx)))
 				outAxis.Y = xy / outAxis.X
 				outAxis.Z = xz / outAxis.X
 			}
 		} else if yy > zz {
 			if yy < epsilon {
-				outAxis.X = 0.7071
-				outAxis.Y = 0
-				outAxis.Z = 0.7071
+				outAxis.X = T(0.7071)
+				outAxis.Y = T(0)
+				outAxis.Z = T(0.7071)
 			} else {
-				outAxis.Y = float32(math.Sqrt(float64(yy)))
+				outAxis.Y = T(math.Sqrt(float64(yy)))
 				outAxis.X = xy / outAxis.Y
 				outAxis.Z = yz / outAxis.Z
 			}
 		} else {
 			if zz < epsilon {
-				outAxis.X = 0.7071
-				outAxis.Y = 0.7071
-				outAxis.Z = 0
+				outAxis.X = T(0.7071)
+				outAxis.Y = T(0.7071)
+				outAxis.Z = T(0)
 			} else {
-				outAxis.Z = float32(math.Sqrt(float64(zz)))
+				outAxis.Z = T(math.Sqrt(float64(zz)))
 				outAxis.X = xz / outAxis.Z
 				outAxis.Y = yz / outAxis.Z
 			}
@@ -298,13 +298,13 @@ func (m *Mat3x3) GetAxisAngle(outAxis *Vec3, outAngleRad *float64) {
 	sSquared := (m[2][1]-m[1][2])*(m[2][1]-m[1][2]) +
 		(m[2][0]-m[0][2])*(m[2][0]-m[0][2]) +
 		(m[1][0]-m[0][1])*(m[1][0]-m[0][1])
-	s := float32(math.Sqrt(float64(sSquared)))
+	s := T(math.Sqrt(float64(sSquared)))
 
-	if s < 0.001 {
-		s = 1
+	if s < T(0.001) {
+		s = T(1)
 	}
 
-	angleCos := (m[0][0] + m[1][1] + m[2][2] - 1) * 0.5
+	angleCos := (m[0][0] + m[1][1] + m[2][2] - T(1)) * T(0.5)
 	if angleCos < -1 {
 		*outAngleRad = math.Pi
 	} else if angleCos > 1 {
@@ -326,13 +326,13 @@ func (m *Mat3x3) GetAxisAngle(outAxis *Vec3, outAngleRad *float64) {
 // pitchRad - Angle to rotate pitch in radians
 //
 // rollRad - Angle to rotate roll in radians
-func (m *Mat3x3) SetRotationEulers(yawRad, pitchRad, rollRad float64) {
-	yawCos := float32(math.Cos(yawRad))
-	pitchCos := float32(math.Cos(pitchRad))
-	rollCos := float32(math.Cos(rollRad))
-	yawSin := float32(math.Sin(yawRad))
-	pitchSin := float32(math.Sin(pitchRad))
-	rollSin := float32(math.Sin(rollRad))
+func (m *Mat3x3[T]) SetRotationEulers(yawRad, pitchRad, rollRad float64) {
+	yawCos := T(math.Cos(yawRad))
+	pitchCos := T(math.Cos(pitchRad))
+	rollCos := T(math.Cos(rollRad))
+	yawSin := T(math.Sin(yawRad))
+	pitchSin := T(math.Sin(pitchRad))
+	rollSin := T(math.Sin(rollRad))
 
 	m[0][0] = rollCos * yawCos
 	m[0][1] = rollSin*yawCos + pitchSin*yawSin*rollCos
@@ -349,9 +349,9 @@ func (m *Mat3x3) SetRotationEulers(yawRad, pitchRad, rollRad float64) {
 // rotates around the y axis by the specified amount
 //
 // yawRad - The angle to rotate around the y axis in radians
-func (m *Mat3x3) SetRotationY(yawRad float64) {
-	cos := float32(math.Cos(yawRad))
-	sin := float32(math.Sin(yawRad))
+func (m *Mat3x3[T]) SetRotationY(yawRad float64) {
+	cos := T(math.Cos(yawRad))
+	sin := T(math.Sin(yawRad))
 
 	m00 := cos
 	m02 := -sin
@@ -374,9 +374,9 @@ func (m *Mat3x3) SetRotationY(yawRad float64) {
 // rotates around the x axis by the specified amount
 //
 // pitchRad - The angle to rotate around the x axis in radians
-func (m *Mat3x3) SetRotationX(pitchRad float64) {
-	cos := float32(math.Cos(pitchRad))
-	sin := float32(math.Sin(pitchRad))
+func (m *Mat3x3[T]) SetRotationX(pitchRad float64) {
+	cos := T(math.Cos(pitchRad))
+	sin := T(math.Sin(pitchRad))
 
 	m11 := cos
 	m12 := sin
@@ -399,9 +399,9 @@ func (m *Mat3x3) SetRotationX(pitchRad float64) {
 // rotates around the z axis by the specified amount
 //
 // rollRad - The angle to rotate around the z axis in radians
-func (m *Mat3x3) SetRotationZ(rollRad float64) {
-	cos := float32(math.Cos(rollRad))
-	sin := float32(math.Sin(rollRad))
+func (m *Mat3x3[T]) SetRotationZ(rollRad float64) {
+	cos := T(math.Cos(rollRad))
+	sin := T(math.Sin(rollRad))
 
 	m00 := cos
 	m01 := sin
@@ -428,7 +428,7 @@ func (m *Mat3x3) SetRotationZ(rollRad float64) {
 // y - Factor to scale by along the y axis
 //
 // z - Factor to scale by along the z axis
-func (m *Mat3x3) SetScale(x, y, z float32) {
+func (m *Mat3x3[T]) SetScale(x, y, z T) {
 	m[0][0] = x
 	m[0][1] = 0
 	m[0][2] = 0
@@ -441,7 +441,7 @@ func (m *Mat3x3) SetScale(x, y, z float32) {
 }
 
 // Transpose mirrors this matrix across the diagonal
-func (m *Mat3x3) Transpose() {
+func (m *Mat3x3[T]) Transpose() {
 	m[1][0], m[0][1] = m[0][1], m[1][0]
 	m[2][0], m[0][2] = m[0][2], m[2][0]
 	m[2][1], m[1][2] = m[1][2], m[2][1]
@@ -449,7 +449,7 @@ func (m *Mat3x3) Transpose() {
 
 // Inverse inverts this matrix. If this matrix has no valid inverse, some
 // entries will be set to NaN
-func (m *Mat3x3) Inverse() {
+func (m *Mat3x3[T]) Inverse() {
 	determinant := m[0][0]*(m[1][1]*m[2][2]-m[2][1]*m[1][2]) -
 		m[1][0]*(m[0][1]*m[2][2]-m[2][1]*m[0][2]) +
 		m[2][0]*(m[0][1]*m[1][2]-m[1][1]*m[0][2])
@@ -479,10 +479,10 @@ func (m *Mat3x3) Inverse() {
 // Orthonormalize this matrix. All 3 columns will be normalized and made to lie
 // at right angles to one another. Only the first column is guaranteed to maintain
 // its current direction.
-func (m *Mat3x3) Orthonormalize() {
-	col0 := Vec3{m[0][0], m[0][1], m[0][2]}
-	col1 := Vec3{m[1][0], m[1][1], m[1][2]}
-	col2 := Vec3{m[2][0], m[2][1], m[2][2]}
+func (m *Mat3x3[T]) Orthonormalize() {
+	col0 := Vec3[T]{m[0][0], m[0][1], m[0][2]}
+	col1 := Vec3[T]{m[1][0], m[1][1], m[1][2]}
+	col2 := Vec3[T]{m[2][0], m[2][1], m[2][2]}
 
 	col0.Normalize()
 	dot0 := col0.DotProduct(&col1)
@@ -516,7 +516,7 @@ func (m *Mat3x3) Orthonormalize() {
 // Transform" is just a matrix multiply with the operands reversed.
 //
 // other - The transform matrix to apply
-func (m *Mat3x3) ApplyTransform(other *Mat3x3) {
+func (m *Mat3x3[T]) ApplyTransform(other *Mat3x3[T]) {
 	m00 := other[0][0]*m[0][0] + other[1][0]*m[0][1] + other[2][0]*m[0][2]
 	m10 := other[0][0]*m[1][0] + other[1][0]*m[1][1] + other[2][0]*m[1][2]
 	m20 := other[0][0]*m[2][0] + other[1][0]*m[2][1] + other[2][0]*m[2][2]
@@ -546,7 +546,7 @@ func (m *Mat3x3) ApplyTransform(other *Mat3x3) {
 // You may prefer to use ApplyTransform.
 //
 // other - The right hand side of the multiplication operation.
-func (m *Mat3x3) MultMat3x3(other *Mat3x3) {
+func (m *Mat3x3[T]) MultMat3x3(other *Mat3x3[T]) {
 	m00 := m[0][0]*other[0][0] + m[1][0]*other[0][1] + m[2][0]*other[0][2]
 	m10 := m[0][0]*other[1][0] + m[1][0]*other[1][1] + m[2][0]*other[1][2]
 	m20 := m[0][0]*other[2][0] + m[1][0]*other[2][1] + m[2][0]*other[2][2]
@@ -574,7 +574,7 @@ func (m *Mat3x3) MultMat3x3(other *Mat3x3) {
 // normal axis
 //
 // normal - The normal of the plane
-func (m *Mat3x3) Proj2D(normal *Vec3) {
+func (m *Mat3x3[T]) Proj2D(normal *Vec3[T]) {
 	transform00 := 1.0 - normal.X*normal.X
 	transform01 := -normal.X * normal.Y
 	transform10 := -normal.X * normal.Y
@@ -603,7 +603,7 @@ func (m *Mat3x3) Proj2D(normal *Vec3) {
 // y - y shear factor
 //
 // z - z shear factor
-func (m *Mat3x3) SetShearX(y, z float32) {
+func (m *Mat3x3[T]) SetShearX(y, z T) {
 	m[0][0] = 1
 	m[1][0] = 0
 	m[2][0] = 0
@@ -621,7 +621,7 @@ func (m *Mat3x3) SetShearX(y, z float32) {
 // y - y shear factor
 //
 // z - z shear factor
-func (m *Mat3x3) ShearX(y, z float32) {
+func (m *Mat3x3[T]) ShearX(y, z T) {
 
 	m01 := y*m[0][0] + m[0][1]
 	m11 := y*m[1][0] + m[1][1]
@@ -645,7 +645,7 @@ func (m *Mat3x3) ShearX(y, z float32) {
 // x - x shear factor
 //
 // z - z shear factor
-func (m *Mat3x3) SetShearY(x, z float32) {
+func (m *Mat3x3[T]) SetShearY(x, z T) {
 	m[0][0] = 1
 	m[1][0] = x
 	m[2][0] = 0
@@ -663,7 +663,7 @@ func (m *Mat3x3) SetShearY(x, z float32) {
 // x - x shear factor
 //
 // z - z shear factor
-func (m *Mat3x3) ShearY(x, z float32) {
+func (m *Mat3x3[T]) ShearY(x, z T) {
 	m00 := m[0][0] + x*m[0][1]
 	m10 := m[1][0] + x*m[1][1]
 	m20 := m[2][0] + x*m[2][1]
@@ -686,7 +686,7 @@ func (m *Mat3x3) ShearY(x, z float32) {
 // x - x shear factor
 //
 // y - y shear factor
-func (m *Mat3x3) SetShearZ(x, y float32) {
+func (m *Mat3x3[T]) SetShearZ(x, y T) {
 	m[0][0] = 1
 	m[1][0] = 0
 	m[2][0] = x
@@ -704,7 +704,7 @@ func (m *Mat3x3) SetShearZ(x, y float32) {
 // x - x shear factor
 //
 // y - y shear factor
-func (m *Mat3x3) ShearZ(x, y float32) {
+func (m *Mat3x3[T]) ShearZ(x, y T) {
 
 	m00 := m[0][0] + x*m[0][2]
 	m10 := m[1][0] + x*m[1][2]
@@ -729,7 +729,7 @@ func (m *Mat3x3) ShearZ(x, y float32) {
 // y - Factor to scale by along the y axis
 //
 // z - Factor to scale by along the z axis
-func (m *Mat3x3) Scale(x, y, z float32) {
+func (m *Mat3x3[T]) Scale(x, y, z T) {
 	m[0][0] *= x
 	m[0][1] *= y
 	m[0][2] *= z
@@ -747,13 +747,13 @@ func (m *Mat3x3) Scale(x, y, z float32) {
 // axis - A 3-element vector that is normal to the angle of rotation. It does not need to be normalized.
 //
 // angleRad - The amount to rotate in radians
-func (m *Mat3x3) SetRotationAroundAxis(axis *Vec3, angleRad float64) {
-	var unitAxis Vec3
+func (m *Mat3x3[T]) SetRotationAroundAxis(axis *Vec3[T], angleRad float64) {
+	var unitAxis Vec3[T]
 	unitAxis.SetVec3(axis)
 	unitAxis.Normalize()
 
-	cos := float32(math.Cos(angleRad))
-	sin := float32(math.Sin(angleRad))
+	cos := T(math.Cos(angleRad))
+	sin := T(math.Sin(angleRad))
 
 	inverseCos := 1 - cos
 
@@ -774,13 +774,13 @@ func (m *Mat3x3) SetRotationAroundAxis(axis *Vec3, angleRad float64) {
 // axis - A 3-element vector that is normal to the angle of rotation. It does not need to be normalized.
 //
 // angleRad - The amount to rotate in radians
-func (m *Mat3x3) RotateAroundAxis(axis *Vec3, angleRad float64) {
-	var unitAxis Vec3
+func (m *Mat3x3[T]) RotateAroundAxis(axis *Vec3[T], angleRad float64) {
+	var unitAxis Vec3[T]
 	unitAxis.SetVec3(axis)
 	unitAxis.Normalize()
 
-	cos := float32(math.Cos(angleRad))
-	sin := float32(math.Sin(angleRad))
+	cos := T(math.Cos(angleRad))
+	sin := T(math.Sin(angleRad))
 
 	inverseCos := 1 - cos
 
@@ -822,9 +822,9 @@ func (m *Mat3x3) RotateAroundAxis(axis *Vec3, angleRad float64) {
 // RotateX applies a transformation to this matrix that rotates around the x axis by the specified amount
 //
 // angleRad - The angle to rotate around the x axis in radians
-func (m *Mat3x3) RotateX(angleRad float64) {
-	cos := float32(math.Cos(angleRad))
-	sin := float32(math.Sin(angleRad))
+func (m *Mat3x3[T]) RotateX(angleRad float64) {
+	cos := T(math.Cos(angleRad))
+	sin := T(math.Sin(angleRad))
 
 	m01 := cos*m[0][1] - sin*m[0][2]
 	m11 := cos*m[1][1] - sin*m[1][2]
@@ -845,9 +845,9 @@ func (m *Mat3x3) RotateX(angleRad float64) {
 // RotateY applies a transformation to this matrix that rotates around the y axis by the specified amount
 //
 // angleRad - The angle to rotate around the y axis in radians
-func (m *Mat3x3) RotateY(angleRad float64) {
-	cos := float32(math.Cos(angleRad))
-	sin := float32(math.Sin(angleRad))
+func (m *Mat3x3[T]) RotateY(angleRad float64) {
+	cos := T(math.Cos(angleRad))
+	sin := T(math.Sin(angleRad))
 
 	m00 := cos*m[0][0] + sin*m[0][2]
 	m10 := cos*m[1][0] + sin*m[1][2]
@@ -868,9 +868,9 @@ func (m *Mat3x3) RotateY(angleRad float64) {
 // RotateZ applies a transformation to this matrix that rotates around the z axis by the specified amount
 //
 // angleRad - The angle to rotate around the z axis in radians
-func (m *Mat3x3) RotateZ(angleRad float64) {
-	cos := float32(math.Cos(angleRad))
-	sin := float32(math.Sin(angleRad))
+func (m *Mat3x3[T]) RotateZ(angleRad float64) {
+	cos := T(math.Cos(angleRad))
+	sin := T(math.Sin(angleRad))
 
 	m00 := cos*m[0][0] - sin*m[0][1]
 	m10 := cos*m[1][0] - sin*m[1][1]
@@ -892,17 +892,17 @@ func (m *Mat3x3) RotateZ(angleRad float64) {
 //
 // epsilon - The epsilon value to use in floating point comparisons. This much floating point
 // drift is permitted before the method returns false. 0.0001 is a common epsilon value
-func (m *Mat3x3) IsNormalized(epsilon float32) bool {
+func (m *Mat3x3[T]) IsNormalized(epsilon T) bool {
 	for i := 0; i < 3; i++ {
-		column := abs(m[i][0]*m[i][0] + m[i][1]*m[i][1] + m[i][2]*m[i][2])
-		if column-1 > 2*epsilon {
+		column := abs[T](m[i][0]*m[i][0] + m[i][1]*m[i][1] + m[i][2]*m[i][2])
+		if column-T(1) > T(2)*epsilon {
 			return false
 		}
 	}
 
 	for i := 0; i < 3; i++ {
-		row := abs(m[0][i]*m[0][i] + m[1][i]*m[1][i] + m[2][i]*m[2][i])
-		for row-1 > 2*epsilon {
+		row := abs[T](m[0][i]*m[0][i] + m[1][i]*m[1][i] + m[2][i]*m[2][i])
+		for row-T(1) > T(2)*epsilon {
 			return false
 		}
 	}
@@ -914,9 +914,9 @@ func (m *Mat3x3) IsNormalized(epsilon float32) bool {
 //
 // epsilon - The epsilon value to use in floating point comparisons. This much floating point
 // drift is permitted before the method returns false. 0.0001 is a common epsilon value
-func (m *Mat3x3) IsNull(epsilon float32) bool {
+func (m *Mat3x3[T]) IsNull(epsilon T) bool {
 	for i := 0; i < 3; i++ {
-		column := abs(m[i][0]*m[i][0] + m[i][1]*m[i][1] + m[i][2]*m[i][2])
+		column := abs[T](m[i][0]*m[i][0] + m[i][1]*m[i][1] + m[i][2]*m[i][2])
 		if column > epsilon {
 			return false
 		}
@@ -931,10 +931,10 @@ func (m *Mat3x3) IsNull(epsilon float32) bool {
 //
 // epsilon - The epsilon value to use in floating point comparisons. This much floating point
 // drift is permitted before the method returns false. 0.0001 is a common epsilon value
-func (m *Mat3x3) Equal(other *Mat3x3, epsilon float32) bool {
+func (m *Mat3x3[T]) Equal(other *Mat3x3[T], epsilon T) bool {
 	for i := 0; i < 3; i++ {
 		for j := 0; j < 3; j++ {
-			if abs(m[i][j]-other[i][j]) > epsilon {
+			if abs[T](m[i][j]-other[i][j]) > epsilon {
 				return false
 			}
 		}
