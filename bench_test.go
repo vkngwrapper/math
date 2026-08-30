@@ -12,7 +12,7 @@ var vkngMathOutQuat Quaternion[float32]
 func BenchmarkTransformVec4VkngMath(b *testing.B) {
 	b.ReportAllocs()
 
-	for i := 0; i < b.N; i++ {
+	for b.Loop() {
 		var mat Mat4x4[float32]
 		mat.SetIdentity()
 		mat.Translate(1, 1, 1)
@@ -29,7 +29,7 @@ func BenchmarkTransformVec4VkngMath(b *testing.B) {
 func BenchmarkRotateVec3VkngMath(b *testing.B) {
 	b.ReportAllocs()
 
-	for i := 0; i < b.N; i++ {
+	for b.Loop() {
 		transform := Vec3[float32]{5, 10, 15}
 		axis := Vec3[float32]{1, 0, 0}
 
@@ -41,7 +41,7 @@ func BenchmarkRotateVec3VkngMath(b *testing.B) {
 func BenchmarkRotateQuaternionVkngMath(b *testing.B) {
 	b.ReportAllocs()
 
-	for i := 0; i < b.N; i++ {
+	for b.Loop() {
 		transform := Vec3[float32]{5, 10, 15}
 		var quat Quaternion[float32]
 		quat.SetRotationEulers(0, math.Pi, math.Pi/2)
@@ -54,7 +54,7 @@ func BenchmarkRotateQuaternionVkngMath(b *testing.B) {
 func BenchmarkMatrixMultTransformVkngMath(b *testing.B) {
 	b.ReportAllocs()
 
-	for i := 0; i < b.N; i++ {
+	for b.Loop() {
 
 		var translateMat, rotateMat, scaleMat Mat4x4[float32]
 		translateMat.SetTranslation(1, 1, 1)
